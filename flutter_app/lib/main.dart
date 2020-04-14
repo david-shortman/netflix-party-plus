@@ -219,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
             print("Unknown Array Message!");
           } else {
             print(messageObj);
-            print('test');
+            print('test change');
             print("Completely Unknown Message!");
           }
         },
