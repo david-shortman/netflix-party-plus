@@ -39,7 +39,7 @@ class MessageUtility {
       if(arrayItems.elementAt(0) == "userId") {
         return new UserIdMessage(arrayItems.elementAt(1));
       } else if(arrayItems.elementAt(0) == "sendMessage") {
-        return new SendMessageMessage(arrayItems.elementAt(1));
+        return new MessageSendMessage(arrayItems.elementAt(1));
       } else if (arrayItems.elementAt(0) == "update") {
         return new UpdateMessage(arrayItems.elementAt(1));
       } else if(arrayItems.length == 1) {
