@@ -1,9 +1,4 @@
-// Copyright 2018 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
@@ -50,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
   IOWebSocketChannel currentChannel;
   String userId = null;
   String sessionId = null;
-  int currentSeqNo = 420;
+  int currentSeqNo = 0;
   int currentServerTime = 0;
   int currentLocalTime = 0;
   int lastKnownMoviePosition = 0;
@@ -223,6 +218,7 @@ class _MyHomePageState extends State<MyHomePage> {
           } else if(messageObj is ArrayMessage) {
             print("Unknown Array Message!");
           } else {
+            print(messageObj);
             print("Completely Unknown Message!");
           }
         },
@@ -251,8 +247,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void sendMessage(String message) {
-    print("sending message: "+currentSeqNo.toString()+message);
-    currentChannel.sink.add(currentSeqNo.toString() + message);
+    print("sending message: 42"+currentSeqNo.toString()+message);
+    currentChannel.sink.add("42"+currentSeqNo.toString() + message);
     currentSeqNo++;
   }
 
@@ -261,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
       currentChannel = null;
       userId = null;
       sessionId = null;
-      currentSeqNo = 420;
+      currentSeqNo = 0;
       currentServerTime = 0;
       currentLocalTime = 0;
       lastKnownMoviePosition = 0;
