@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
-import 'package:flutterapp/Message.dart';
 import 'package:flutterapp/MessageArray.dart';
 import 'package:flutterapp/MessageObject.dart';
 import 'package:flutterapp/MessageSendMessage.dart';
@@ -13,14 +13,29 @@ import 'package:flutterapp/MessageUserId.dart';
 import 'package:flutterapp/MessageUtility.dart';
 import 'package:flutterapp/MessageVideoIdAndMessageBacklog.dart';
 import 'package:flutterapp/UserMessage.dart';
+import 'package:flutterapp/domains/messages/Message.dart';
+import 'package:flutterapp/domains/messages/buffering/BufferingContent.dart';
+import 'package:flutterapp/domains/messages/buffering/BufferingMessage.dart';
+import 'package:flutterapp/domains/messages/chat-message/SendMessageBody.dart';
+import 'package:flutterapp/domains/messages/chat-message/SendMessageContent.dart';
+import 'package:flutterapp/domains/messages/chat-message/SendMessageMessage.dart';
+import 'package:flutterapp/domains/messages/join-session/JoinSessionContent.dart';
+import 'package:flutterapp/domains/messages/join-session/JoinSessionMessage.dart';
+import 'package:flutterapp/domains/messages/join-session/UserSettings.dart';
+import 'package:flutterapp/domains/messages/server-time/GetServerTimeMessage.dart';
+import 'package:flutterapp/domains/messages/server-time/GetServerTimeContent.dart';
+import 'package:flutterapp/domains/messages/update-session/UpdateSessionContent.dart';
+import 'package:flutterapp/domains/messages/update-session/UpdateSessionMessage.dart';
+import 'package:flutterapp/domains/messenger/Messenger.dart';
 import 'package:web_socket_channel/io.dart';
+
+import 'ReceivedMessage.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final wordPair = WordPair.random();
     return MaterialApp(
       title: 'Netflix Party',
       home:  MyHomePage(
@@ -43,9 +58,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   IOWebSocketChannel currentChannel;
+  Messenger messenger = new Messenger();
   String userId = null;
   String sessionId = null;
-  int currentSeqNo = 0;
+  int currentSequenceNum = 0;
   int currentServerTime = 0;
   int currentLocalTime = 0;
   int lastKnownMoviePosition = 0;
@@ -87,18 +103,18 @@ class _MyHomePageState extends State<MyHomePage> {
       return getConnectedWidgets();
     }
   }
-//426["buffering",{"buffering":false}]
-  
 
   void postMessageText(String messageText) {
     int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
     int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
     int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-    sendMessage("[\"sendMessage\",{\"body\":\""+messageText+"\",\"isSystemMessage\":false,\"timestamp\":"+expectedServerTime.toString()+",\"userId\":\""+userId+"\",\"permId\":\""+userId+"\",\"userIcon\":\"Sailor Cat.svg\",\"userNickname\":\"Mobile User\"}]");
+    SendMessageContent sendMessageContent = new SendMessageContent(new SendMessageBody(messageText, false, expectedServerTime, userId, userId, "Sailor Cat.svg", "Mobile User"));
+    sendMessage(new SendMessageMessage(sendMessageContent));
   }
 
   void sendNotBufferingMessage() {
-    sendMessage("[\"buffering\",{\"buffering\":false}]");
+    BufferingContent bufferingContent = new BufferingContent(false);
+    sendMessage(new BufferingMessage(bufferingContent));
   }
 
   void connectToServer() {
@@ -150,10 +166,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void connectAndSetupListener(String serverId) {
     currentChannel = new IOWebSocketChannel.connect("wss://"+serverId+".netflixparty.com/socket.io/?EIO=3&transport=websocket");
+    messenger.setChannel(currentChannel);
     currentChannel.stream.listen(
             (message){
               print(message);
-          Message messageObj = messageUtility.interpretMessage(message);
+          ReceivedMessage messageObj = messageUtility.interpretMessage(message);
           if(messageObj is UserIdMessage) {
             userId = (messageObj as UserIdMessage).userId;
             sendGetServerTimeMessage();
@@ -194,7 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               connected = true;
             });
-          } else if(messageObj is SendMessageMessage) {
+          } else if(messageObj is MessageSendMessage) {
             setState(() {
               this.userMessages.add(messageObj.userMessage);
             });
@@ -235,29 +252,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   void joinSession(String userIdForJoin, String nickNameForJoin, String sessionIdForJoin) {
-    sendMessage("[\"joinSession\",{\"sessionId\":\"" + sessionIdForJoin +
-        "\",\"permId\":\"" + userIdForJoin +
-        "\",\"userSettings\":{\"recentlyUpdated\":true,\"userIcon\":\"Sailor Cat.svg\",\"userId\":\"" +
-        userIdForJoin + "\",\"userNickname\":\""+nickNameForJoin+"\"}}]");
+    UserSettings userSettings = new UserSettings(true, "Sailor Cat.svg", userIdForJoin, nickNameForJoin);
+    JoinSessionContent joinSessionContent = new JoinSessionContent(sessionIdForJoin, userIdForJoin, userSettings);
+    sendMessage(new JoinSessionMessage(joinSessionContent));
     sessionJoined = true;
   }
 
   void sendGetServerTimeMessage() {
-    sendMessage("[\"getServerTime\",{\"version\":\"1.7.8\"}]");
+    GetServerTimeContent getServerTimeContent = new GetServerTimeContent("1.7.8");
+    sendMessage(new GetServerTimeMessage(getServerTimeContent));
   }
 
-  void sendMessage(String message) {
-    print("sending message: 42"+currentSeqNo.toString()+message);
-    currentChannel.sink.add("42"+currentSeqNo.toString() + message);
-    currentSeqNo++;
+  void sendMessage(SocketMessage message) {
+    messenger.sendMessage(message, currentSequenceNum);
+    currentSequenceNum++;
   }
 
   void clearAllVariables() {
     setState(() {
       currentChannel = null;
+      messenger = null;
       userId = null;
       sessionId = null;
-      currentSeqNo = 0;
+      currentSequenceNum = 0;
       currentServerTime = 0;
       currentLocalTime = 0;
       lastKnownMoviePosition = 0;
@@ -379,7 +396,8 @@ class _MyHomePageState extends State<MyHomePage> {
             currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
 
             print('sending pause with movie time: ' + expectedMovieTime.toString());
-            sendMessage("[\"updateSession\",{\"lastKnownTime\":"+this.lastKnownMoviePosition.toString()+",\"lastKnownTimeUpdatedAt\":"+this.currentServerTime.toString()+",\"state\":\"paused\",\"lastKnownTimeRemaining\":null,\"lastKnownTimeRemainingText\":null,\"videoDuration\":"+videoDuration.toString()+",\"bufferingState\":false}]");
+            UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "paused", null, null, videoDuration, false);
+            sendMessage(new UpdateSessionMessage(updateSessionContent));
             setState(() {
               isPlaying = false;
             });
@@ -399,7 +417,8 @@ class _MyHomePageState extends State<MyHomePage> {
             int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
             this.currentServerTime = expectedServerTime;
             currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-            sendMessage("[\"updateSession\",{\"lastKnownTime\":"+lastKnownMoviePosition.toString()+",\"lastKnownTimeUpdatedAt\":"+currentServerTime.toString()+",\"state\":\"playing\",\"lastKnownTimeRemaining\":null,\"lastKnownTimeRemainingText\":null,\"videoDuration\":"+videoDuration.toString()+",\"bufferingState\":false}]");
+            UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "playing", null, null, videoDuration, false);
+            sendMessage(new UpdateSessionMessage(updateSessionContent));
             setState(() {
               isPlaying = true;
             });

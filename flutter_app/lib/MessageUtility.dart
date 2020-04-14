@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutterapp/Message.dart';
+import 'package:flutterapp/ReceivedMessage.dart';
 import 'package:flutterapp/MessageArray.dart';
 import 'package:flutterapp/MessageObject.dart';
 import 'package:flutterapp/MessageSendMessage.dart';
@@ -12,7 +12,7 @@ import 'package:flutterapp/MessageUserId.dart';
 import 'MessageVideoIdAndMessageBacklog.dart';
 
 class MessageUtility {
-  Message interpretMessage(String message) {
+  ReceivedMessage interpretMessage(String message) {
     int firstSquareBracket = message.toString().indexOf("[");
     int firstCurlyBracket = message.toString().indexOf("{");
     int seqNo = 0;
@@ -34,12 +34,12 @@ class MessageUtility {
       var arrayJson = jsonDecode(message.toString().substring(firstSquareBracket));
       List<Object> arrayItems = arrayJson != null ? List.from(arrayJson) : null;
       if(arrayItems.length == 0) {
-        return new Message();
+        return new ReceivedMessage();
       }
       if(arrayItems.elementAt(0) == "userId") {
         return new UserIdMessage(arrayItems.elementAt(1));
       } else if(arrayItems.elementAt(0) == "sendMessage") {
-        return new SendMessageMessage(arrayItems.elementAt(1));
+        return new MessageSendMessage(arrayItems.elementAt(1));
       } else if (arrayItems.elementAt(0) == "update") {
         return new UpdateMessage(arrayItems.elementAt(1));
       } else if(arrayItems.length == 1) {
@@ -54,6 +54,6 @@ class MessageUtility {
       }
 
       }
-      return new Message();
+      return new ReceivedMessage();
     }
 }

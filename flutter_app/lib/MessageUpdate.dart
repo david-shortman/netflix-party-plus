@@ -1,6 +1,6 @@
-import 'Message.dart';
+import 'ReceivedMessage.dart';
 
-class UpdateMessage extends Message {
+class UpdateMessage extends ReceivedMessage {
   int lastKnownTime;
   int lastKnownTimeRemaining;
   int lastKnownTimeUpdatedAt;

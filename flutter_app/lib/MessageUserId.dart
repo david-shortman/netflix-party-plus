@@ -1,6 +1,6 @@
-import 'package:flutterapp/Message.dart';
+import 'package:flutterapp/ReceivedMessage.dart';
 
-class UserIdMessage extends Message {
+class UserIdMessage extends ReceivedMessage {
   String userId;
 
   UserIdMessage(this.userId) {

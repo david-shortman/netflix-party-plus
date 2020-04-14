@@ -1,10 +1,10 @@
-import 'package:flutterapp/Message.dart';
+import 'package:flutterapp/ReceivedMessage.dart';
 import 'package:flutterapp/UserMessage.dart';
 
-class SendMessageMessage extends Message {
+class MessageSendMessage extends ReceivedMessage {
   UserMessage userMessage;
 
-  SendMessageMessage(Map<String, dynamic> objectFromMessage) {
+  MessageSendMessage(Map<String, dynamic> objectFromMessage) {
     userMessage = new UserMessage(objectFromMessage);
   }
 

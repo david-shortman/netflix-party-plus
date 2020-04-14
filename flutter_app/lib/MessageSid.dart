@@ -1,6 +1,6 @@
-import 'package:flutterapp/Message.dart';
+import 'package:flutterapp/ReceivedMessage.dart';
 
-class SidMessage extends Message {
+class SidMessage extends ReceivedMessage {
   String sid;
   dynamic upgrades;
   int pingInterval;
