@@ -4,11 +4,11 @@ on:
   push:
     branches: [ master ]
     paths:
-      - 'flutter_app/*'
+      - 'flutter_app/**'
   pull_request:
     branches: [ master ]
     paths:
-      - 'flutter_app/*'
+      - 'flutter_app/**'
 
 jobs:
   build:
