@@ -3,22 +3,25 @@ name: Dart CI
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'flutter_app/*'
   pull_request:
     branches: [ master ]
+    paths:
+      - 'flutter_app/*'
 
 jobs:
   build:
     name: run tests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-
-    - name: install dependencies
-      uses: steebchen/flutter@v1.0.0
-      with:
-        args: cd flutter_app && pub get
-
-    - name: run tests
-      uses: steebchen/flutter@v1.0.0
-      with:
-        args: cd flutter_app && flutter test
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.12.13+hotfix.9'
+      - run: cd flutter_app && flutter pub get
+      - run: cd flutter_app && flutter test
+      - run: cd flutter_app && flutter build apk
