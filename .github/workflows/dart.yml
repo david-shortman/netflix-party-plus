@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Change directory to Flutter app
+      run: cd flutter_app
     - name: Install dependencies
       run: pub get
     - name: Run tests
