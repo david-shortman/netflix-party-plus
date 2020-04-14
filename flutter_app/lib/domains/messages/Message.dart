@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutterapp/messages/MessageContent.dart';
+import 'package:flutterapp/domains/messages/MessageContent.dart';
 
 class SocketMessage {
   MessageContent content;

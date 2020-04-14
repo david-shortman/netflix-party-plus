@@ -1,6 +1,6 @@
-import 'package:flutterapp/Message.dart';
+import 'package:flutterapp/ReceivedMessage.dart';
 
-class ServerTimeMessage extends Message{
+class ServerTimeMessage extends ReceivedMessage{
   int serverTime = 0;
 
   ServerTimeMessage(this.serverTime) {

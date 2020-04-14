@@ -1,4 +1,4 @@
-import 'package:flutterapp/messages/buffering/BufferingContent.dart';
+import 'package:flutterapp/domains/messages/buffering/BufferingContent.dart';
 
 import '../Message.dart';
 

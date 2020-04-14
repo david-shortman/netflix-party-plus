@@ -1,4 +1,4 @@
-import 'package:flutterapp/messages/MessageContent.dart';
+import 'package:flutterapp/domains/messages/MessageContent.dart';
 
 class GetServerTimeContent extends MessageContent {
   String _version;

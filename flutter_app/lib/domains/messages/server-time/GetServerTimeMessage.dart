@@ -1,4 +1,4 @@
-import 'package:flutterapp/messages/server-time/GetServerTimeContent.dart';
+import 'package:flutterapp/domains/messages/server-time/GetServerTimeContent.dart';
 
 import '../Message.dart';
 

@@ -1,4 +1,4 @@
-import 'package:flutterapp/messages/update-session/UpdateSessionContent.dart';
+import 'package:flutterapp/domains/messages/update-session/UpdateSessionContent.dart';
 
 import '../Message.dart';
 

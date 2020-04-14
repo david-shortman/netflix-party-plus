@@ -13,22 +13,23 @@ import 'package:flutterapp/MessageUserId.dart';
 import 'package:flutterapp/MessageUtility.dart';
 import 'package:flutterapp/MessageVideoIdAndMessageBacklog.dart';
 import 'package:flutterapp/UserMessage.dart';
-import 'package:flutterapp/messages/Message.dart';
-import 'package:flutterapp/messages/buffering/BufferingContent.dart';
-import 'package:flutterapp/messages/buffering/BufferingMessage.dart';
-import 'package:flutterapp/messages/chat-message/SendMessageBody.dart';
-import 'package:flutterapp/messages/chat-message/SendMessageContent.dart';
-import 'package:flutterapp/messages/chat-message/SendMessageMessage.dart';
-import 'package:flutterapp/messages/join-session/JoinSessionContent.dart';
-import 'package:flutterapp/messages/join-session/JoinSessionMessage.dart';
-import 'package:flutterapp/messages/join-session/UserSettings.dart';
-import 'package:flutterapp/messages/server-time/GetServerTimeMessage.dart';
-import 'package:flutterapp/messages/server-time/GetServerTimeContent.dart';
-import 'package:flutterapp/messages/update-session/UpdateSessionContent.dart';
-import 'package:flutterapp/messages/update-session/UpdateSessionMessage.dart';
+import 'package:flutterapp/domains/messages/Message.dart';
+import 'package:flutterapp/domains/messages/buffering/BufferingContent.dart';
+import 'package:flutterapp/domains/messages/buffering/BufferingMessage.dart';
+import 'package:flutterapp/domains/messages/chat-message/SendMessageBody.dart';
+import 'package:flutterapp/domains/messages/chat-message/SendMessageContent.dart';
+import 'package:flutterapp/domains/messages/chat-message/SendMessageMessage.dart';
+import 'package:flutterapp/domains/messages/join-session/JoinSessionContent.dart';
+import 'package:flutterapp/domains/messages/join-session/JoinSessionMessage.dart';
+import 'package:flutterapp/domains/messages/join-session/UserSettings.dart';
+import 'package:flutterapp/domains/messages/server-time/GetServerTimeMessage.dart';
+import 'package:flutterapp/domains/messages/server-time/GetServerTimeContent.dart';
+import 'package:flutterapp/domains/messages/update-session/UpdateSessionContent.dart';
+import 'package:flutterapp/domains/messages/update-session/UpdateSessionMessage.dart';
+import 'package:flutterapp/domains/messenger/Messenger.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'Message.dart';
+import 'ReceivedMessage.dart';
 
 void main() => runApp(MyApp());
 
@@ -57,9 +58,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   IOWebSocketChannel currentChannel;
+  Messenger messenger = new Messenger();
   String userId = null;
   String sessionId = null;
-  int currentSeqNo = 0;
+  int currentSequenceNum = 0;
   int currentServerTime = 0;
   int currentLocalTime = 0;
   int lastKnownMoviePosition = 0;
@@ -164,10 +166,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void connectAndSetupListener(String serverId) {
     currentChannel = new IOWebSocketChannel.connect("wss://"+serverId+".netflixparty.com/socket.io/?EIO=3&transport=websocket");
+    messenger.setChannel(currentChannel);
     currentChannel.stream.listen(
             (message){
               print(message);
-          Message messageObj = messageUtility.interpretMessage(message);
+          ReceivedMessage messageObj = messageUtility.interpretMessage(message);
           if(messageObj is UserIdMessage) {
             userId = (messageObj as UserIdMessage).userId;
             sendGetServerTimeMessage();
@@ -261,17 +264,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void sendMessage(SocketMessage message) {
-    debugPrint("Sending message: | ${message.buildString(currentSeqNo)}");
-    currentChannel.sink.add(message.buildString(currentSeqNo));
-    currentSeqNo++;
+    messenger.sendMessage(message, currentSequenceNum);
+    currentSequenceNum++;
   }
 
   void clearAllVariables() {
     setState(() {
       currentChannel = null;
+      messenger = null;
       userId = null;
       sessionId = null;
-      currentSeqNo = 0;
+      currentSequenceNum = 0;
       currentServerTime = 0;
       currentLocalTime = 0;
       lastKnownMoviePosition = 0;

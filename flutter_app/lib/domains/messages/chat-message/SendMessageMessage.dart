@@ -1,4 +1,4 @@
-import 'package:flutterapp/messages/chat-message/SendMessageContent.dart';
+import 'package:flutterapp/domains/messages/chat-message/SendMessageContent.dart';
 
 import '../Message.dart';
 

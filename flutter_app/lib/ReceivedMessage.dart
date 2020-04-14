@@ -1,3 +1,3 @@
-class Message {
+class ReceivedMessage {
   String messageType = "UNKNOWN";
 }

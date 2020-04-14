@@ -1,7 +1,7 @@
-import 'package:flutterapp/Message.dart';
+import 'package:flutterapp/ReceivedMessage.dart';
 import 'package:flutterapp/UserMessage.dart';
 
-class VideoIdAndMessageCatchupMessage extends Message {
+class VideoIdAndMessageCatchupMessage extends ReceivedMessage {
   int videoId;
   int lastKnownTime;
   int lastKnownTimeUpdatedAt;

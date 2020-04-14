@@ -1,4 +1,4 @@
-import 'package:flutterapp/mappable/Mappable.dart';
+import 'package:flutterapp/domains/mappable/Mappable.dart';
 
 class UserSettings extends Mappable {
   bool _recentlyUpdated;

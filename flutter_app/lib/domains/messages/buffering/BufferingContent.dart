@@ -1,4 +1,4 @@
-import 'package:flutterapp/messages/MessageContent.dart';
+import 'package:flutterapp/domains/messages/MessageContent.dart';
 
 class BufferingContent extends MessageContent {
   bool _isBuffering;

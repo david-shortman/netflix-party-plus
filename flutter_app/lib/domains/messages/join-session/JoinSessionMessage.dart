@@ -1,4 +1,4 @@
-import 'package:flutterapp/messages/join-session/JoinSessionContent.dart';
+import 'package:flutterapp/domains/messages/join-session/JoinSessionContent.dart';
 
 import '../Message.dart';
 
