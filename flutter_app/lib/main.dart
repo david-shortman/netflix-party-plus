@@ -58,7 +58,6 @@ class _MyHomePageState extends State<MyHomePage> {
   Messenger messenger = new Messenger();
   String userId = null;
   String sessionId = null;
-  int currentSequenceNum = 0;
   int currentServerTime = 0;
   int currentLocalTime = 0;
   int lastKnownMoviePosition = 0;
@@ -255,17 +254,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void sendMessage(SocketMessage message) {
-    messenger.sendMessage(message, currentSequenceNum);
-    currentSequenceNum++;
+    messenger.sendMessage(message);
   }
 
   void clearAllVariables() {
     setState(() {
       currentChannel = null;
-      messenger = null;
       userId = null;
       sessionId = null;
-      currentSequenceNum = 0;
       currentServerTime = 0;
       currentLocalTime = 0;
       lastKnownMoviePosition = 0;
