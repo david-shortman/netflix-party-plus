@@ -1,6 +1,6 @@
 import 'package:flutterapp/domains/mappable/Mappable.dart';
 
-class UserSettings extends Mappable {
+class UserSettings implements Mappable {
   bool _recentlyUpdated;
   String _userIcon;
   String _userId;
@@ -16,6 +16,7 @@ class UserSettings extends Mappable {
     _userNickname = userNickname;
   }
 
+  @override
   Map<String, dynamic> toMap() =>
       {
         'recentlyUpdated': _recentlyUpdated,

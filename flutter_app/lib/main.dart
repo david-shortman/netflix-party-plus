@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutterapp/MessageArray.dart';
@@ -55,7 +53,6 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
   IOWebSocketChannel currentChannel;
   Messenger messenger = new Messenger();
@@ -76,9 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
   bool connected = false;
   int videoDuration = 655550;
   List<UserMessage> userMessages = new List();
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +146,6 @@ class _MyHomePageState extends State<MyHomePage> {
       print("ServerId: "+serverId);
       print("SessionId: "+sessionId);
       connectAndSetupListener(serverId);
-
   }
   
   void sendMessageToChat() {
@@ -161,8 +154,6 @@ class _MyHomePageState extends State<MyHomePage> {
       _messageController.text = "";
     });
   }
-
-
 
   void connectAndSetupListener(String serverId) {
     currentChannel = new IOWebSocketChannel.connect("wss://"+serverId+".netflixparty.com/socket.io/?EIO=3&transport=websocket");

@@ -1,6 +1,6 @@
 import 'package:flutterapp/domains/messages/MessageContent.dart';
 
-class UpdateSessionContent extends MessageContent {
+class UpdateSessionContent implements MessageContent {
   int _lastKnownTime;
   int _lastKnownTimeUpdatedAt;
   String _state;
@@ -25,6 +25,7 @@ class UpdateSessionContent extends MessageContent {
     _isBuffering = isBuffering;
   }
 
+  @override
   Map<String, dynamic> toMap() =>
       {
         'lastKnownTime': _lastKnownTime,

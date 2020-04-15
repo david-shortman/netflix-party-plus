@@ -1,6 +1,6 @@
 import 'package:flutterapp/domains/messages/MessageContent.dart';
 
-class SendMessageBody extends MessageContent {
+class SendMessageBody implements MessageContent {
   String _text;
   bool _isSystemMessage;
   int _timestamp;
@@ -25,6 +25,7 @@ class SendMessageBody extends MessageContent {
     _userNickname = userNickname;
   }
 
+  @override
   Map<String, dynamic> toMap() =>
       {
         'body': _text,

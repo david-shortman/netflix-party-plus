@@ -2,7 +2,7 @@ import 'package:flutterapp/domains/messages/MessageContent.dart';
 
 import 'UserSettings.dart';
 
-class JoinSessionContent extends MessageContent {
+class JoinSessionContent implements MessageContent {
   String _sessionId;
   String _permId;
   UserSettings _userSettings;
@@ -13,6 +13,7 @@ class JoinSessionContent extends MessageContent {
     _userSettings = userSettings;
   }
 
+  @override
   Map<String, dynamic> toMap() =>
       {
         'sessionId': _sessionId,
