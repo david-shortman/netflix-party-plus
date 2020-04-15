@@ -1,0 +1,26 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'flutter_app/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'flutter_app/**'
+
+jobs:
+  build:
+    name: run build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.12.13+hotfix.9'
+      - run: cd flutter_app && flutter pub get
+      - run: cd flutter_app && flutter build aot
