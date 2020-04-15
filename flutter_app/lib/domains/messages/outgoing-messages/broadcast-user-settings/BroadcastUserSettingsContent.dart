@@ -1,6 +1,6 @@
 import 'package:flutterapp/domains/messages/outgoing-messages/join-session/UserSettings.dart';
 
-import '../MessageContent.dart';
+import '../../MessageContent.dart';
 
 class BroadCastUserSettingsContent extends MessageContent {
   UserSettings _content;

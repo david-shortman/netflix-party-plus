@@ -1,6 +1,5 @@
-import 'package:flutterapp/domains/messages/broadcastUserSettings/BroadcastUserSettingsContent.dart';
-
-import '../SocketMessage.dart';
+import '../../SocketMessage.dart';
+import 'BroadcastUserSettingsContent.dart';
 
 class BroadcastUserSettingsMessage extends SocketMessage {
   String type = 'broadcastUserSettings';
