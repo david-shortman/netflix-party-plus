@@ -1,4 +1,4 @@
-![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Tests/badge.svg)
+![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Tests/badge.svg) ![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Build/badge.svg)
 # netflix-party-enhancement-suite
 A set of enhancements to the Netflix Party experience
 
