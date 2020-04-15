@@ -1,39 +1,35 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:flutterapp/MessageArray.dart';
-import 'package:flutterapp/MessageObject.dart';
-import 'package:flutterapp/MessageSendMessage.dart';
-import 'package:flutterapp/MessageServerTime.dart';
-import 'package:flutterapp/MessageSid.dart';
-import 'package:flutterapp/MessageUpdate.dart';
-import 'package:flutterapp/MessageUserId.dart';
-import 'package:flutterapp/MessageUtility.dart';
-import 'package:flutterapp/MessageVideoIdAndMessageBacklog.dart';
-import 'package:flutterapp/UserMessage.dart';
-import 'package:flutterapp/domains/messages/Message.dart';
-import 'package:flutterapp/domains/messages/broadcastUserSettings/BroadCastUserSettingsMessage.dart';
-import 'package:flutterapp/domains/messages/broadcastUserSettings/BroadcastUserSettingsContent.dart';
-import 'package:flutterapp/domains/messages/buffering/BufferingContent.dart';
-import 'package:flutterapp/domains/messages/buffering/BufferingMessage.dart';
-import 'package:flutterapp/domains/messages/chat-message/SendMessageBody.dart';
-import 'package:flutterapp/domains/messages/chat-message/SendMessageContent.dart';
-import 'package:flutterapp/domains/messages/chat-message/SendMessageMessage.dart';
-import 'package:flutterapp/domains/messages/join-session/JoinSessionContent.dart';
-import 'package:flutterapp/domains/messages/join-session/JoinSessionMessage.dart';
-import 'package:flutterapp/domains/messages/join-session/UserSettings.dart';
-import 'package:flutterapp/domains/messages/server-time/GetServerTimeMessage.dart';
-import 'package:flutterapp/domains/messages/server-time/GetServerTimeContent.dart';
-import 'package:flutterapp/domains/messages/update-session/UpdateSessionContent.dart';
-import 'package:flutterapp/domains/messages/update-session/UpdateSessionMessage.dart';
-import 'package:flutterapp/domains/messenger/Messenger.dart';
-import 'package:flutterapp/UserSettingsScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'ReceivedMessage.dart';
+import 'pages/UserSettingsScreen.dart';
+import 'domains/messages/SocketMessage.dart';
+import 'domains/messages/incoming-messages/ReceivedMessage.dart';
+import 'domains/messages/incoming-messages/ReceivedMessageUtility.dart';
+import 'domains/messages/incoming-messages/SentMessageMessage.dart';
+import 'domains/messages/incoming-messages/ServerTimeMessage.dart';
+import 'domains/messages/incoming-messages/SidMessage.dart';
+import 'domains/messages/incoming-messages/UpdateMessage.dart';
+import 'domains/messages/incoming-messages/UserIdMessage.dart';
+import 'domains/messages/incoming-messages/UserMessage.dart';
+import 'domains/messages/incoming-messages/VideoIdAndMessageCatchupMessage.dart';
+import 'domains/messages/outgoing-messages/broadcast-user-settings/BroadCastUserSettingsMessage.dart';
+import 'domains/messages/outgoing-messages/broadcast-user-settings/BroadcastUserSettingsContent.dart';
+import 'domains/messages/outgoing-messages/buffering/BufferingContent.dart';
+import 'domains/messages/outgoing-messages/buffering/BufferingMessage.dart';
+import 'domains/messages/outgoing-messages/chat-message/SendMessageBody.dart';
+import 'domains/messages/outgoing-messages/chat-message/SendMessageContent.dart';
+import 'domains/messages/outgoing-messages/chat-message/SendMessageMessage.dart';
+import 'domains/messages/outgoing-messages/join-session/JoinSessionContent.dart';
+import 'domains/messages/outgoing-messages/join-session/JoinSessionMessage.dart';
+import 'domains/messages/outgoing-messages/join-session/UserSettings.dart';
+import 'domains/messages/outgoing-messages/server-time/GetServerTimeContent.dart';
+import 'domains/messages/outgoing-messages/server-time/GetServerTimeMessage.dart';
+import 'domains/messages/outgoing-messages/update-session/UpdateSessionContent.dart';
+import 'domains/messages/outgoing-messages/update-session/UpdateSessionMessage.dart';
+import 'domains/messenger/Messenger.dart';
 
 void main() => runApp(MyApp());
 
@@ -59,7 +55,6 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> {
   IOWebSocketChannel currentChannel;
   Messenger messenger = new Messenger();
@@ -69,7 +64,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int currentLocalTime = 0;
   int lastKnownMoviePosition = 0;
   bool sessionJoined = false;
-  MessageUtility messageUtility = new MessageUtility();
   SidMessage sidMessage;
   TextEditingController _controller = TextEditingController();
   TextEditingController _messageController = TextEditingController();
@@ -85,7 +79,6 @@ class _MyHomePageState extends State<MyHomePage> {
   _MyHomePageState() {
     _loadUsernameAndIcon();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -185,10 +178,9 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         }
       }
-      print("ServerId: "+serverId);
-      print("SessionId: "+sessionId);
+      debugPrint("ServerId: "+serverId);
+      debugPrint("SessionId: "+sessionId);
       connectAndSetupListener(serverId);
-
   }
   
   void sendMessageToChat() {
@@ -198,15 +190,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-
-
   void connectAndSetupListener(String serverId) {
     currentChannel = new IOWebSocketChannel.connect("wss://"+serverId+".netflixparty.com/socket.io/?EIO=3&transport=websocket");
     messenger.setChannel(currentChannel);
     currentChannel.stream.listen(
             (message){
-              print(message);
-          ReceivedMessage messageObj = messageUtility.interpretMessage(message);
+          debugPrint('got $message');
+          ReceivedMessage messageObj = ReceivedMessageUtility.fromString(message);
           if(messageObj is UserIdMessage) {
             userId = (messageObj as UserIdMessage).userId;
             sendGetServerTimeMessage();
@@ -219,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
             videoDuration = messageObj.videoDuration;
             currentServerTime = messageObj.lastKnownTimeUpdatedAt;
             currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-            print("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
+            debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
             sendNotBufferingMessage();
 
             if(messageObj.state == "playing") {
@@ -231,7 +221,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 this.isPlaying = false;
               });
             }
-          } else if(messageObj is SidMessage) {
+          } else {
+            if(messageObj is SidMessage) {
             SidMessage sidMessage = messageObj;
             this.sidMessage = sidMessage;
             if(serverTimeTimer != null) {
@@ -247,7 +238,7 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               connected = true;
             });
-          } else if(messageObj is MessageSendMessage) {
+          } else if(messageObj is SentMessageMessage) {
             setState(() {
               this.userMessages.add(messageObj.userMessage);
             });
@@ -256,9 +247,9 @@ class _MyHomePageState extends State<MyHomePage> {
             lastKnownMoviePosition = messageObj.lastKnownTime;
             currentServerTime = messageObj.lastKnownTimeUpdatedAt;
             currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-            print("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
+            debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
             sendNotBufferingMessage();
-            print(messageObj.state);
+            debugPrint(messageObj.state);
             setState(() {
               if(messageObj.state == "playing") {
                 this.isPlaying = true;
@@ -266,26 +257,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 this.isPlaying = false;
               }
             });
-          } else if(messageObj is ObjectMessage) {
-            print("Unknown Object Message!");
-          } else if(messageObj is ArrayMessage) {
-            print("Unknown Array Message!");
-          } else {
-            print(messageObj);
-            print("Completely Unknown Message!");
+          }
           }
         },
         onError: (error, StackTrace stackTrace){
-          // error handling
-          print('onError');
+          debugPrint('onError');
         },
         onDone: (){
-          // communication has been closed
-          print('Communication Closed');
+          debugPrint('Communication Closed');
         }
     );
   }
-
 
   void joinSession(String userIdForJoin, String nickNameForJoin, String sessionIdForJoin) {
     UserSettings userSettings = new UserSettings(true, "Sailor Cat.svg", userIdForJoin, nickNameForJoin);
@@ -313,20 +295,12 @@ class _MyHomePageState extends State<MyHomePage> {
       lastKnownMoviePosition = 0;
       sessionJoined = false;
       userMessages.clear();
-      MessageUtility messageUtility = new MessageUtility();
-      SidMessage sidMessage;
-      TextEditingController _controller = TextEditingController();
-      TextEditingController _messageController = TextEditingController();
-      Timer timer;
-      bool isPlaying = false;
-      bool connected = false;
-      int videoDuration = 655550;
     });
   }
 
   @override
   void dispose() {
-    print("Disposing...");
+    debugPrint("Disposing...");
     currentChannel.sink.close();
     if(serverTimeTimer != null) {
       serverTimeTimer.cancel();
@@ -339,8 +313,6 @@ class _MyHomePageState extends State<MyHomePage> {
     clearAllVariables();
     super.dispose();
   }
-  
-  
   
   //WIDGET FUNCTIONS
 
@@ -425,7 +397,7 @@ class _MyHomePageState extends State<MyHomePage> {
             lastKnownMoviePosition = expectedMovieTime;
             currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
 
-            print('sending pause with movie time: ' + expectedMovieTime.toString());
+            debugPrint('sending pause with movie time: ' + expectedMovieTime.toString());
             UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "paused", null, null, videoDuration, false);
             sendMessage(new UpdateSessionMessage(updateSessionContent));
             setState(() {
@@ -441,7 +413,7 @@ class _MyHomePageState extends State<MyHomePage> {
           color: Colors.blue,
           textColor: Colors.white,
           onPressed: () {
-            print('sending play with movie time: ' + lastKnownMoviePosition.toString());
+            debugPrint('sending play with movie time: ' + lastKnownMoviePosition.toString());
             int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
             int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
             int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;

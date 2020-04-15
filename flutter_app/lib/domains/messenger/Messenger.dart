@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutterapp/domains/messages/Message.dart';
+import 'package:flutterapp/domains/messages/SocketMessage.dart';
 import 'package:web_socket_channel/io.dart';
 
 class Messenger {
@@ -12,7 +12,6 @@ class Messenger {
   }
 
   void sendMessage(SocketMessage message) {
-    debugPrint("Sending message: | ${message.buildString(_currentSequenceNum)}");
     _channel.sink.add(message.buildString(_currentSequenceNum));
     _currentSequenceNum++;
   }
