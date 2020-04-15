@@ -14,6 +14,8 @@ import 'package:flutterapp/MessageUtility.dart';
 import 'package:flutterapp/MessageVideoIdAndMessageBacklog.dart';
 import 'package:flutterapp/UserMessage.dart';
 import 'package:flutterapp/domains/messages/Message.dart';
+import 'package:flutterapp/domains/messages/broadcastUserSettings/BroadCastUserSettingsMessage.dart';
+import 'package:flutterapp/domains/messages/broadcastUserSettings/BroadcastUserSettingsContent.dart';
 import 'package:flutterapp/domains/messages/buffering/BufferingContent.dart';
 import 'package:flutterapp/domains/messages/buffering/BufferingMessage.dart';
 import 'package:flutterapp/domains/messages/chat-message/SendMessageBody.dart';
@@ -27,6 +29,8 @@ import 'package:flutterapp/domains/messages/server-time/GetServerTimeContent.dar
 import 'package:flutterapp/domains/messages/update-session/UpdateSessionContent.dart';
 import 'package:flutterapp/domains/messages/update-session/UpdateSessionMessage.dart';
 import 'package:flutterapp/domains/messenger/Messenger.dart';
+import 'package:flutterapp/UserSettingsScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 
 import 'ReceivedMessage.dart';
@@ -71,19 +75,25 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController _messageController = TextEditingController();
   Timer serverTimeTimer;
   Timer pingTimer;
+  String _username;
+  String _icon;
   bool isPlaying = false;
   bool connected = false;
   int videoDuration = 655550;
   List<UserMessage> userMessages = new List();
 
-
+  _MyHomePageState() {
+    _loadUsernameAndIcon();
+  }
 
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: getActionIcons(context),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -93,6 +103,33 @@ class _MyHomePageState extends State<MyHomePage> {
         )),
       ),
     );
+  }
+
+  _loadUsernameAndIcon() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      _username = (prefs.getString('username') ?? "");
+      _icon = (prefs.getString('userIcon') ?? "");
+      if (_username == "") {
+        _username = "Mobile User";
+        prefs.setString("username", _username);
+      }
+      if (_icon == "") {
+        _icon = "Batman.svg";
+        prefs.setString("userIcon", _icon);
+      }
+    });
+    print("_username is now " + _username);
+    print("_icon is now " + _icon);
+    if (connected) {
+      _sendBroadcastUserSettingsMessage();
+    }
+
+  }
+
+  _sendBroadcastUserSettingsMessage() {
+    sendMessage(BroadcastUserSettingsMessage(BroadCastUserSettingsContent(UserSettings(true, _icon, userId, _username))));
   }
   
   List<Widget> getWidgets() {
@@ -107,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
     int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
     int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
     int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-    SendMessageContent sendMessageContent = new SendMessageContent(new SendMessageBody(messageText, false, expectedServerTime, userId, userId, "Sailor Cat.svg", "Mobile User"));
+    SendMessageContent sendMessageContent = new SendMessageContent(new SendMessageBody(messageText, false, expectedServerTime, userId, userId, _icon, _username));
     sendMessage(new SendMessageMessage(sendMessageContent));
   }
 
@@ -307,6 +344,15 @@ class _MyHomePageState extends State<MyHomePage> {
   
   //WIDGET FUNCTIONS
 
+  goToAccountSettings(BuildContext) async {
+    print("go to account settings");
+    await Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => UserSettingsScreen()),
+    );
+    _loadUsernameAndIcon();
+  }
+
   List<Widget> getNotConnectedWidgets() {
     List<Widget> widgets = new List<Widget>();
     widgets.add(TextFormField(
@@ -326,7 +372,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Widget> getConnectedWidgets() {
     List<Widget> widgets = new List<Widget>();
-    widgets.add(getDisconnectButtonWidget());
     widgets.add(getPlayOrPauseButtonWidget());
     widgets.add(getMessageSendBox());
     widgets.add(FlatButton(
@@ -350,27 +395,16 @@ class _MyHomePageState extends State<MyHomePage> {
     return widgets;
   }
 
-  Widget getDisconnectButtonWidget() {
-    return FlatButton(
-      color: Colors.blue,
-      textColor: Colors.white,
-      onPressed: () {
-        print("button pressed");
-
-        try {
-          this.currentChannel.sink.close();
-          this.serverTimeTimer.cancel();
-          this.pingTimer.cancel();
-        } on Exception {}
-        setState(() {
-          connected = false;
-          clearAllVariables();
-        });
-      },
-      child: Text(
-        "Click To Disconnect",
-      ),
-    );
+  void disconnectButtonPressed() {
+    try {
+      this.currentChannel.sink.close();
+      this.serverTimeTimer.cancel();
+      this.pingTimer.cancel();
+    } on Exception {}
+    setState(() {
+      connected = false;
+      clearAllVariables();
+    });
   }
 
   Widget getPlayOrPauseButtonWidget() {
@@ -425,6 +459,25 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       }
     }
+  }
+
+  List<Widget> getActionIcons(BuildContext context) {
+    List<Widget> widgets = new List<Widget>();
+    if(this.connected) {
+      widgets.add(IconButton(
+        icon: Icon(Icons.cloud_off),
+        onPressed: () {
+          disconnectButtonPressed();
+        },
+      ));
+    }
+    widgets.add(IconButton(
+      icon: Icon(Icons.account_circle),
+      onPressed: () {
+        goToAccountSettings(context);
+      },
+    ));
+    return widgets;
   }
 
   Widget getMessageSendBox() {
