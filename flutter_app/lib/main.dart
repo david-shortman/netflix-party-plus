@@ -1,33 +1,31 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutterapp/MessageArray.dart';
-import 'package:flutterapp/MessageObject.dart';
-import 'package:flutterapp/MessageSendMessage.dart';
-import 'package:flutterapp/MessageServerTime.dart';
-import 'package:flutterapp/MessageSid.dart';
-import 'package:flutterapp/MessageUpdate.dart';
-import 'package:flutterapp/MessageUserId.dart';
-import 'package:flutterapp/MessageUtility.dart';
-import 'package:flutterapp/MessageVideoIdAndMessageBacklog.dart';
-import 'package:flutterapp/UserMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/MessageSendMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/MessageServerTime.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/MessageSid.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/MessageUserId.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessageUtility.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/MessageVideoIdAndMessageBacklog.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/UserMessage.dart';
 import 'package:flutterapp/domains/messages/Message.dart';
-import 'package:flutterapp/domains/messages/buffering/BufferingContent.dart';
-import 'package:flutterapp/domains/messages/buffering/BufferingMessage.dart';
-import 'package:flutterapp/domains/messages/chat-message/SendMessageBody.dart';
-import 'package:flutterapp/domains/messages/chat-message/SendMessageContent.dart';
-import 'package:flutterapp/domains/messages/chat-message/SendMessageMessage.dart';
-import 'package:flutterapp/domains/messages/join-session/JoinSessionContent.dart';
-import 'package:flutterapp/domains/messages/join-session/JoinSessionMessage.dart';
-import 'package:flutterapp/domains/messages/join-session/UserSettings.dart';
-import 'package:flutterapp/domains/messages/server-time/GetServerTimeMessage.dart';
-import 'package:flutterapp/domains/messages/server-time/GetServerTimeContent.dart';
-import 'package:flutterapp/domains/messages/update-session/UpdateSessionContent.dart';
-import 'package:flutterapp/domains/messages/update-session/UpdateSessionMessage.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/buffering/BufferingContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/buffering/BufferingMessage.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/chat-message/SendMessageBody.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/chat-message/SendMessageContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/chat-message/SendMessageMessage.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/join-session/JoinSessionContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/join-session/JoinSessionMessage.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/join-session/UserSettings.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/server-time/GetServerTimeMessage.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/server-time/GetServerTimeContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/update-session/UpdateSessionContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/update-session/UpdateSessionMessage.dart';
 import 'package:flutterapp/domains/messenger/Messenger.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'ReceivedMessage.dart';
+import 'domains/messages/incoming-messages/MessageUpdate.dart';
+import 'domains/messages/incoming-messages/ReceivedMessage.dart';
 
 void main() => runApp(MyApp());
 
@@ -62,7 +60,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int currentLocalTime = 0;
   int lastKnownMoviePosition = 0;
   bool sessionJoined = false;
-  MessageUtility messageUtility = new MessageUtility();
   SidMessage sidMessage;
   TextEditingController _controller = TextEditingController();
   TextEditingController _messageController = TextEditingController();
@@ -160,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
     currentChannel.stream.listen(
             (message){
           debugPrint('got $message');
-          ReceivedMessage messageObj = messageUtility.interpretMessage(message);
+          ReceivedMessage messageObj = ReceivedMessageUtility.fromString(message);
           if(messageObj is UserIdMessage) {
             userId = (messageObj as UserIdMessage).userId;
             sendGetServerTimeMessage();
@@ -201,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               connected = true;
             });
-          } else if(messageObj is MessageSendMessage) {
+          } else if(messageObj is SentMessageMessage) {
             setState(() {
               this.userMessages.add(messageObj.userMessage);
             });
@@ -220,8 +217,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 this.isPlaying = false;
               }
             });
-          } else {
-            debugPrint("Received uninterpretable message: $messageObj");
           }
         },
         onError: (error, StackTrace stackTrace){

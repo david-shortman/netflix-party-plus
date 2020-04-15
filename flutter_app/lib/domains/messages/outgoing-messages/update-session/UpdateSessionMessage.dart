@@ -1,6 +1,6 @@
-import 'package:flutterapp/domains/messages/update-session/UpdateSessionContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/update-session/UpdateSessionContent.dart';
 
-import '../Message.dart';
+import '../../Message.dart';
 
 class UpdateSessionMessage extends SocketMessage {
   String type = 'updateSession';

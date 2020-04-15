@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutterapp/domains/messages/MessageArray.dart';
-import 'package:flutterapp/domains/messages/MessageContent.dart';
-import 'package:flutterapp/domains/messages/SerializedMessageType.dart';
-import 'package:flutterapp/domains/messages/dynamic/DynamicMessageContent.dart';
-import 'package:flutterapp/domains/messages/dynamic/SingleValueDynamicMessageContent.dart';
-import 'package:flutterapp/domains/messages/empty-message/EmptyMessage.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/dynamic/DynamicMessageContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/dynamic/SingleValueDynamicMessageContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/empty-message/EmptyMessage.dart';
+
+import 'MessageContent.dart';
+import 'SerializedMessageType.dart';
 
 class SocketMessage {
   MessageContent content;
@@ -14,7 +14,7 @@ class SocketMessage {
 
   SocketMessage();
 
-  SocketMessage.fromMessage(String message) {
+  SocketMessage.fromString(String message) {
     int indexOfOpenBracket = message.indexOf('[');
     int indexOfOpenBrace = message.indexOf('{');
 

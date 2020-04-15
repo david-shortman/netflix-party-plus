@@ -1,6 +1,6 @@
-import 'package:flutterapp/domains/messages/buffering/BufferingContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/buffering/BufferingContent.dart';
 
-import '../Message.dart';
+import '../../Message.dart';
 
 class BufferingMessage extends SocketMessage {
   String type = 'buffering';

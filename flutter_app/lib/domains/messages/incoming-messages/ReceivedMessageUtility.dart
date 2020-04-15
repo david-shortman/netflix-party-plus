@@ -1,17 +1,17 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutterapp/ReceivedMessage.dart';
-import 'package:flutterapp/MessageSendMessage.dart';
-import 'package:flutterapp/MessageServerTime.dart';
-import 'package:flutterapp/MessageSid.dart';
-import 'package:flutterapp/MessageUpdate.dart';
-import 'package:flutterapp/MessageUserId.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/MessageSendMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/MessageServerTime.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/MessageSid.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/MessageUserId.dart';
 import 'package:flutterapp/domains/messages/Message.dart';
 
+import 'MessageUpdate.dart';
 import 'MessageVideoIdAndMessageBacklog.dart';
 
-class MessageUtility {
-  ReceivedMessage interpretMessage(String message) {
-    SocketMessage socketMessage = new SocketMessage.fromMessage(message);
+class ReceivedMessageUtility {
+  static ReceivedMessage fromString(String message) {
+    SocketMessage socketMessage = new SocketMessage.fromString(message);
 
     debugPrint('received: ${socketMessage.buildString(0)}');
 
@@ -25,7 +25,7 @@ class MessageUtility {
       case "userId":
         return new UserIdMessage(messageContentMap['value']);
       case "sendMessage":
-        return new MessageSendMessage(messageContentMap['value']);
+        return new SentMessageMessage(messageContentMap['value']);
       case "update":
         return new UpdateMessage(messageContentMap['value']);
       case "unknown":

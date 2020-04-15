@@ -1,5 +1,5 @@
-import 'package:flutterapp/ReceivedMessage.dart';
-import 'package:flutterapp/UserMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/UserMessage.dart';
 
 class VideoIdAndMessageCatchupMessage extends ReceivedMessage {
   int videoId;

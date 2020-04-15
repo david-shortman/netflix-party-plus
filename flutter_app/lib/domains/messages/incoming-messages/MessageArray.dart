@@ -1,4 +1,4 @@
-import 'package:flutterapp/ReceivedMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessage.dart';
 
 class ArrayMessage extends ReceivedMessage{
   String message;
@@ -6,6 +6,4 @@ class ArrayMessage extends ReceivedMessage{
   ArrayMessage(this.message) {
     this.messageType = "Array";
   }
-
-
 }
