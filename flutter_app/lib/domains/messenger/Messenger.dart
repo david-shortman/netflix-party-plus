@@ -4,15 +4,16 @@ import 'package:web_socket_channel/io.dart';
 
 class Messenger {
   IOWebSocketChannel _channel;
+  int _currentSequenceNum = 0;
 
   Messenger() {}
-
   void setChannel(IOWebSocketChannel channel) {
     _channel = channel;
   }
 
-  void sendMessage(SocketMessage message, int currentSequenceNum) {
-    debugPrint("Sending message: | ${message.buildString(currentSequenceNum)}");
-    _channel.sink.add(message.buildString(currentSequenceNum));
+  void sendMessage(SocketMessage message) {
+    debugPrint("Sending message: | ${message.buildString(_currentSequenceNum)}");
+    _channel.sink.add(message.buildString(_currentSequenceNum));
+    _currentSequenceNum++;
   }
 }
