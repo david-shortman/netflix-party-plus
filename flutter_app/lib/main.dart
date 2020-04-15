@@ -269,7 +269,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void clearAllVariables() {
     setState(() {
       currentChannel = null;
-      messenger = null;
       userId = null;
       sessionId = null;
       currentServerTime = 0;
