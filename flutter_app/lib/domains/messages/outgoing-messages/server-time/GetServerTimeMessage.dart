@@ -1,6 +1,6 @@
 import 'package:flutterapp/domains/messages/outgoing-messages/server-time/GetServerTimeContent.dart';
 
-import '../../Message.dart';
+import '../../SocketMessage.dart';
 
 class GetServerTimeMessage extends SocketMessage {
   String type = 'getServerTime';

@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/MessageSendMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/MessageServerTime.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/MessageSid.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/MessageUserId.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/SentMessageMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/ServerTimeMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/SidMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/UserIdMessage.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessageUtility.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/MessageVideoIdAndMessageBacklog.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/VideoIdAndMessageCatchupMessage.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/UserMessage.dart';
-import 'package:flutterapp/domains/messages/Message.dart';
+import 'package:flutterapp/domains/messages/SocketMessage.dart';
 import 'package:flutterapp/domains/messages/outgoing-messages/buffering/BufferingContent.dart';
 import 'package:flutterapp/domains/messages/outgoing-messages/buffering/BufferingMessage.dart';
 import 'package:flutterapp/domains/messages/outgoing-messages/chat-message/SendMessageBody.dart';
@@ -24,7 +24,7 @@ import 'package:flutterapp/domains/messages/outgoing-messages/update-session/Upd
 import 'package:flutterapp/domains/messenger/Messenger.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'domains/messages/incoming-messages/MessageUpdate.dart';
+import 'domains/messages/incoming-messages/UpdateMessage.dart';
 import 'domains/messages/incoming-messages/ReceivedMessage.dart';
 
 void main() => runApp(MyApp());

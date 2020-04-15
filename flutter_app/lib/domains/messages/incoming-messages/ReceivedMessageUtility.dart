@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/MessageSendMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/MessageServerTime.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/MessageSid.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/MessageUserId.dart';
-import 'package:flutterapp/domains/messages/Message.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/SentMessageMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/ServerTimeMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/SidMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/UserIdMessage.dart';
+import 'package:flutterapp/domains/messages/SocketMessage.dart';
 
-import 'MessageUpdate.dart';
-import 'MessageVideoIdAndMessageBacklog.dart';
+import 'UpdateMessage.dart';
+import 'VideoIdAndMessageCatchupMessage.dart';
 
 class ReceivedMessageUtility {
   static ReceivedMessage fromString(String message) {

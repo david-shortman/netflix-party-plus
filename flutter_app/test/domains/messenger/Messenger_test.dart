@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutterapp/domains/messages/Message.dart';
+import 'package:flutterapp/domains/messages/SocketMessage.dart';
 import 'package:flutterapp/domains/messenger/Messenger.dart';
 import 'package:mockito/mockito.dart';
 import 'package:web_socket_channel/io.dart';
