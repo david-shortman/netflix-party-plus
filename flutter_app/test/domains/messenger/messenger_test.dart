@@ -19,13 +19,13 @@ void main() {
 
       String message = "what's up";
       SocketMessage mockSocketMessage = new MockSocketMessage();
-      int sequenceNumber = 1;
+      int sequenceNumber = 0;
       when(mockSocketMessage.buildString(sequenceNumber)).thenReturn(message);
 
       messenger.setChannel(mockIOWebSocketChannel);
-      messenger.sendMessage(mockSocketMessage, sequenceNumber);
+      messenger.sendMessage(mockSocketMessage);
 
-      verify(mockSocketMessage.buildString(1));
+      verify(mockSocketMessage.buildString(sequenceNumber));
       verify(mockWebSocketSink.add(message));
     });
   });
