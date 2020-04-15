@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'UserSettingsScreen.dart';
+import 'pages/UserSettingsScreen.dart';
 import 'domains/messages/SocketMessage.dart';
 import 'domains/messages/incoming-messages/ReceivedMessage.dart';
 import 'domains/messages/incoming-messages/ReceivedMessageUtility.dart';
