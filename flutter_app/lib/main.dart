@@ -142,8 +142,8 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         }
       }
-      print("ServerId: "+serverId);
-      print("SessionId: "+sessionId);
+      debugPrint("ServerId: "+serverId);
+      debugPrint("SessionId: "+sessionId);
       connectAndSetupListener(serverId);
   }
   
@@ -159,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
     messenger.setChannel(currentChannel);
     currentChannel.stream.listen(
             (message){
-              print(message);
+          debugPrint('got $message');
           ReceivedMessage messageObj = messageUtility.interpretMessage(message);
           if(messageObj is UserIdMessage) {
             userId = (messageObj as UserIdMessage).userId;
@@ -173,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
             videoDuration = messageObj.videoDuration;
             currentServerTime = messageObj.lastKnownTimeUpdatedAt;
             currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-            print("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
+            debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
             sendNotBufferingMessage();
 
             if(messageObj.state == "playing") {
@@ -210,9 +210,9 @@ class _MyHomePageState extends State<MyHomePage> {
             lastKnownMoviePosition = messageObj.lastKnownTime;
             currentServerTime = messageObj.lastKnownTimeUpdatedAt;
             currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-            print("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
+            debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
             sendNotBufferingMessage();
-            print(messageObj.state);
+            debugPrint(messageObj.state);
             setState(() {
               if(messageObj.state == "playing") {
                 this.isPlaying = true;
@@ -220,26 +220,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 this.isPlaying = false;
               }
             });
-          } else if(messageObj is ObjectMessage) {
-            print("Unknown Object Message!");
-          } else if(messageObj is ArrayMessage) {
-            print("Unknown Array Message!");
           } else {
-            print(messageObj);
-            print("Completely Unknown Message!");
+            debugPrint("Received uninterpretable message: $messageObj");
           }
         },
         onError: (error, StackTrace stackTrace){
-          // error handling
-          print('onError');
+          debugPrint('onError');
         },
         onDone: (){
-          // communication has been closed
-          print('Communication Closed');
+          debugPrint('Communication Closed');
         }
     );
   }
-
 
   void joinSession(String userIdForJoin, String nickNameForJoin, String sessionIdForJoin) {
     UserSettings userSettings = new UserSettings(true, "Sailor Cat.svg", userIdForJoin, nickNameForJoin);
@@ -267,20 +259,12 @@ class _MyHomePageState extends State<MyHomePage> {
       lastKnownMoviePosition = 0;
       sessionJoined = false;
       userMessages.clear();
-      MessageUtility messageUtility = new MessageUtility();
-      SidMessage sidMessage;
-      TextEditingController _controller = TextEditingController();
-      TextEditingController _messageController = TextEditingController();
-      Timer timer;
-      bool isPlaying = false;
-      bool connected = false;
-      int videoDuration = 655550;
     });
   }
 
   @override
   void dispose() {
-    print("Disposing...");
+    debugPrint("Disposing...");
     currentChannel.sink.close();
     if(serverTimeTimer != null) {
       serverTimeTimer.cancel();
@@ -293,8 +277,6 @@ class _MyHomePageState extends State<MyHomePage> {
     clearAllVariables();
     super.dispose();
   }
-  
-  
   
   //WIDGET FUNCTIONS
 
@@ -346,7 +328,7 @@ class _MyHomePageState extends State<MyHomePage> {
       color: Colors.blue,
       textColor: Colors.white,
       onPressed: () {
-        print("button pressed");
+        debugPrint("button pressed");
 
         try {
           this.currentChannel.sink.close();
@@ -382,7 +364,7 @@ class _MyHomePageState extends State<MyHomePage> {
             lastKnownMoviePosition = expectedMovieTime;
             currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
 
-            print('sending pause with movie time: ' + expectedMovieTime.toString());
+            debugPrint('sending pause with movie time: ' + expectedMovieTime.toString());
             UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "paused", null, null, videoDuration, false);
             sendMessage(new UpdateSessionMessage(updateSessionContent));
             setState(() {
@@ -398,7 +380,7 @@ class _MyHomePageState extends State<MyHomePage> {
           color: Colors.blue,
           textColor: Colors.white,
           onPressed: () {
-            print('sending play with movie time: ' + lastKnownMoviePosition.toString());
+            debugPrint('sending play with movie time: ' + lastKnownMoviePosition.toString());
             int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
             int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
             int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;

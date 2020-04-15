@@ -12,7 +12,6 @@ class Messenger {
   }
 
   void sendMessage(SocketMessage message) {
-    debugPrint("Sending message: | ${message.buildString(_currentSequenceNum)}");
     _channel.sink.add(message.buildString(_currentSequenceNum));
     _currentSequenceNum++;
   }
