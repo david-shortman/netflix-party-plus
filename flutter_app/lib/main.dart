@@ -120,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),),
           IconButton(
-            icon: SvgPicture.asset('assets/images/Alien.svg', height: 85),
+            icon: SvgPicture.asset('assets/avatars/$_icon', height: 85),
             onPressed: () {
               goToAccountSettings(context);
             },
@@ -153,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         avatarBuilder: (chatUser) {
             debugPrint(chatUser.avatar);
-            return new SvgPicture.asset('assets/images/${chatUser.avatar}', height: 35);
+            return new SvgPicture.asset('assets/avatars/${chatUser.avatar}', height: 35);
         },),
     );
   }
