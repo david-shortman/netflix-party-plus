@@ -22,12 +22,18 @@ dev_dependencies:
     sdk: flutter
 
   mockito: ^4.1.1
+  flutter_launcher_icons: "^0.7.3"
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
 
 
 # The following section is specific to Flutter.
 flutter:
   assets:
-    - assets/images/
+    - assets/avatars/
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

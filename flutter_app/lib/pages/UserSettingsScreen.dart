@@ -19,27 +19,27 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
 
   _UserSettingsScreenState() {
     _setUsernameTextFieldFromSharedPreferences();
-    images.add(SvgPicture.asset('assets/images/Alien.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Batman.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/ChickenLeg.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Chocobar.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Cinderella.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Cookie.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/CptAmerica.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/DeadPool.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Goofy.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Hamburger.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/hotdog.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/IceCream.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/IronMan.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Mulan.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Pizza.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Poohbear.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Popcorn.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/SailorCat.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Sailormoon.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Snow-White.svg', height: 85));
-    images.add(SvgPicture.asset('assets/images/Wolverine.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Alien.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Batman.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/ChickenLeg.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Chocobar.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Cinderella.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Cookie.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/CptAmerica.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/DeadPool.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Goofy.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Hamburger.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/hotdog.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/IceCream.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/IronMan.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Mulan.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Pizza.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Poohbear.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Popcorn.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/SailorCat.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Sailormoon.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Snow-White.svg', height: 85));
+    images.add(SvgPicture.asset('assets/avatars/Wolverine.svg', height: 85));
   }
 
   _usernameChanged() {
