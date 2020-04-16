@@ -33,7 +33,7 @@ class ReceivedMessageUtility {
           return new ServerTimeMessage(messageContentMap['value']);
         }
         if (messageContentMap['value'] is Map) {
-          if (messageContentMap.containsKey('videoId')) {
+          if (messageContentMap['value'].containsKey('videoId')) {
             return new VideoIdAndMessageCatchupMessage(messageContentMap['value']);
           }
         }
