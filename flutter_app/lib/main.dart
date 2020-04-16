@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -72,7 +73,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int currentLocalTime = 0;
   int lastKnownMoviePosition = 0;
   bool sessionJoined = false;
-  bool isAttemptingToJoinSession = false;
+  bool isAttemptingToJoinSessionFromText = false;
+  bool isAttemptingToJoinSessionFromQR = false;
   SidMessage sidMessage;
   TextEditingController _controller = TextEditingController();
   TextEditingController _messageController = TextEditingController();
@@ -120,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),),
           IconButton(
-            icon: SvgPicture.asset('assets/avatars/$_icon', height: 85),
+            icon: SvgPicture.asset('assets/avatars/${_icon ?? 'Alien.svg'}', height: 85),
             onPressed: () {
               goToAccountSettings(context);
             },
@@ -131,10 +133,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _getNotConnectedWidget() {
-    return Padding(padding: new EdgeInsets.all(10), child: Column(
+    return SingleChildScrollView(child: Padding(padding: new EdgeInsets.all(10), child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: getNotConnectedWidgets(),
-    ));
+    )));
   }
 
   Widget _getConnectedWidget() {
@@ -198,10 +200,14 @@ class _MyHomePageState extends State<MyHomePage> {
     sendMessage(new BufferingMessage(bufferingContent));
   }
 
+  void _onConnectPressed() {
+    setState(() {
+      isAttemptingToJoinSessionFromText = true;
+    });
+    _connectToServer();
+  }
+
   void _connectToServer() {
-      setState(() {
-        isAttemptingToJoinSession = true;
-      });
       sessionJoined = false;
       sessionId = "";
       String serverId = "";
@@ -236,7 +242,8 @@ class _MyHomePageState extends State<MyHomePage> {
       else {
         setState(() {
           sleep(new Duration(milliseconds: 1000));
-          isAttemptingToJoinSession = false;
+          isAttemptingToJoinSessionFromText = false;
+          isAttemptingToJoinSessionFromQR = false;
         });
         return;
       }
@@ -345,7 +352,8 @@ class _MyHomePageState extends State<MyHomePage> {
     sendMessage(new JoinSessionMessage(joinSessionContent));
     sessionJoined = true;
     setState(() {
-      isAttemptingToJoinSession = false;
+      isAttemptingToJoinSessionFromText = false;
+      isAttemptingToJoinSessionFromQR = false;
     });
   }
 
@@ -367,7 +375,8 @@ class _MyHomePageState extends State<MyHomePage> {
       currentLocalTime = 0;
       lastKnownMoviePosition = 0;
       sessionJoined = false;
-      isAttemptingToJoinSession = false;
+      isAttemptingToJoinSessionFromText = false;
+      isAttemptingToJoinSessionFromQR = false;
       userMessages.clear();
       chatMessages.clear();
     });
@@ -409,14 +418,39 @@ class _MyHomePageState extends State<MyHomePage> {
     widgets.add(Padding(
       padding: new EdgeInsets.fromLTRB(50, 10, 50, 10),
       child: ProgressButton(
-        child: Text(isAttemptingToJoinSession ? "" : "Connect", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-        onPressed: _connectToServer,
-        buttonState: isAttemptingToJoinSession ? ButtonState.inProgress : ButtonState.normal,
+        child: Text(isAttemptingToJoinSessionFromText ? "" : "Connect", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+        onPressed: _onConnectPressed,
+        buttonState: isAttemptingToJoinSessionFromText ? ButtonState.inProgress : ButtonState.normal,
+        backgroundColor: Theme.of(context).primaryColor,
+        progressColor: Colors.white,
+      ),
+    ));
+    widgets.add(Padding(padding: new EdgeInsets.fromLTRB(0, 10, 0, 10), child: Text("OR")));
+    widgets.add(Padding(padding: new EdgeInsets.fromLTRB(0, 4, 0, 4), child: Align(alignment: Alignment.centerLeft, child: Text("1. Copy the link from Netflix Party on your computer"))));
+    widgets.add(Padding(padding: new EdgeInsets.fromLTRB(0, 4, 0, 4), child: Align(alignment: Alignment.centerLeft,child: Text("2. Visit the-qrcode-generator.com"))));
+    widgets.add(Padding(padding: new EdgeInsets.fromLTRB(0, 4, 0, 4), child: Align(alignment: Alignment.centerLeft,child: Text("3. Paste the link there to create a scannable QR code"))));
+    widgets.add(Padding(
+      padding: new EdgeInsets.fromLTRB(50, 10, 50, 10),
+      child: ProgressButton(
+        child: Text(isAttemptingToJoinSessionFromQR ? "" : "Scan QR Code", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+        onPressed: _onScanQRPressed,
+        buttonState: isAttemptingToJoinSessionFromQR ? ButtonState.inProgress : ButtonState.normal,
         backgroundColor: Theme.of(context).primaryColor,
         progressColor: Colors.white,
       ),
     ));
     return widgets;
+  }
+
+  void _onScanQRPressed() async {
+    debugPrint('qr pressed');
+    var result = await BarcodeScanner.scan();
+    _controller.text = result;
+    _connectToServer();
+    setState(() {
+      isAttemptingToJoinSessionFromQR = true;
+    });
+    debugPrint(result);
   }
 
   void disconnectButtonPressed() {
