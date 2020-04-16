@@ -14,6 +14,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   String _username = "";
   String _iconName = "";
   List<Widget> images = new List<Widget>();
+  List<Widget> imageWidgets = new List();
 
 
   _UserSettingsScreenState() {
@@ -68,53 +69,47 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     });
   }
 
-  List<Widget>_getWidgets() {
-    List<Widget> widgets = new List<Widget>();
-    widgets.add(new TextFormField(
-      controller: _usernameController,
-      decoration: InputDecoration(labelText: 'Enter Username'),
-    ));
-    Row row = Row(children: new List<Widget>());
-    for(int i=0; i<images.length; i++) {
-      SvgPicture image = images.elementAt(i);
-      String imageName = (image.pictureProvider as ExactAssetPicture).assetName.substring(14);
-      Widget widget = GestureDetector(onTap: () {_updateIconInPreferences(imageName);},child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: image));
-      if(imageName == _iconName) {
-        widget = Container(
-            decoration: BoxDecoration(
-              color: Color.fromRGBO(69, 182, 254, 1),
-            ),
-            child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: image)
-        );
-      }
-
-      row.children.add(widget);
-      if ((i+1)%4 == 0) {
-        widgets.add(row);
-        row = new Row(children: new List<Widget>());
-      }
-    }
-    widgets.add(row);
-
-    return widgets;
-  }
+   _getImageWidgets() {
+     List<Widget> returnWidgets = new List<Widget>();
+     images.forEach((inputImage) {
+       SvgPicture image = inputImage;
+       String imageName = (image.pictureProvider as ExactAssetPicture).assetName.substring(14);
+       Widget widget = GestureDetector(onTap: () {_updateIconInPreferences(imageName);},child: Padding(
+           padding: const EdgeInsets.all(8.0),
+           child: image));
+       if(imageName == _iconName) {
+         widget = Container(
+             decoration: BoxDecoration(
+               color: Color.fromRGBO(69, 182, 254, 1),
+             ),
+             child: Padding(
+                 padding: const EdgeInsets.all(8.0),
+                 child: image)
+         );
+       }
+       returnWidgets.add(widget);
+     });
+     return returnWidgets;
+   }
 
   @override
   Widget build (BuildContext ctxt) {
     _usernameController.addListener(_usernameChanged);
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("User Settings"),
-      ),
-      body: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(children: _getWidgets())
-      ),
-    );
+        appBar: new AppBar(
+          title: new Text("User Settings"),
+        ),
+        body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column( children: [new TextFormField(
+          controller: _usernameController,
+          decoration: InputDecoration(labelText: 'Enter Username'),
+        ), Expanded( child: GridView.count(crossAxisCount: 4,
+            crossAxisSpacing: 4.0,
+            mainAxisSpacing: 8.0,
+            children: _getImageWidgets())
+        )])));
+
   }
 
 
