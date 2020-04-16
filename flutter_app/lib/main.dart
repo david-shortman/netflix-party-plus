@@ -1,6 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:progress_button/progress_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -37,9 +42,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Netflix Party',
+      title: 'Netflix Party Harder',
+      theme: new ThemeData(
+        primaryColor: Colors.redAccent,
+      ),
       home:  MyHomePage(
-        title: 'Netflix Party',
+        title: 'Netflix Party Harder',
       )
     );
   }
@@ -64,6 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int currentLocalTime = 0;
   int lastKnownMoviePosition = 0;
   bool sessionJoined = false;
+  bool isAttemptingToJoinSession = false;
   SidMessage sidMessage;
   TextEditingController _controller = TextEditingController();
   TextEditingController _messageController = TextEditingController();
@@ -75,6 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool connected = false;
   int videoDuration = 655550;
   List<UserMessage> userMessages = new List();
+  List<ChatMessage> chatMessages = new List();
 
   _MyHomePageState() {
     _loadUsernameAndIcon();
@@ -86,15 +96,65 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: getActionIcons(context),
+        backgroundColor: Colors.red,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView(child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: getWidgets(),
-        )),
+      body: connected ? _getConnectedWidget() : _getNotConnectedWidget(),
+      bottomNavigationBar: _getBottomAppBarWidget(),
+      floatingActionButton: _getPlayControlButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _getBottomAppBarWidget() {
+    return BottomAppBar(
+      child: new Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Visibility(
+            visible: connected,
+            child: IconButton(
+              icon: Icon(Icons.power_settings_new),
+              onPressed: () {
+                disconnectButtonPressed();
+              },
+            ),),
+          IconButton(
+            icon: SvgPicture.asset('assets/images/Alien.svg', height: 85),
+            onPressed: () {
+              goToAccountSettings(context);
+            },
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _getNotConnectedWidget() {
+    return Padding(padding: new EdgeInsets.all(10), child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: getNotConnectedWidgets(),
+    ));
+  }
+
+  Widget _getConnectedWidget() {
+    return Padding(
+      padding: new EdgeInsets.all(10),
+      child: DashChat(
+          scrollToBottom: false,
+          messages: chatMessages,
+          onSend: (message) {
+            postMessageText(message.text);
+          },
+          user: ChatUser(
+            name: _username,
+            uid: userId,
+            avatar: _icon,
+          ),
+        avatarBuilder: (chatUser) {
+            debugPrint(chatUser.avatar);
+            return new SvgPicture.asset('assets/images/${chatUser.avatar}', height: 35);
+        },),
     );
   }
 
@@ -124,14 +184,6 @@ class _MyHomePageState extends State<MyHomePage> {
   _sendBroadcastUserSettingsMessage() {
     sendMessage(BroadcastUserSettingsMessage(BroadCastUserSettingsContent(UserSettings(true, _icon, userId, _username))));
   }
-  
-  List<Widget> getWidgets() {
-    if(!connected) {
-      return getNotConnectedWidgets();
-    } else {
-      return getConnectedWidgets();
-    }
-  }
 
   void postMessageText(String messageText) {
     int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
@@ -146,7 +198,10 @@ class _MyHomePageState extends State<MyHomePage> {
     sendMessage(new BufferingMessage(bufferingContent));
   }
 
-  void connectToServer() {
+  void _connectToServer() {
+      setState(() {
+        isAttemptingToJoinSession = true;
+      });
       sessionJoined = false;
       sessionId = "";
       String serverId = "";
@@ -178,88 +233,23 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         }
       }
+      else {
+        setState(() {
+          sleep(new Duration(milliseconds: 1000));
+          isAttemptingToJoinSession = false;
+        });
+        return;
+      }
       debugPrint("ServerId: "+serverId);
       debugPrint("SessionId: "+sessionId);
       connectAndSetupListener(serverId);
-  }
-  
-  void sendMessageToChat() {
-    postMessageText(_messageController.text);
-    setState(() {
-      _messageController.text = "";
-    });
   }
 
   void connectAndSetupListener(String serverId) {
     currentChannel = new IOWebSocketChannel.connect("wss://"+serverId+".netflixparty.com/socket.io/?EIO=3&transport=websocket");
     messenger.setChannel(currentChannel);
     currentChannel.stream.listen(
-            (message){
-          debugPrint('got $message');
-          ReceivedMessage messageObj = ReceivedMessageUtility.fromString(message);
-          if(messageObj is UserIdMessage) {
-            userId = (messageObj as UserIdMessage).userId;
-            sendGetServerTimeMessage();
-          } else if(messageObj is ServerTimeMessage) {
-            if (!sessionJoined) {
-              joinSession(userId, "Mobile User", sessionId);
-            }
-          } else if(messageObj is UpdateMessage) {
-            lastKnownMoviePosition = messageObj.lastKnownTime;
-            videoDuration = messageObj.videoDuration;
-            currentServerTime = messageObj.lastKnownTimeUpdatedAt;
-            currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-            debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
-            sendNotBufferingMessage();
-
-            if(messageObj.state == "playing") {
-              setState(() {
-                this.isPlaying = true;
-              });
-            } else {
-              setState(() {
-                this.isPlaying = false;
-              });
-            }
-          } else {
-            if(messageObj is SidMessage) {
-            SidMessage sidMessage = messageObj;
-            this.sidMessage = sidMessage;
-            if(serverTimeTimer != null) {
-              serverTimeTimer.cancel();
-              serverTimeTimer = null;
-            }
-            serverTimeTimer = Timer.periodic(Duration(milliseconds: 5000), (Timer t) => sendGetServerTimeMessage());
-            if (pingTimer != null) {
-              pingTimer.cancel();
-              pingTimer = null;
-            }
-            pingTimer = Timer.periodic(Duration(milliseconds: sidMessage.pingInterval), (Timer t) => currentChannel.sink.add("2"));
-            setState(() {
-              connected = true;
-            });
-          } else if(messageObj is SentMessageMessage) {
-            setState(() {
-              this.userMessages.add(messageObj.userMessage);
-            });
-          } else if(messageObj is VideoIdAndMessageCatchupMessage) {
-            this.userMessages.addAll(messageObj.userMessages);
-            lastKnownMoviePosition = messageObj.lastKnownTime;
-            currentServerTime = messageObj.lastKnownTimeUpdatedAt;
-            currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-            debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
-            sendNotBufferingMessage();
-            debugPrint(messageObj.state);
-            setState(() {
-              if(messageObj.state == "playing") {
-                this.isPlaying = true;
-              } else {
-                this.isPlaying = false;
-              }
-            });
-          }
-          }
-        },
+        _onReceivedStreamMessage,
         onError: (error, StackTrace stackTrace){
           debugPrint('onError');
         },
@@ -269,11 +259,94 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  void _onReceivedStreamMessage(message) {
+    // TODO: clean up this method
+    debugPrint('got $message');
+    ReceivedMessage messageObj = ReceivedMessageUtility.fromString(message);
+    if(messageObj is UserIdMessage) {
+      userId = (messageObj as UserIdMessage).userId;
+      sendGetServerTimeMessage();
+    } else if(messageObj is ServerTimeMessage) {
+      if (!sessionJoined) {
+        joinSession(userId, "Mobile User", sessionId);
+      }
+    } else if(messageObj is UpdateMessage) {
+      lastKnownMoviePosition = messageObj.lastKnownTime;
+      videoDuration = messageObj.videoDuration;
+      currentServerTime = messageObj.lastKnownTimeUpdatedAt;
+      currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
+      debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
+      sendNotBufferingMessage();
+
+      if(messageObj.state == "playing") {
+        setState(() {
+          this.isPlaying = true;
+        });
+      } else {
+        setState(() {
+          this.isPlaying = false;
+        });
+      }
+    } else {
+      if(messageObj is SidMessage) {
+        SidMessage sidMessage = messageObj;
+        this.sidMessage = sidMessage;
+        if(serverTimeTimer != null) {
+          serverTimeTimer.cancel();
+          serverTimeTimer = null;
+        }
+        serverTimeTimer = Timer.periodic(Duration(milliseconds: 5000), (Timer t) => sendGetServerTimeMessage());
+        if (pingTimer != null) {
+          pingTimer.cancel();
+          pingTimer = null;
+        }
+        pingTimer = Timer.periodic(Duration(milliseconds: sidMessage.pingInterval), (Timer t) => currentChannel.sink.add("2"));
+        setState(() {
+          connected = true;
+        });
+      } else if(messageObj is SentMessageMessage) {
+        setState(() {
+          this.userMessages.add(messageObj.userMessage);
+          this.chatMessages.add(new ChatMessage(createdAt: DateTime.fromMillisecondsSinceEpoch(messageObj.userMessage.timestamp), text: messageObj.userMessage.body, user: new ChatUser.fromJson({
+            'uid': messageObj.userMessage.userId,
+            'name': messageObj.userMessage.userNickname,
+            'avatar': messageObj.userMessage.userIcon
+          })));
+        });
+      } else if(messageObj is VideoIdAndMessageCatchupMessage) {
+        this.userMessages.addAll(messageObj.userMessages);
+        this.chatMessages.addAll(messageObj.userMessages.map((userMessage) {
+          return new ChatMessage(text: userMessage.body, user: new ChatUser.fromJson({
+            'uid': userMessage.userId,
+            'name': userMessage.userNickname,
+            'avatar': userMessage.userIcon
+          }));
+        }));
+        lastKnownMoviePosition = messageObj.lastKnownTime;
+        currentServerTime = messageObj.lastKnownTimeUpdatedAt;
+        currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
+        debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
+        sendNotBufferingMessage();
+        debugPrint(messageObj.state);
+        setState(() {
+          if(messageObj.state == "playing") {
+            this.isPlaying = true;
+          } else {
+            this.isPlaying = false;
+          }
+        });
+      }
+    }
+  }
+
   void joinSession(String userIdForJoin, String nickNameForJoin, String sessionIdForJoin) {
     UserSettings userSettings = new UserSettings(true, "Sailor Cat.svg", userIdForJoin, nickNameForJoin);
     JoinSessionContent joinSessionContent = new JoinSessionContent(sessionIdForJoin, userIdForJoin, userSettings);
     sendMessage(new JoinSessionMessage(joinSessionContent));
     sessionJoined = true;
+    setState(() {
+      isAttemptingToJoinSession = false;
+    });
   }
 
   void sendGetServerTimeMessage() {
@@ -294,7 +367,9 @@ class _MyHomePageState extends State<MyHomePage> {
       currentLocalTime = 0;
       lastKnownMoviePosition = 0;
       sessionJoined = false;
+      isAttemptingToJoinSession = false;
       userMessages.clear();
+      chatMessages.clear();
     });
   }
 
@@ -331,39 +406,16 @@ class _MyHomePageState extends State<MyHomePage> {
       controller: _controller,
       decoration: InputDecoration(labelText: 'Enter URL'),
     ));
-    widgets.add(FlatButton(
-      color: Colors.blue,
-      textColor: Colors.white,
-      onPressed: () => connectToServer(),
-      child: Text(
-        "Connect",
+    widgets.add(Padding(
+      padding: new EdgeInsets.fromLTRB(50, 10, 50, 10),
+      child: ProgressButton(
+        child: Text(isAttemptingToJoinSession ? "" : "Connect", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+        onPressed: _connectToServer,
+        buttonState: isAttemptingToJoinSession ? ButtonState.inProgress : ButtonState.normal,
+        backgroundColor: Theme.of(context).primaryColor,
+        progressColor: Colors.white,
       ),
     ));
-    return widgets;
-  }
-
-  List<Widget> getConnectedWidgets() {
-    List<Widget> widgets = new List<Widget>();
-    widgets.add(getPlayOrPauseButtonWidget());
-    widgets.add(getMessageSendBox());
-    widgets.add(FlatButton(
-      color: Colors.blue,
-      textColor: Colors.white,
-      onPressed: () => sendMessageToChat(),
-      child: Text(
-        "Send Message",
-      ),
-    ));
-    String username;
-    Iterator<UserMessage> itr = this.userMessages.iterator;
-    while(itr.moveNext()) {
-      UserMessage message = itr.current;
-      username = "";
-      if(message != null && message.userNickname != null) {
-        username = message.userNickname;
-      }
-      widgets.add(Text(username + " - " + message.body));
-    }
     return widgets;
   }
 
@@ -379,89 +431,45 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Widget getPlayOrPauseButtonWidget() {
-    if(!connected) {
-      return Text("");
-    } else {
-      if (isPlaying) {
-        return FlatButton(
-          color: Colors.blue,
-          textColor: Colors.white,
-          onPressed: () {
-            int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
-            int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
-            int expectedMovieTime = lastKnownMoviePosition + millisecondsSinceLastUpdate;
-            int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-
-            currentServerTime = expectedServerTime;
-            lastKnownMoviePosition = expectedMovieTime;
-            currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-
-            debugPrint('sending pause with movie time: ' + expectedMovieTime.toString());
-            UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "paused", null, null, videoDuration, false);
-            sendMessage(new UpdateSessionMessage(updateSessionContent));
-            setState(() {
-              isPlaying = false;
-            });
-          },
-          child: Text(
-            "Pause",
-          ),
-        );
-      } else {
-        return FlatButton(
-          color: Colors.blue,
-          textColor: Colors.white,
-          onPressed: () {
-            debugPrint('sending play with movie time: ' + lastKnownMoviePosition.toString());
-            int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
-            int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
-            int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-            this.currentServerTime = expectedServerTime;
-            currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-            UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "playing", null, null, videoDuration, false);
-            sendMessage(new UpdateSessionMessage(updateSessionContent));
-            setState(() {
-              isPlaying = true;
-            });
-          },
-          child: Text(
-            "Play",
-          ),
-        );
-      }
-    }
+  Widget _getPlayControlButton() {
+    return FlatButton(
+      color: Theme.of(context).primaryColor,
+      shape: new CircleBorder(),
+      onPressed: isPlaying ? _onPausePressed : _onPlayPressed,
+      child: Icon(isPlaying ? Icons.pause : Icons.play_arrow, size: 50, color: Colors.white,),
+    );
   }
 
-  List<Widget> getActionIcons(BuildContext context) {
-    List<Widget> widgets = new List<Widget>();
-    if(this.connected) {
-      widgets.add(IconButton(
-        icon: Icon(Icons.cloud_off),
-        onPressed: () {
-          disconnectButtonPressed();
-        },
-      ));
-    }
-    widgets.add(IconButton(
-      icon: Icon(Icons.account_circle),
-      onPressed: () {
-        goToAccountSettings(context);
-      },
-    ));
-    return widgets;
+  void _onPlayPressed() {
+    debugPrint('sending play with movie time: ' + lastKnownMoviePosition.toString());
+    int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
+    int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
+    int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
+    this.currentServerTime = expectedServerTime;
+    currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
+    UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "playing", null, null, videoDuration, false);
+    sendMessage(new UpdateSessionMessage(updateSessionContent));
+    setState(() {
+      isPlaying = true;
+    });
   }
 
-  Widget getMessageSendBox() {
-    if(connected) {
-      return Form(
-          child: TextFormField(
-            controller: _messageController,
-            decoration: InputDecoration(labelText: 'Post a message'),
-          ));
-    } else {
-      return Text("Can't send messages when not connected");
-    }
+  void _onPausePressed() {
+    int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
+    int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
+    int expectedMovieTime = lastKnownMoviePosition + millisecondsSinceLastUpdate;
+    int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
+
+    currentServerTime = expectedServerTime;
+    lastKnownMoviePosition = expectedMovieTime;
+    currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
+
+    debugPrint('sending pause with movie time: ' + expectedMovieTime.toString());
+    UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "paused", null, null, videoDuration, false);
+    sendMessage(new UpdateSessionMessage(updateSessionContent));
+    setState(() {
+      isPlaying = false;
+    });
   }
 }
 
