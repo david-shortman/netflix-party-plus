@@ -15,6 +15,8 @@ dependencies:
   web_socket_channel: ^1.1.0
   shared_preferences: ^0.5.6
   flutter_svg: ^0.17.4
+  dash_chat: 1.0.19
+  progress_button: ^0.0.2
 
 dev_dependencies:
   flutter_test:
