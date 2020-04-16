@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: connected ? _getConnectedWidget() : _getNotConnectedWidget(),
       bottomNavigationBar: _getBottomAppBarWidget(),
-      floatingActionButton: _getPlayControlButton(),
+      floatingActionButton: Visibility(visible: connected, child: _getPlayControlButton()),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
