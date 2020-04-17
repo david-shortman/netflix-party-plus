@@ -76,8 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isAttemptingToJoinSessionFromText = false;
   bool isAttemptingToJoinSessionFromQR = false;
   SidMessage sidMessage;
-  TextEditingController _controller = TextEditingController();
-  TextEditingController _messageController = TextEditingController();
+  TextEditingController _urlTextController = TextEditingController();
   Timer serverTimeTimer;
   Timer pingTimer;
   String _username;
@@ -215,31 +214,31 @@ class _MyHomePageState extends State<MyHomePage> {
       sessionJoined = false;
       sessionId = "";
       String serverId = "";
-      int varStart = _controller.text.toString().indexOf('?');
+      int varStart = _urlTextController.text.toString().indexOf('?');
       if (varStart >= 0) {
-        int sessionIdStart = _controller.text.toString().indexOf(
+        int sessionIdStart = _urlTextController.text.toString().indexOf(
             'npSessionId=');
         if (sessionIdStart >= 0) {
-          int sessionIdEnd = _controller.text.toString().indexOf(
+          int sessionIdEnd = _urlTextController.text.toString().indexOf(
               '&', sessionIdStart);
           if (sessionIdEnd > sessionIdStart) {
-            sessionId = _controller.text.toString().substring(
+            sessionId = _urlTextController.text.toString().substring(
                 sessionIdStart + 12, sessionIdEnd);
           } else {
             sessionId =
-                _controller.text.toString().substring(sessionIdStart + 12);
+                _urlTextController.text.toString().substring(sessionIdStart + 12);
           }
         }
-        int serverIdStart = _controller.text.toString().indexOf('npServerId=');
+        int serverIdStart = _urlTextController.text.toString().indexOf('npServerId=');
         if (serverIdStart >= 0) {
-          int serverIdEnd = _controller.text.toString().indexOf(
+          int serverIdEnd = _urlTextController.text.toString().indexOf(
               '&', serverIdStart);
           if (serverIdEnd > serverIdStart) {
-            serverId = _controller.text.toString().substring(
+            serverId = _urlTextController.text.toString().substring(
                 serverIdStart + 11, serverIdEnd);
           } else {
             serverId =
-                _controller.text.toString().substring(serverIdStart + 11);
+                _urlTextController.text.toString().substring(serverIdStart + 11);
           }
         }
       }
@@ -418,11 +417,9 @@ class _MyHomePageState extends State<MyHomePage> {
     widgets.add(TextFormField(
       textInputAction: TextInputAction.go,
       onFieldSubmitted: _onSubmitPressedInUrlField,
-      controller: _controller,
+      controller: _urlTextController,
       decoration: InputDecoration(labelText: 'Enter URL', suffixIcon: IconButton(icon: Icon(Icons.cancel), onPressed: () {
-        this.setState(() {
-          _controller.clear();
-        });
+        WidgetsBinding.instance.addPostFrameCallback( (_) => _urlTextController.clear());
       },)),
     ));
     widgets.add(Padding(
@@ -455,7 +452,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onScanQRPressed() async {
     debugPrint('qr pressed');
     var result = await BarcodeScanner.scan();
-    _controller.text = result;
+    _urlTextController.text = result;
     _connectToServer();
     setState(() {
       isAttemptingToJoinSessionFromQR = true;
