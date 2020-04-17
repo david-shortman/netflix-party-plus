@@ -7,8 +7,7 @@ A Flutter application that allows you to interact with a Netflix Party group thr
 
 ## Getting Started
 
-To get started using Flutter, check out the documentation at
-[online documentation](https://flutter.dev/docs), which offers tutorials,
+To get started using Flutter, check out [the official documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
 To run on a computer already set up with the Flutter SDK:
