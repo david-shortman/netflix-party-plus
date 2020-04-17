@@ -413,6 +413,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   List<Widget> getNotConnectedWidgets() {
+    debugPrint('remove me');
     List<Widget> widgets = new List<Widget>();
     widgets.add(TextFormField(
       textInputAction: TextInputAction.go,
