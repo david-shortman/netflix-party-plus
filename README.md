@@ -2,7 +2,7 @@
 # netflix-party-enhancement-suite
 A set of enhancements to the Netflix Party experience
 
-## Netflix Party Hardy (A NP Remote App)
+## Netflix Party Harder (A NP Remote App)
 
 Status: WIP
 
