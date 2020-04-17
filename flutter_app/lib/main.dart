@@ -67,8 +67,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   IOWebSocketChannel currentChannel;
   Messenger messenger = new Messenger();
-  String userId = null;
-  String sessionId = null;
+  String userId;
+  String sessionId;
   int currentServerTime = 0;
   int currentLocalTime = 0;
   int lastKnownMoviePosition = 0;
@@ -274,7 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
     debugPrint('got $message');
     ReceivedMessage messageObj = ReceivedMessageUtility.fromString(message);
     if(messageObj is UserIdMessage) {
-      userId = (messageObj as UserIdMessage).userId;
+      userId = messageObj.userId;
       sendGetServerTimeMessage();
     } else if(messageObj is ServerTimeMessage) {
       if (!sessionJoined) {
@@ -403,7 +403,7 @@ class _MyHomePageState extends State<MyHomePage> {
   
   //WIDGET FUNCTIONS
 
-  goToAccountSettings(BuildContext) async {
+  goToAccountSettings(buildContext) async {
     print("go to account settings");
     await Navigator.push(
       context,

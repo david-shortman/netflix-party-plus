@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutterapp/domains/messages/SocketMessage.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -6,7 +5,7 @@ class Messenger {
   IOWebSocketChannel _channel;
   int _currentSequenceNum = 0;
 
-  Messenger() {}
+  Messenger();
   void setChannel(IOWebSocketChannel channel) {
     _channel = channel;
   }
