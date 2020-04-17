@@ -11,7 +11,6 @@ class UserSettingsScreen extends StatefulWidget {
 
 class _UserSettingsScreenState extends State<UserSettingsScreen> {
   TextEditingController _usernameController = TextEditingController();
-  String _username = "";
   String _iconName = "";
   List<Widget> images = new List<Widget>();
   List<Widget> imageWidgets = new List();
@@ -64,7 +63,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _usernameController.text = prefs.getString("username");
-      _username = prefs.getString("username");
       _iconName = prefs.getString("userIcon") ?? "";
     });
   }
