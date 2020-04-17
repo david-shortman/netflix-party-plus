@@ -200,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
     sendMessage(new BufferingMessage(bufferingContent));
   }
 
-  void _onSubmitePressedInUrlField(String s) {
+  void _onSubmitPressedInUrlField(String s) {
     _onConnectPressed();
   }
 
@@ -417,7 +417,7 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Widget> widgets = new List<Widget>();
     widgets.add(TextFormField(
       textInputAction: TextInputAction.go,
-      onFieldSubmitted: _onSubmitePressedInUrlField,
+      onFieldSubmitted: _onSubmitPressedInUrlField,
       controller: _controller,
       decoration: InputDecoration(labelText: 'Enter URL', suffixIcon: IconButton(icon: Icon(Icons.cancel), onPressed: () {
         this.setState(() {
@@ -516,5 +516,4 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 }
-
 
