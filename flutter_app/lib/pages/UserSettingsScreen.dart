@@ -104,9 +104,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         child: Column( children: [new TextFormField(
           controller: _usernameController,
           decoration: InputDecoration(labelText: 'Enter Username', suffixIcon: IconButton(icon: Icon(Icons.cancel), onPressed: () {
-            this.setState(() {
               WidgetsBinding.instance.addPostFrameCallback( (_) => _usernameController.clear());
-            });
           },)),
         ), Expanded( child: GridView.count(crossAxisCount: 4,
             crossAxisSpacing: 4.0,
