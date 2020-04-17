@@ -23,4 +23,11 @@ jobs:
         with:
           flutter-version: '1.12.13+hotfix.9'
       - run: cd flutter_app && flutter pub get
-      - run: cd flutter_app && flutter test
+      - run: cd flutter_app && flutter  analyze
+      - run: cd flutter_app && flutter test --coverage
+      # https://github.com/marketplace/actions/codecov
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: flutter_app/coverage/lcov.info
