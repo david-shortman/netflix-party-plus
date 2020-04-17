@@ -420,9 +420,7 @@ class _MyHomePageState extends State<MyHomePage> {
       onFieldSubmitted: _onSubmitePressedInUrlField,
       controller: _controller,
       decoration: InputDecoration(labelText: 'Enter URL', suffixIcon: IconButton(icon: Icon(Icons.cancel), onPressed: () {
-        this.setState(() {
-          _controller.clear();
-        });
+        WidgetsBinding.instance.addPostFrameCallback( (_) => _controller.clear());
       },)),
     ));
     widgets.add(Padding(

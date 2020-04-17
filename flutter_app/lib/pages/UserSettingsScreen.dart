@@ -105,7 +105,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
           controller: _usernameController,
           decoration: InputDecoration(labelText: 'Enter Username', suffixIcon: IconButton(icon: Icon(Icons.cancel), onPressed: () {
             this.setState(() {
-              _usernameController.clear();
+              WidgetsBinding.instance.addPostFrameCallback( (_) => _usernameController.clear());
             });
           },)),
         ), Expanded( child: GridView.count(crossAxisCount: 4,
