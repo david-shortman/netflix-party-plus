@@ -103,7 +103,11 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         padding: const EdgeInsets.all(20.0),
         child: Column( children: [new TextFormField(
           controller: _usernameController,
-          decoration: InputDecoration(labelText: 'Enter Username'),
+          decoration: InputDecoration(labelText: 'Enter Username', suffixIcon: IconButton(icon: Icon(Icons.cancel), onPressed: () {
+            this.setState(() {
+              _usernameController.clear();
+            });
+          },)),
         ), Expanded( child: GridView.count(crossAxisCount: 4,
             crossAxisSpacing: 4.0,
             mainAxisSpacing: 8.0,

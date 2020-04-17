@@ -200,6 +200,10 @@ class _MyHomePageState extends State<MyHomePage> {
     sendMessage(new BufferingMessage(bufferingContent));
   }
 
+  void _onSubmitePressedInUrlField(String s) {
+    _onConnectPressed();
+  }
+
   void _onConnectPressed() {
     setState(() {
       isAttemptingToJoinSessionFromText = true;
@@ -412,8 +416,14 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> getNotConnectedWidgets() {
     List<Widget> widgets = new List<Widget>();
     widgets.add(TextFormField(
+      textInputAction: TextInputAction.go,
+      onFieldSubmitted: _onSubmitePressedInUrlField,
       controller: _controller,
-      decoration: InputDecoration(labelText: 'Enter URL'),
+      decoration: InputDecoration(labelText: 'Enter URL', suffixIcon: IconButton(icon: Icon(Icons.cancel), onPressed: () {
+        this.setState(() {
+          _controller.clear();
+        });
+      },)),
     ));
     widgets.add(Padding(
       padding: new EdgeInsets.fromLTRB(50, 10, 50, 10),
