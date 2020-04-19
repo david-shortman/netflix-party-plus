@@ -1,8 +1,6 @@
 name: Dart CI
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -10,6 +8,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: bltavares/actions/dartfmt@master
+    - uses: actions/checkout@v1
+    - uses: subosito/flutter-action@v1
       with:
-        secrets: ${{ secrets.GITHUB_TOKEN }}
+        flutter-version: '1.12.x' # you can use 1.12
+        channel: 'dev' # optional, default to: 'stable'
+    - run: flutter format
+    - uses: matheusalbino/git-commit@v1.0.1
+      with:
+        user-name: DasFormatter
+        user-email: DasFormatter@example.com
+        message: Format Code
+        github-token: ${{ secrets.GITHUB_TOKEN }}
