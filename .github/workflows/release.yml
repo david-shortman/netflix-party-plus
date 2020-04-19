@@ -2,9 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [ master, test-deploy ]
-    tags: 
-      - 'release*'
+    branches: [ 'releases/**' ]
     paths:
       - 'flutter_app/**'
 
