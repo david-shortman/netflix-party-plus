@@ -22,7 +22,7 @@ jobs:
           APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
           TEAM_ID: ${{ secrets.TEAM_ID }}
         run: |
-          fastlane setup --verbose
+          cd flutter_app/ios && fastlane setup --verbose
       - name: Run fastlane beta
         env:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
@@ -37,4 +37,4 @@ jobs:
           LANG: 'en_US.UTF-8'
           LC_ALL: 'en_US.UTF-8'
         run: |
-          fastlane beta --verbose
+          cd flutter_app/ios && fastlane beta --verbose
