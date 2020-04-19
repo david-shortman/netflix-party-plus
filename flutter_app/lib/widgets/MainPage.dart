@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:dash_chat/dash_chat.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
@@ -115,8 +116,11 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           Visibility(
             visible: connected,
-            child: IconButton(
-              icon: Icon(Icons.power_settings_new),
+            child: CupertinoButton(
+              child: Text(
+                "Disconnect",
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
               onPressed: () {
                 disconnectButtonPressed();
               },
@@ -146,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _getConnectedWidget() {
     return Padding(
-      padding: new EdgeInsets.all(10),
+      padding: new EdgeInsets.fromLTRB(10, 1, 10, 10),
       child: ChatStream.getChatStream(
         context: context,
         messages: _chatMessages,
@@ -341,7 +345,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   messageObj.userMessage.timestamp),
               text: messageObj.userMessage.body,
               user: _buildChatUser(messageObj.userMessage)));
-          _scrollToBottomOfChatStream();
+          WidgetsBinding.instance
+              .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
         });
       } else if (messageObj is VideoIdAndMessageCatchupMessage) {
         this.userMessages.addAll(messageObj.userMessages);
@@ -349,7 +354,8 @@ class _MyHomePageState extends State<MyHomePage> {
           return new ChatMessage(
               text: userMessage.body, user: _buildChatUser(userMessage));
         }));
-        _scrollToBottomOfChatStream();
+        WidgetsBinding.instance
+            .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
         lastKnownMoviePosition = messageObj.lastKnownTime;
         currentServerTime = messageObj.lastKnownTimeUpdatedAt;
         currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
@@ -384,10 +390,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _scrollToBottomOfChatStream() {
-    _chatStreamScrollController.animateTo(
-        _chatStreamScrollController.position.maxScrollExtent + 50,
-        duration: new Duration(milliseconds: 300),
-        curve: Curves.bounceIn);
+    if (_chatStreamScrollController.position !=
+        _chatStreamScrollController.position.maxScrollExtent) {
+      _chatStreamScrollController.animateTo(
+          _chatStreamScrollController.position.maxScrollExtent + 5,
+          duration: new Duration(milliseconds: 300),
+          curve: Curves.linear);
+    }
   }
 
   void showToastMessage(String message) {
@@ -473,25 +482,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Widget> getNotConnectedWidgets() {
     List<Widget> widgets = new List<Widget>();
-    widgets.add(TextFormField(
-      textInputAction: TextInputAction.go,
-      onFieldSubmitted: _onSubmitPressedInUrlField,
-      controller: _urlTextController,
-      decoration: InputDecoration(
-          labelText: 'Enter URL',
-          suffixIcon: IconButton(
-            icon: Icon(Icons.cancel),
-            onPressed: () {
-              WidgetsBinding.instance
-                  .addPostFrameCallback((_) => _urlTextController.clear());
-            },
+    widgets.add(Padding(
+      padding: EdgeInsets.all(6),
+    ));
+    widgets.add(
+      Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            "Party URL",
+            textAlign: TextAlign.left,
+            style: TextStyle(fontSize: 20),
           )),
+    );
+    widgets.add(Padding(
+      padding: EdgeInsets.all(4),
+    ));
+    widgets.add(CupertinoTextField(
+      textInputAction: TextInputAction.go,
+      onSubmitted: _onSubmitPressedInUrlField,
+      controller: _urlTextController,
+      placeholder: 'Enter URL',
+      style: Theme.of(context).primaryTextTheme.body1,
+      clearButtonMode: OverlayVisibilityMode.editing,
     ));
     widgets.add(Padding(
       padding: new EdgeInsets.fromLTRB(50, 10, 50, 10),
       child: ProgressButton(
         child: Text(
-          isAttemptingToJoinSessionFromText ? "" : "Connect",
+          isAttemptingToJoinSessionFromText ? "" : "Connect to Party",
           style:
               new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
@@ -504,7 +522,11 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     ));
     widgets.add(Padding(
-        padding: new EdgeInsets.fromLTRB(0, 10, 0, 10), child: Text("OR")));
+        padding: new EdgeInsets.fromLTRB(0, 10, 0, 10),
+        child: Text(
+          "OR",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        )));
     widgets.add(Padding(
         padding: new EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Align(
@@ -564,16 +586,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _getPlayControlButton() {
-    return FlatButton(
-      color: Theme.of(context).primaryColor,
-      shape: new CircleBorder(),
-      onPressed: isPlaying ? _onPausePressed : _onPlayPressed,
-      child: Icon(
-        isPlaying ? Icons.pause : Icons.play_arrow,
-        size: 50,
-        color: Colors.white,
-      ),
-    );
+    return new CupertinoButton(
+        child: Icon(
+            isPlaying
+                ? CupertinoIcons.pause_solid
+                : CupertinoIcons.play_arrow_solid,
+            size: 40),
+        color: Theme.of(context).primaryColor,
+        padding: EdgeInsets.fromLTRB(35, 0, 30, 4),
+        minSize: 55,
+        borderRadius: BorderRadius.circular(500),
+        onPressed: isPlaying ? _onPausePressed : _onPlayPressed);
   }
 
   void _onPlayPressed() {

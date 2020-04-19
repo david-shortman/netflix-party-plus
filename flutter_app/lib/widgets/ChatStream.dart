@@ -1,4 +1,5 @@
 import 'package:dash_chat/dash_chat.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
@@ -29,16 +30,29 @@ class ChatStream {
         );
       },
       showUserAvatar: true,
+      scrollToBottom: false,
       messageTimeBuilder: (text) {
         return new Text(
           text,
           style: new TextStyle(color: Colors.white, fontSize: 10),
         );
       },
-      messageContainerDecoration:
-          new BoxDecoration(color: Theme.of(context).cardColor),
-      inputContainerStyle:
-          new BoxDecoration(color: Theme.of(context).dialogBackgroundColor),
+      sendButtonBuilder: (onPressed) {
+        return new CupertinoButton(
+            child: Icon(CupertinoIcons.up_arrow),
+            color: Theme.of(context).primaryColor,
+            padding: EdgeInsets.all(3),
+            minSize: 30,
+            borderRadius: BorderRadius.circular(500),
+            onPressed: onPressed);
+      },
+      inputToolbarPadding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+      messageContainerDecoration: new BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(15)),
+      inputContainerStyle: new BoxDecoration(
+          color: Theme.of(context).dialogBackgroundColor,
+          borderRadius: BorderRadius.circular(30)),
       avatarBuilder: (chatUser) {
         return new SvgPicture.asset('assets/avatars/${chatUser.avatar}',
             height: 35);
