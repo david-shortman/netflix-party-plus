@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master, test-deploy ]
     tags: 
-      - 'release'
+      - 'release*'
     paths:
       - 'flutter_app/**'
 
