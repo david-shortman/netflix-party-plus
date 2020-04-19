@@ -19,6 +19,5 @@ class UserMessage {
     permId = objectFromMessage['permId'];
     userIcon = objectFromMessage['userIcon'];
     userNickname = objectFromMessage['userNickname'];
-    debugPrint('\n !!!! ' + json.encode(objectFromMessage));
   }
 }

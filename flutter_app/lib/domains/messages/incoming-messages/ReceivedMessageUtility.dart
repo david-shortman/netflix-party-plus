@@ -14,8 +14,6 @@ class ReceivedMessageUtility {
   static ReceivedMessage fromString(String message) {
     SocketMessage socketMessage = new SocketMessage.fromString(message);
 
-    debugPrint('received: ${socketMessage.buildString(0)}');
-
     Map<String, dynamic> messageContentMap = socketMessage.content.toMap();
 
     if (messageContentMap.containsKey('sid')) {
