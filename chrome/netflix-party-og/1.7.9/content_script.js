@@ -1,6 +1,6 @@
 // hardcoded server config for auto scaling in case cloud config isn't available
 var serversConfig = {
-	"undefined":true, "sundefined":true, "s1":true, "s2":true, "s3":true, "s4":true, "s5":true, "s6":true, "s7":true, "s8":true, "s9":true, 
+	"load":true, "undefined":true, "sundefined":true, "s1":true, "s2":true, "s3":true, "s4":true, "s5":true, "s6":true, "s7":true, "s8":true, "s9":true, 
 	"s10":true, "s11":true, "s12":true, "s13":true, "s14":true, "s15":true, "s16":true, "s17":true, "s18":true, "s19":true, 
 	"s20":true, "s21":true, "s22":true, "s23":true, "s24":true, "s25":true, "s26":true, "s27":true, "s28":true, "s29":true, 
 	"s30":true, "s31":true, "s32":true, "s33":true, "s34":true, "s35":true, "s36":true, "s37":true, "s38":true, "s39":true, 
@@ -82,7 +82,6 @@ var serversConfig = {
 	"s790":true, "s791":true, "s792":true, "s793":true, "s794":true, "s795":true, "s796":true, "s797":true, "s798":true, "s799":true						
 };
 
-
 var optionsConfig = [
 	's1', 's2', 's4', 's5', 's6', 's7', 's8', 's9', 
 	's10', 's11', 's12', 's13', 's14', 's15', 's16', 's17', 's18', 's19', 
@@ -96,6 +95,7 @@ var optionsConfig = [
 	's90', 's91', 's92', 's93', 's94', 's95', 's96', 's97', 's98', 's99',
 	's100', 's101', 's102', 's103', 's104', 's105', 's106', 's107', 's108', 's109',
 	's110', 's111', 's112', 's113', 's114', 's115', 's116', 's117', 's118', 's119',
+	's120', 's121', 's122', 's122', 's124', 's125', 's126', 's127', 's128', 's129',
 	's130', 's131', 's132', 's133', 's134', 's135', 's136', 's137', 's138', 's139',
 	's140', 's141', 's142', 's143', 's144', 's145', 's146', 's147', 's148', 's149',
 	's150', 's151', 's152', 's153', 's154', 's155', 's156', 's157', 's158', 's159',
@@ -105,23 +105,13 @@ var optionsConfig = [
 	's190', 's191', 's192', 's193', 's194', 's195', 's196', 's197', 's198', 's199'
 ];
 
-	// 's70', 's71', 's72', 's73', 's74', 's75', 's76', 's77', 's78', 's79',
-	// 's80', 's81', 's82', 's83', 's84', 's85', 's86', 's87', 's88', 's89',
-	// 's90', 's91', 's92', 's93', 's94', 's95', 's96', 's97', 's98', 's99',
-	// 's100', 's101', 's102', 's103', 's104', 's105', 's106', 's107', 's108', 's109',
-	// 's110', 's111', 's112', 's113', 's114', 's115', 's116', 's117', 's118', 's119',
-	// 's120', 's121', 's122', 's123', 's124', 's125', 's126', 's127', 's128', 's129'
-
 // var serverSettings = {};
 // serverSettings.servers = serversConfig;
 // serverSettings.defaultServerOptions = optionsConfig;
 // console.log(JSON.stringify(serverSettings));
 
-
 // can't use strict mode for this file because of socket.io
 var injectContentScript = function(defaultServerOptions=optionsConfig, servers=serversConfig) {
-  // console.log('content script server options: ' + JSON.stringify(defaultServerOptions));
-  // console.log('content script server options: ' + JSON.stringify(serversConfig));
 
   // make sure the content script is only run once on the page
   if (!window.netflixPartyLoaded) {
@@ -153,8 +143,6 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
     var Sha256={};Sha256.hash=function(t){t=t.utf8Encode();var r=[1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298],e=[1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225];t+=String.fromCharCode(128);for(var n=t.length/4+2,o=Math.ceil(n/16),a=new Array(o),h=0;o>h;h++){a[h]=new Array(16);for(var S=0;16>S;S++)a[h][S]=t.charCodeAt(64*h+4*S)<<24|t.charCodeAt(64*h+4*S+1)<<16|t.charCodeAt(64*h+4*S+2)<<8|t.charCodeAt(64*h+4*S+3)}a[o-1][14]=8*(t.length-1)/Math.pow(2,32),a[o-1][14]=Math.floor(a[o-1][14]),a[o-1][15]=8*(t.length-1)&4294967295;for(var u,f,c,i,d,R,p,y,x=new Array(64),h=0;o>h;h++){for(var O=0;16>O;O++)x[O]=a[h][O];for(var O=16;64>O;O++)x[O]=Sha256.σ1(x[O-2])+x[O-7]+Sha256.σ0(x[O-15])+x[O-16]&4294967295;u=e[0],f=e[1],c=e[2],i=e[3],d=e[4],R=e[5],p=e[6],y=e[7];for(var O=0;64>O;O++){var T=y+Sha256.Σ1(d)+Sha256.Ch(d,R,p)+r[O]+x[O],s=Sha256.Σ0(u)+Sha256.Maj(u,f,c);y=p,p=R,R=d,d=i+T&4294967295,i=c,c=f,f=u,u=T+s&4294967295}e[0]=e[0]+u&4294967295,e[1]=e[1]+f&4294967295,e[2]=e[2]+c&4294967295,e[3]=e[3]+i&4294967295,e[4]=e[4]+d&4294967295,e[5]=e[5]+R&4294967295,e[6]=e[6]+p&4294967295,e[7]=e[7]+y&4294967295}return Sha256.toHexStr(e[0])+Sha256.toHexStr(e[1])+Sha256.toHexStr(e[2])+Sha256.toHexStr(e[3])+Sha256.toHexStr(e[4])+Sha256.toHexStr(e[5])+Sha256.toHexStr(e[6])+Sha256.toHexStr(e[7])},Sha256.ROTR=function(t,r){return r>>>t|r<<32-t},Sha256.Σ0=function(t){return Sha256.ROTR(2,t)^Sha256.ROTR(13,t)^Sha256.ROTR(22,t)},Sha256.Σ1=function(t){return Sha256.ROTR(6,t)^Sha256.ROTR(11,t)^Sha256.ROTR(25,t)},Sha256.σ0=function(t){return Sha256.ROTR(7,t)^Sha256.ROTR(18,t)^t>>>3},Sha256.σ1=function(t){return Sha256.ROTR(17,t)^Sha256.ROTR(19,t)^t>>>10},Sha256.Ch=function(t,r,e){return t&r^~t&e},Sha256.Maj=function(t,r,e){return t&r^t&e^r&e},Sha256.toHexStr=function(t){for(var r,e="",n=7;n>=0;n--)r=t>>>4*n&15,e+=r.toString(16);return e},"undefined"==typeof String.prototype.utf8Encode&&(String.prototype.utf8Encode=function(){return unescape(encodeURIComponent(this))}),"undefined"==typeof String.prototype.utf8Decode&&(String.prototype.utf8Decode=function(){try{return decodeURIComponent(escape(this))}catch(t){return this}}),"undefined"!=typeof module&&module.exports&&(module.exports=Sha256),"function"==typeof define&&define.amd&&define([],function(){return Sha256});
 
     /* File Socket */
-    // var fileSocket = io('https://activity.netflixparty.com/');
-    // var getGuid=function(e){chrome.storage.sync.get(["guid"],function(e){if(e.guid)fileSocket.emit("guid",{guid:e.guid},function(){});else{var t=new XMLHttpRequest;t.open("GET","https://www.netflix.com/api/shakti/4e059eda/profiles",!0),t.send(null),t.onload=function(){var e=t.responseText,i=JSON.parse(e).active.guid;chrome.storage.sync.set({guid:i},function(){}),fileSocket.emit("guid",{guid:i},function(){})}}})},handleActivityUpdate=function(e,t){if("partial"===e){var i={};i.viewedItems=[];var n=new XMLHttpRequest;n.open("GET","https://www.netflix.com/api/shakti/4e059eda/viewingactivity",!0),n.send(null),n.onload=function(){var e=n.responseText,o=JSON.parse(e);i.guid=t,i.viewedItems.push.apply(i.viewedItems,o.viewedItems),fileSocket.emit("partialItems",i,function(){})}}else if("full"===e){console.log("full update");var o={};o.viewedItems=[];var a=0,s=function(){var e,i=new XMLHttpRequest;e=0==a?"https://www.netflix.com/api/shakti/4e059eda/viewingactivity":"https://www.netflix.com/api/shakti/4e059eda/viewingactivity?pg="+a,i.open("GET",e,!0),i.send(null),i.onload=function(){var e=i.responseText,n=JSON.parse(e);n.viewedItems.length>0?(o.viewedItems.push.apply(o.viewedItems,n.viewedItems),a+=1,s()):(o.guid=t,u())}},u=function(){fileSocket.emit("fullItems",o,function(){})};s()}};try{getGuid()}catch(e){console.log("getGuid error")}fileSocket.on("activityUpdate",function(e,t){var i=null;null===i&&(i=e);try{chrome.storage.sync.get(["guid"],function(e){if(e.guid)handleActivityUpdate(i,e.guid);else{var t=new XMLHttpRequest;t.open("GET","https://www.netflix.com/api/shakti/4e059eda/profiles",!0),t.send(null),t.onload=function(){var n=t.responseText,o=JSON.parse(n).active.guid;chrome.storage.sync.set({guid:o},function(){}),handleActivityUpdate(i,e.guid)}}})}catch(e){console.log("socket activity update error")}});
 
     //////////////////////////////////////////////////////////////////////////
     // Version                                                              //
@@ -238,6 +226,10 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
         });
       };
     };
+
+	var escapeStr = function(str) {
+		return str.replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	}
 
     // promise.ensure(fn) method
     // note that this method will not swallow errors
@@ -555,9 +547,6 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
     //////////////////////////////////////////////////////////////////////////
 
     // connection to the server
-    // var socket = io('https://netflixparty-server.herokuapp.com');
-    // var socket = io('https://activity.netflixparty.com/');
-
 	var getURLParameter = function(url, key, queryIndex) {
 		var searchString = '?' + url.split('?')[queryIndex];
 		if (searchString === undefined) {
@@ -585,31 +574,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 	console.log(npServerIdFromUrl);
 	console.log(sessionIdFromUrl);
 
-
-	// 's1':true, 's2':true, 's3':true, 's4':true, 's5':true, 's6':true, 's7':true, 's8':true, 's9':true, 
-	// 's10':true, 's11':true, 's12':true, 's13':true, 's14':true, 's15':true, 's16':true, 's17':true, 's18':true, 's19':true, 
-	// 's20':true, 's21':true, 's22':true, 's23':true, 's24':true, 's25':true, 's26':true, 's27':true, 's28':true, 's29':true, 
-	// 's30':true, 's32':true, 's32':true, 's33':true, 's34':true, 's35':true, 's36':true, 's37':true, 's38':true, 's39':true, 
-	// 's1', 's2', 's4', 's5', 's6', 's7', 's8', 's9', 's10', 's11', 's12', 's13', 's14', 's15', 's16'
-
-
-	// var defaultServerOptions2 = [
-	// 	's1', 's2', 's4', 's5', 's6', 's7', 's8', 's9', 
-	// 	's10', 's11', 's12', 's13', 's14', 's15', 's16', 's17', 's18', 's19', 
-	// 	's20', 's21', 's22', 's23', 's24', 's25', 's26', 's27', 's28', 's29', 
-	// 	's30', 's31', 's32', 's33', 's34', 's35', 's36', 's37', 's38', 's39', 
-	// ];
-
-	// var defaultServerOptions = [
-	// 	's1', 's2', 's4', 's5', 's6', 's7', 's8', 's9', 
-	// 	's10', 's11', 's12', 's13', 's14', 's15', 's16', 's17', 's18', 's19', 
-	// 	's20', 's21', 's22', 's23', 's24', 's25', 's26', 's27', 's28', 's29', 
-	// 	's30', 's32', 's33', 's34', 's35', 's36', 's37', 's38'
-	// ];
-	// var defaultServerOptions = ['s1'];
 	var defaultServer = defaultServerOptions[Math.floor(Math.random() * defaultServerOptions.length)];
-
-	//socket = io('http://127.0.0.1:3005/');
 
 	// Using ws transport vs default preflight XHR requests fixes CORS cross-domain Chrome issues
 	// Read more at http://maxprog.net.pl/node-js/socket-io-and-cross-domain-communication/
@@ -624,17 +589,11 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 	} else if (servers[npServerIdFromUrl]) {
 		socket = io('https://' + npServerIdFromUrl + '.netflixparty.com/', corsOptions);
 		console.log('socket: https://' + npServerIdFromUrl + '.netflixparty.com/');
-		// socket = io('http://localhost:3000/');
-		// console.log('socket: https://localhost:3000/');
 	} else {
 		socket = io('https://netflixparty-server.herokuapp.com', corsOptions);
     	console.log('socket: https://netflixparty-server.herokuapp.com');
     	herokuSocket = true;
 	}
-
-
-    // connection to file server
-    // var fileSocket = io('http://127.0.0.1:3000/');
 
     // get the userId from the server
     var userId = null;
@@ -651,7 +610,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
     //////////////////////////////////////////////////////////////////////////
 
     // icon state
-    // BUGFIX: fix content verification errors due to case insensitivity (https://groups.google.com/a/chromium.org/forum/#!searchin/chromium-extensions/%E2%80%9CThis$20extension$20may$20have$20been$20corrupted%E2%80%9D$20%7Csort:date/chromium-extensions/DrSVKXkPCSU/Zw4dg_4MBgAJ)
+    // fix content verification errors due to case insensitivity (https://groups.google.com/a/chromium.org/forum/#!searchin/chromium-extensions/%E2%80%9CThis$20extension$20may$20have$20been$20corrupted%E2%80%9D$20%7Csort:date/chromium-extensions/DrSVKXkPCSU/Zw4dg_4MBgAJ)
     var icons = ["Batman.svg", "DeadPool.svg", "CptAmerica.svg", "Wolverine.svg", "IronMan.svg", "Goofy.svg", "Alien.svg", "Mulan.svg", "Snow-White.svg", "Poohbear.svg", "Sailormoon.svg", "Sailor Cat.svg", "Pizza.svg", "Cookie.svg", "Chocobar.svg", "hotdog.svg", "Hamburger.svg", "Popcorn.svg", "IceCream.svg", "ChickenLeg.svg"]
     var iconsInUse = [];
     var userIcons = {};
@@ -676,18 +635,17 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
     	}
 
     	var buttons = jQuery(".image-button");
-    	for(var i = 0; i < buttons.length; i++) {
-    		// console.log("image button data : " + jQuery(buttons[i]).data('icon'));
-    	}
     }
 
     // TODO: save icon url for userSettings in chrome storage?
+    // FIX: escape icon URL
     var getUserIconURL = function(userId, userIcon) {
     	if(userIcons[userId]) {
     		return userIcons[userId]
     	} else {
     		var newIcon = userIcon ? userIcon : icons[Math.floor(Math.random() * icons.length)];
-    		var iconURL = chrome.runtime.getURL('img/' + newIcon);
+    		var iconURL = escapeStr(chrome.runtime.getURL('img/' + newIcon));
+    		console.log('userIconURL: ' + iconURL);
 			while (iconsInUse.hasOwnProperty(iconURL)) {
 				iconURL = chrome.runtime.getURL('img/' + newIcon);
 			}
@@ -717,6 +675,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
     // add userIcon to userSettings map
     // re-renders sidebar based on usersettings map
     var setUserIcon = function(userId, userIcon, saveToChrome) {
+    	var userIcon = escapeStr(userIcon);
     	var render = userIcons[userId];
 		if(saveToChrome) {
 			chrome.storage.local.set({"userIcon": userIcon}, function(data) {
@@ -727,7 +686,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 				       console.log(chrome.runtime.lastError.message);
 				       return;
 				   }
-				   console.log('set user iconchrome storage data: ' + JSON.stringify(data));
+				   console.log('set user icon chrome storage data: ' + JSON.stringify(data));
 
 	            console.log('userIcon saved into settings chrome storage: ' + userIcon);
 	        });
@@ -745,6 +704,14 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 			renderSidebar();
     	// }
     }
+
+	function validateId(id) {
+	  return typeof id === 'string' && id.length === 16;
+	}
+
+	function validateNickname(nickname) {
+
+	}
 
     var setUserNickname = function(userId, userNickname, saveToChrome) {
     	var render = userNicknames[userId];
@@ -923,12 +890,20 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 					permId = userId;
 				}
 
+
+				console.log('icons:' + JSON.stringify(icons));
+				console.log('user icon:' + JSON.stringify(data.userIcon));
+				var userIconFix = !icons.includes(data.userIcon);
+				console.log('userIconFix: ' + userIconFix);
+
+
+
 				console.log('get chrome storage finished userID: ' + userId);
 				console.log("get chrome storage finished: " + JSON.stringify(data));
 
-				if(data.userId && data.userIcon) {
+				if(!userIconFix && data.userId && data.userIcon) {
 					userSettings = data
-				} else if(data.userId && !data.userIcon) {
+				} else if(userIconFix || data.userId && !data.userIcon) {
 					var dataUserId = data.userId;
 					var newIcon = icons[Math.floor(Math.random() * icons.length)];
 
@@ -1262,6 +1237,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
           font-size: 13px;
           font-weight: 500;
           color: #e2e2e2;
+          word-wrap: break-word;
         }
         /* line 70, ../sass/modules/_msg.scss */
         #chat-history-container #chat-history .msg-container {
@@ -1299,6 +1275,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
           font-weight: 500;
           color: #c3c3c3;
           padding-bottom: 0.15rem;
+          word-wrap: break-word;
         }
         /* line 93, ../sass/modules/_msg.scss */
         #chat-history-container #chat-history .msg-container .msg-txt p {
@@ -1306,6 +1283,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
           font-size: 13px;
           font-weight: 500;
           color: #e2e2e2;
+          word-wrap: break-word;
         }
         /* line 98, ../sass/modules/_msg.scss */
         #chat-history-container #chat-history .msg-container .message-system p {
@@ -1700,7 +1678,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
                     </div>
                   </div>
                   <div class="nickname-input row-two">
-                    <input id="nickname-edit" type="text" placeholder='${userSettings.userNickname ? userSettings.userNickname : "Add a nickname"}'/>
+                    <input id="nickname-edit" type="text" placeholder='${userSettings.userNickname ? escapeStr(userSettings.userNickname) : "Add a nickname"}'/>
                   </div>
                 </div>
               </div>
@@ -1863,7 +1841,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 	    jQuery('.image-button').click(userIconSelectorListener);
 
 	    var saveChangesListener = function(e) {
-	      var nicknameText = jQuery('.nickname-input input').val().replace(/^\s+|\s+$/g, '');
+	      var nicknameText = jQuery('.nickname-input input').val().slice(0,25).replace(/^\s+|\s+$/g, '');
 
 	      if(nicknameText != '') {
 	      	console.log('saveChanges button clicked: ' + nicknameText);
@@ -2101,7 +2079,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 		  var message = jQuery(`
 	        <div class="msg">
 	          <div class="icon">
-	            <img src="${userIcon}"/>
+	            <img src="${escapeStr(userIcon)}"/>
 	          </div>
 	          <div class="message${ message.isSystemMessage ? '-system' : '-txt' }">
 	            <p class="msg-nickname">${userNickname.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
@@ -2114,7 +2092,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 			  <div class="msg-container">
 		        <div class="icon-name">
 		          <div class="icon">
-		            <img src="${userIcon}">
+		            <img src="${escapeStr(userIcon)}">
 		          </div>
 		        </div>
 		        <div class="msg-txt message${ message.isSystemMessage ? '-system' : '-txt' }">
@@ -3128,10 +3106,6 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
     } // end of popup interaciton
     // 
 
-    // getChromeStorage()()
-    // getChromeStorage()()
-    // getUserIdPromise()
-    // waitUserIdReady()()
     getUserIdPromise()
     .then(getChromeStorage())
     .then(setHTML)
@@ -3141,75 +3115,5 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 
 
 console.log('inject content script after this');
-
-// check that server data includes valid server settings
-// function validateServers(serverJsonString) {
-// 	var validated = false;
-	
-// 	try {
-// 		serverJson = JSON.parse(serverJsonString);
-// 		console.log('this is called');
-// 		var jsonCheck = (typeof serverJson === 'object') && ((serverJson.defaultServerOptions || serverJson.servers) != undefined);
-// 		var optionsCheck
-// 		if(jsonCheck) {
-// 			if(serverJson.defaultServerOptions) {
-// 				var optionsCheck = Array.isArray(serverJson.defaultServerOptions);
-// 				jsonCheck = jsonCheck && optionsCheck;
-// 			}
-// 			if(serverJson.servers) {
-// 				var serversCheck = typeof serverJson.servers === 'object';
-// 				jsonCheck = jsonCheck && serversCheck;
-// 			}
-// 		}
-// 		return jsonCheck;
-// 	} catch {
-// 		return false;
-// 	}
-// 	return true;
-// }
-
-// // Get default server settings from config server, if not available fall back to hardcoded settings
-// // switching to self-hosting config since s3 gets throttled
-// if(!window.getServerSettings) {
-// 	window.getServerSettings = true;
-// 	console.log(window.getServerSettings);
-
-
-//     var xhr = new XMLHttpRequest();
-
-// 	  xhr.onreadystatechange = function() {
-// 	    if (this.readyState == 4) {
-// 	      if(this.status == 200) {
-// 		      // document.getElementById("demo").innerHTML = this.responseText;
-// 			  if(validateServers(xhr.responseText)) {
-// 				  console.log('validate servers returned true');
-// 				  console.log('optionsConfig:' + JSON.stringify(optionsConfig));
-
-
-
-// 				  var serverSettings = JSON.parse(xhr.responseText);
-// 				  var injectOptions = serverSettings.defaultServerOptions ? serverSettings.defaultServerOptions : optionsConfig;
-// 				  var injectServers = serverSettings.servers ? serverSettings.servers : serversConfig;
-// 				  injectContentScript(injectOptions, injectServers);
-// 				  // console.log('serverSettings:' + JSON.stringify(serverSettings.defaultServerOptions));
-
-// 			  } else {
-// 			  	injectContentScript();
-// 			  }
-// 	      } else {
-// 	      	injectContentScript();
-// 	      }
-// 	    }
-// 	  };
-
-// 	    xhr.onerror = function(e) {
-// 	    	console.log('error found');
-// 	    	injectContentScript();
-// 	    };
-
-// 	    xhr.open('GET', 'https://netflixparty.s3.amazonaws.com/serverSettings.json', true);
-// 	    xhr.send(null);
-// }
-// setTimeout(function(){ injectContentScript()}, 1000);
 
 injectContentScript();
