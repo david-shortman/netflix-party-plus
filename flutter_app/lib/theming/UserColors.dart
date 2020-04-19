@@ -48,5 +48,6 @@ class UserColors {
       case "Wolverine.svg":
         return Colors.deepOrangeAccent;
     }
-  }
+    return Colors.teal;
+    }
 }

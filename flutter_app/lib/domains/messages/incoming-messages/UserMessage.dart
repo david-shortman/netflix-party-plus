@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
-
 class UserMessage {
   String body;
   bool isSystemMessage;
