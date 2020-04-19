@@ -17,7 +17,13 @@ jobs:
           flutter-version: '1.12.13+hotfix.9'
       - run: cd flutter_app && flutter pub get
       - run: cd flutter_app && flutter build ios --release --no-codesign
-      - uses: maierj/fastlane-action@v1.4.0
+      - name: Run fastlane setup
+        env:
+          APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+        run: |
+          fastlane setup --verbose
+      - name: Run fastlane beta
         env:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
@@ -28,6 +34,5 @@ jobs:
           FASTLANE_SESION: ${{ secrets.FASTLANE_SESSION }}
           LANG: 'en_US.UTF-8'
           LC_ALL: 'en_US.UTF-8'
-        with:
-          lane: 'beta'
-          subdirectory: './flutter_app/ios'
+        run: |
+          fastlane beta --verbose
