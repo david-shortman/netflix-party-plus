@@ -35,7 +35,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     images.add(SvgPicture.asset("assets/avatars/Pizza.svg", height: 85));
     images.add(SvgPicture.asset("assets/avatars/Poohbear.svg", height: 85));
     images.add(SvgPicture.asset("assets/avatars/Popcorn.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Sailor Cat.svg", height: 85));
+    images.add(SvgPicture.asset("assets/avatars/SailorCat.svg", height: 85));
     images.add(SvgPicture.asset("assets/avatars/Sailormoon.svg", height: 85));
     images.add(SvgPicture.asset("assets/avatars/Snow-White.svg", height: 85));
     images.add(SvgPicture.asset("assets/avatars/Wolverine.svg", height: 85));

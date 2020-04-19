@@ -16,6 +16,18 @@ class UserSettings implements Mappable {
     _userNickname = userNickname;
   }
 
+  String getNickname() {
+    return _userNickname;
+  }
+
+  String getIcon() {
+    return _userIcon;
+  }
+
+  String getId() {
+    return _userId;
+  }
+
   @override
   Map<String, dynamic> toMap() =>
       {

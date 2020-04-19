@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    branches: [ 'releases/**' ]
+    paths:
+      - 'flutter_app/**'
+
+jobs:
+  build:
+    name: run fastlane beta release
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.12.13+hotfix.9'
+      - run: cd flutter_app && flutter pub get
+      - run: cd flutter_app && flutter build ios --release --no-codesign
+      - name: Run fastlane setup
+        env:
+          APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          MATCH_KEYCHAIN_NAME: ${{ secrets.MATCH_KEYCHAIN_NAME }}
+          MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
+        run: |
+          cd flutter_app/ios && fastlane setup --verbose
+      - name: Run fastlane beta
+        env:
+          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
+          ITC_TEAM_ID: ${{ secrets.ITC_TEAM_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_KEYCHAIN_NAME: ${{ secrets.MATCH_KEYCHAIN_NAME }}
+          MATCH_KEYCHAIN_PASSWORD: ${{ secrets.MATCH_KEYCHAIN_PASSWORD }}
+          FASTLANE_SESION: ${{ secrets.FASTLANE_SESSION }}
+          LANG: 'en_US.UTF-8'
+          LC_ALL: 'en_US.UTF-8'
+        run: |
+          cd flutter_app/ios && fastlane beta --verbose

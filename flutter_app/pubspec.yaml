@@ -17,6 +17,7 @@ dependencies:
   dash_chat: 1.0.19
   progress_button: ^0.0.2
   barcode_scan: 2.0.2
+  fluttertoast: ^4.0.0
 
 dev_dependencies:
   flutter_test:
