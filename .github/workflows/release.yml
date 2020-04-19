@@ -8,25 +8,26 @@ on:
 
 jobs:
   build:
+    name: run fastlane beta release
     runs-on: macOS-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v1
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: '1.12.13+hotfix.9'
       - run: cd flutter_app && flutter pub get
       - run: cd flutter_app && flutter build ios --release --no-codesign
-      - name: Run fastlane deploy
-        uses: maierj/fastlane-action@v1.4.0
-        env:
-          FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD}}
-          APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
-          ITC_TEAM_ID: ${{ secrets.ITC_TEAM_ID }}
-          TEAM_ID: ${{ secrets.TEAM_ID }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          FASTLANE_SESION: ${{ secrets.FASTLANE_SESSION }}
-          LANG: 'en_US.UTF-8'
-          LC_ALL: 'en_US.UTF-8'
-        with:
-          lane: 'beta'
-          subdirectory: './flutter_app/ios'
+#       - name: Run fastlane deploy
+#         uses: maierj/fastlane-action@v1.4.0
+#         env:
+#           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD}}
+#           APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
+#           ITC_TEAM_ID: ${{ secrets.ITC_TEAM_ID }}
+#           TEAM_ID: ${{ secrets.TEAM_ID }}
+#           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+#           FASTLANE_SESION: ${{ secrets.FASTLANE_SESSION }}
+#           LANG: 'en_US.UTF-8'
+#           LC_ALL: 'en_US.UTF-8'
+#         with:
+#           lane: 'beta'
+#           subdirectory: './flutter_app/ios'
