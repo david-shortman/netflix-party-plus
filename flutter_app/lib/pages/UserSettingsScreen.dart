@@ -15,7 +15,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   List<Widget> images = new List<Widget>();
   List<Widget> imageWidgets = new List();
 
-
   _UserSettingsScreenState() {
     _setUsernameTextFieldFromSharedPreferences();
     images.add(SvgPicture.asset("assets/avatars/Alien.svg", height: 85));
@@ -45,6 +44,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     _updateUsernameInPreferences();
     //
   }
+
   _updateUsernameInPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("username", _usernameController.text);
@@ -56,7 +56,6 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     setState(() {
       this._iconName = iconName;
     });
-
   }
 
   _setUsernameTextFieldFromSharedPreferences() async {
@@ -67,51 +66,57 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     });
   }
 
-   _getImageWidgets() {
-     List<Widget> returnWidgets = new List<Widget>();
-     images.forEach((inputImage) {
-       SvgPicture image = inputImage;
-       String imageName = (image.pictureProvider as ExactAssetPicture).assetName.substring(14);
-       Widget widget = GestureDetector(onTap: () {_updateIconInPreferences(imageName);},child: Padding(
-           padding: const EdgeInsets.all(8.0),
-           child: image));
-       if(imageName == _iconName) {
-         widget = Container(
-             decoration: BoxDecoration(
-               color: Color.fromRGBO(69, 182, 254, 1),
-             ),
-             child: Padding(
-                 padding: const EdgeInsets.all(8.0),
-                 child: image)
-         );
-       }
-       returnWidgets.add(widget);
-     });
-     return returnWidgets;
-   }
+  _getImageWidgets() {
+    List<Widget> returnWidgets = new List<Widget>();
+    images.forEach((inputImage) {
+      SvgPicture image = inputImage;
+      String imageName =
+          (image.pictureProvider as ExactAssetPicture).assetName.substring(14);
+      Widget widget = GestureDetector(
+          onTap: () {
+            _updateIconInPreferences(imageName);
+          },
+          child: Padding(padding: const EdgeInsets.all(8.0), child: image));
+      if (imageName == _iconName) {
+        widget = Container(
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(69, 182, 254, 1),
+            ),
+            child: Padding(padding: const EdgeInsets.all(8.0), child: image));
+      }
+      returnWidgets.add(widget);
+    });
+    return returnWidgets;
+  }
 
   @override
-  Widget build (BuildContext ctxt) {
+  Widget build(BuildContext ctxt) {
     _usernameController.addListener(_usernameChanged);
     return new Scaffold(
         appBar: new AppBar(
           title: new Text("User Settings"),
         ),
         body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column( children: [new TextFormField(
-          controller: _usernameController,
-          decoration: InputDecoration(labelText: 'Enter Username', suffixIcon: IconButton(icon: Icon(Icons.cancel), onPressed: () {
-              WidgetsBinding.instance.addPostFrameCallback( (_) => _usernameController.clear());
-          },)),
-        ), Expanded( child: GridView.count(crossAxisCount: 4,
-            crossAxisSpacing: 4.0,
-            mainAxisSpacing: 8.0,
-            children: _getImageWidgets())
-        )])));
-
+            padding: const EdgeInsets.all(20.0),
+            child: Column(children: [
+              new TextFormField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                    labelText: 'Enter Username',
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.cancel),
+                      onPressed: () {
+                        WidgetsBinding.instance.addPostFrameCallback(
+                            (_) => _usernameController.clear());
+                      },
+                    )),
+              ),
+              Expanded(
+                  child: GridView.count(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 4.0,
+                      mainAxisSpacing: 8.0,
+                      children: _getImageWidgets()))
+            ])));
   }
-
-
-
 }

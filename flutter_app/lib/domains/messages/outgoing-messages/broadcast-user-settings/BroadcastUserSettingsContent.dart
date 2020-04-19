@@ -9,8 +9,5 @@ class BroadCastUserSettingsContent extends MessageContent {
     this._content = content;
   }
 
-  Map<String, dynamic> toMap() =>
-      {
-        'userSettings': _content.toMap()
-      };
+  Map<String, dynamic> toMap() => {'userSettings': _content.toMap()};
 }

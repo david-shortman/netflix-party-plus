@@ -33,7 +33,8 @@ class ReceivedMessageUtility {
         }
         if (messageContentMap['value'] is Map) {
           if (messageContentMap['value'].containsKey('videoId')) {
-            return new VideoIdAndMessageCatchupMessage(messageContentMap['value']);
+            return new VideoIdAndMessageCatchupMessage(
+                messageContentMap['value']);
           } else if (messageContentMap['value'].containsKey('errorMessage')) {
             return new ErrorMessage(messageContentMap['value']);
           }
@@ -42,5 +43,5 @@ class ReceivedMessageUtility {
 
     debugPrint('Not implemented: ${socketMessage.buildString(0)}\n');
     return new ReceivedMessage();
-    }
+  }
 }
