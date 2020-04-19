@@ -16,11 +16,8 @@ class VideoIdAndMessageCatchupMessage extends ReceivedMessage {
     lastKnownTime = objectFromMessage['lastKnownTime'];
     lastKnownTimeUpdatedAt = objectFromMessage['lastKnownTimeUpdatedAt'];
     Iterator<dynamic> messageIterator = messageArray.iterator;
-    while(messageIterator.moveNext()) {
+    while (messageIterator.moveNext()) {
       userMessages.add(new UserMessage(messageIterator.current));
     }
-
   }
-
-
 }

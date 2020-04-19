@@ -9,7 +9,8 @@ class UpdateSessionContent implements MessageContent {
   int _videoDuration;
   bool _isBuffering;
 
-  UpdateSessionContent(int lastKnownTime,
+  UpdateSessionContent(
+      int lastKnownTime,
       int lastKnownTimeUpdatedAt,
       String state,
       int lastKnownTimeRemaining,
@@ -26,8 +27,7 @@ class UpdateSessionContent implements MessageContent {
   }
 
   @override
-  Map<String, dynamic> toMap() =>
-      {
+  Map<String, dynamic> toMap() => {
         'lastKnownTime': _lastKnownTime,
         'lastKnownTimeUpdatedAt': _lastKnownTimeUpdatedAt,
         'state': _state,

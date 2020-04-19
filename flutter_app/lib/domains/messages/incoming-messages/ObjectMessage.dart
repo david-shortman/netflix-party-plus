@@ -6,6 +6,4 @@ class ObjectMessage extends ReceivedMessage {
   ObjectMessage(this.message) {
     this.messageType = "Object";
   }
-
-
 }
