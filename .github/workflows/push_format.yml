@@ -13,7 +13,7 @@ jobs:
       with:
         flutter-version: '1.12.x' # you can use 1.12
         channel: 'dev' # optional, default to: 'stable'
-    - run: flutter format
+    - run: flutter format .
     - uses: matheusalbino/git-commit@v1.0.1
       with:
         user-name: DasFormatter
