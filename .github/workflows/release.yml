@@ -11,8 +11,7 @@ jobs:
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@master
-      - name: Build
-        uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v1
         with:
           flutter-version: '1.12.13+hotfix.9'
       - run: cd flutter_app && flutter pub get
@@ -26,8 +25,8 @@ jobs:
           TEAM_ID: ${{ secrets.TEAM_ID }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           FASTLANE_SESION: ${{ secrets.FASTLANE_SESSION }}
-          LANG: en_US.UTF-8
-          LC_ALL: en_US.UTF-8
+          LANG: 'en_US.UTF-8'
+          LC_ALL: 'en_US.UTF-8'
         with:
           lane: 'beta'
           subdirectory: './flutter_app/ios'
