@@ -7,11 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
+import 'package:flutterapp/theming/AppTheme.dart';
+import 'package:flutterapp/theming/UserColors.dart';
+import 'package:flutterapp/widgets/ChatStream.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_button/progress_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 
+import 'domains/avatar/Avatar.dart';
 import 'pages/UserSettingsScreen.dart';
 import 'domains/messages/SocketMessage.dart';
 import 'domains/messages/incoming-messages/ReceivedMessage.dart';
@@ -46,9 +50,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Netflix Party Harder',
-      theme: new ThemeData(
-        primaryColor: Colors.redAccent,
-      ),
+      theme: PartyHarderTheme.getLightTheme(),
+      darkTheme: PartyHarderTheme.getDarkTheme(),
       home:  MyHomePage(
         title: 'Netflix Party Harder',
       )
@@ -68,7 +71,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   IOWebSocketChannel currentChannel;
   Messenger messenger = new Messenger();
-  String userId;
+  String _userId;
   String sessionId;
   int currentServerTime = 0;
   int currentLocalTime = 0;
@@ -78,6 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isAttemptingToJoinSessionFromQR = false;
   SidMessage sidMessage;
   TextEditingController _urlTextController = TextEditingController();
+  ScrollController _chatStreamScrollController = ScrollController();
   Timer serverTimeTimer;
   Timer pingTimer;
   String _username;
@@ -86,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool connected = false;
   int videoDuration = 655550;
   List<UserMessage> userMessages = new List();
-  List<ChatMessage> chatMessages = new List();
+  List<ChatMessage> _chatMessages = new List();
 
   _MyHomePageState() {
     _loadUsernameAndIcon();
@@ -98,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Colors.red,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
       body: connected ? _getConnectedWidget() : _getNotConnectedWidget(),
       bottomNavigationBar: _getBottomAppBarWidget(),
@@ -142,21 +146,15 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _getConnectedWidget() {
     return Padding(
       padding: new EdgeInsets.all(10),
-      child: DashChat(
-          scrollToBottom: false,
-          messages: chatMessages,
-          onSend: (message) {
-            postMessageText(message.text);
-          },
-          user: ChatUser(
-            name: _username,
-            uid: userId,
-            avatar: _icon,
-          ),
-        avatarBuilder: (chatUser) {
-            debugPrint(chatUser.avatar);
-            return new SvgPicture.asset('assets/avatars/${chatUser.avatar}', height: 35);
-        },),
+      child: ChatStream.getChatStream(
+        context: context,
+        messages: _chatMessages,
+        onSend: (message) {
+          postMessageText(message.text);
+        },
+        userSettings: new UserSettings(false, _icon, _userId, _username),
+        scrollController: _chatStreamScrollController,
+      ),
     );
   }
 
@@ -184,14 +182,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _sendBroadcastUserSettingsMessage() {
-    sendMessage(BroadcastUserSettingsMessage(BroadCastUserSettingsContent(UserSettings(true, _icon, userId, _username))));
+    sendMessage(BroadcastUserSettingsMessage(BroadCastUserSettingsContent(UserSettings(true, _icon, _userId, _username))));
   }
 
   void postMessageText(String messageText) {
     int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
     int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
     int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-    SendMessageContent sendMessageContent = new SendMessageContent(new SendMessageBody(messageText, false, expectedServerTime, userId, userId, _icon, _username));
+    SendMessageContent sendMessageContent = new SendMessageContent(new SendMessageBody(messageText, false, expectedServerTime, _userId, _userId, _icon, _username));
     sendMessage(new SendMessageMessage(sendMessageContent));
   }
 
@@ -280,11 +278,11 @@ class _MyHomePageState extends State<MyHomePage> {
     debugPrint('got $message');
     ReceivedMessage messageObj = ReceivedMessageUtility.fromString(message);
     if(messageObj is UserIdMessage) {
-      userId = messageObj.userId;
+      _userId = messageObj.userId;
       sendGetServerTimeMessage();
     } else if(messageObj is ServerTimeMessage) {
       if (!sessionJoined) {
-        joinSession(userId, "Mobile User", sessionId);
+        joinSession(sessionId);
       }
     } else if(messageObj is UpdateMessage) {
       lastKnownMoviePosition = messageObj.lastKnownTime;
@@ -324,22 +322,16 @@ class _MyHomePageState extends State<MyHomePage> {
       else if(messageObj is SentMessageMessage) {
         setState(() {
           this.userMessages.add(messageObj.userMessage);
-          this.chatMessages.add(new ChatMessage(createdAt: DateTime.fromMillisecondsSinceEpoch(messageObj.userMessage.timestamp), text: messageObj.userMessage.body, user: new ChatUser.fromJson({
-            'uid': messageObj.userMessage.userId,
-            'name': messageObj.userMessage.userNickname,
-            'avatar': messageObj.userMessage.userIcon
-          })));
+          this._chatMessages.add(new ChatMessage(createdAt: DateTime.fromMillisecondsSinceEpoch(messageObj.userMessage.timestamp), text: messageObj.userMessage.body, user: _buildChatUser(messageObj.userMessage)));
+          _scrollToBottomOfChatStream();
         });
       }
       else if(messageObj is VideoIdAndMessageCatchupMessage) {
         this.userMessages.addAll(messageObj.userMessages);
-        this.chatMessages.addAll(messageObj.userMessages.map((userMessage) {
-          return new ChatMessage(text: userMessage.body, user: new ChatUser.fromJson({
-            'uid': userMessage.userId,
-            'name': userMessage.userNickname,
-            'avatar': userMessage.userIcon
-          }));
+        this._chatMessages.addAll(messageObj.userMessages.map((userMessage) {
+          return new ChatMessage(text: userMessage.body, user: _buildChatUser(userMessage));
         }));
+        _scrollToBottomOfChatStream();
         lastKnownMoviePosition = messageObj.lastKnownTime;
         currentServerTime = messageObj.lastKnownTimeUpdatedAt;
         currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
@@ -362,6 +354,19 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  ChatUser _buildChatUser(UserMessage userMessage) {
+    return new ChatUser.fromJson({
+      'uid': userMessage.userId,
+      'name': userMessage.userNickname,
+      'avatar': UserAvatar.formatIconName(userMessage.userIcon),
+      'containerColor': UserColors.getColor(userMessage.userIcon)
+      });
+  }
+
+  void _scrollToBottomOfChatStream() {
+    _chatStreamScrollController.animateTo(_chatStreamScrollController.position.maxScrollExtent + 50, duration: new Duration(milliseconds: 300), curve: Curves.bounceIn);
+  }
+
   void showToastMessage(String message) {
     Fluttertoast.showToast(
         msg: message,
@@ -374,9 +379,9 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void joinSession(String userIdForJoin, String nickNameForJoin, String sessionIdForJoin) {
-    UserSettings userSettings = new UserSettings(true, "Sailor Cat.svg", userIdForJoin, nickNameForJoin);
-    JoinSessionContent joinSessionContent = new JoinSessionContent(sessionIdForJoin, userIdForJoin, userSettings);
+  void joinSession(String sessionIdForJoin) {
+    UserSettings userSettings = new UserSettings(true, _icon, _userId, _username);
+    JoinSessionContent joinSessionContent = new JoinSessionContent(sessionIdForJoin, _userId, userSettings);
     sendMessage(new JoinSessionMessage(joinSessionContent));
     sessionJoined = true;
     setState(() {
@@ -409,7 +414,7 @@ class _MyHomePageState extends State<MyHomePage> {
         pingTimer = null;
       }
       currentChannel = null;
-      userId = null;
+      _userId = null;
       sessionId = null;
       currentServerTime = 0;
       currentLocalTime = 0;
@@ -418,7 +423,7 @@ class _MyHomePageState extends State<MyHomePage> {
       isAttemptingToJoinSessionFromText = false;
       isAttemptingToJoinSessionFromQR = false;
       userMessages.clear();
-      chatMessages.clear();
+      _chatMessages.clear();
 
     });
   }
@@ -443,7 +448,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   List<Widget> getNotConnectedWidgets() {
-    debugPrint('remove me');
     List<Widget> widgets = new List<Widget>();
     widgets.add(TextFormField(
       textInputAction: TextInputAction.go,
@@ -481,14 +485,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onScanQRPressed() async {
-    debugPrint('qr pressed');
     var result = await BarcodeScanner.scan();
     _urlTextController.text = result;
     _connectToServer();
     setState(() {
       isAttemptingToJoinSessionFromQR = true;
     });
-    debugPrint(result);
   }
 
   void disconnectButtonPressed() {

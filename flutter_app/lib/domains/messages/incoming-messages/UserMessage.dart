@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
-
 class UserMessage {
   String body;
   bool isSystemMessage;
@@ -19,6 +15,5 @@ class UserMessage {
     permId = objectFromMessage['permId'];
     userIcon = objectFromMessage['userIcon'];
     userNickname = objectFromMessage['userNickname'];
-    debugPrint('\n !!!! ' + json.encode(objectFromMessage));
   }
 }
