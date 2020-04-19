@@ -20,7 +20,7 @@ Features:
   - Customize the jump distance
   - iOS/Android compatability
 
-## Party Hardy Extension
+## Party Harder Extension
 
 Status: Concept
 
