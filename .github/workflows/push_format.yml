@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        token: stefanzweifel/git-auto-commit-action@v4.1.3
+        token: ${{ secrets.GITHUB_TOKEN }}
     - uses: subosito/flutter-action@v1
       with:
         flutter-version: '1.12.x' # you can use 1.12
