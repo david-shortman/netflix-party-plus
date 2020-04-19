@@ -244,7 +244,7 @@ class _MyHomePageState extends State<MyHomePage> {
             }
           }
         } on Exception catch (e) {
-          debugPrint("Error parsing URL: " + _urlTextController.text);
+          debugPrint("Error parsing URL: " + _urlTextController.text + e.toString());
         }
       }
       if ("" == serverId || "" == sessionId) {
