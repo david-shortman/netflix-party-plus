@@ -6,6 +6,8 @@ import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_button/progress_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
@@ -216,33 +218,38 @@ class _MyHomePageState extends State<MyHomePage> {
       String serverId = "";
       int varStart = _urlTextController.text.toString().indexOf('?');
       if (varStart >= 0) {
-        int sessionIdStart = _urlTextController.text.toString().indexOf(
-            'npSessionId=');
-        if (sessionIdStart >= 0) {
-          int sessionIdEnd = _urlTextController.text.toString().indexOf(
-              '&', sessionIdStart);
-          if (sessionIdEnd > sessionIdStart) {
-            sessionId = _urlTextController.text.toString().substring(
-                sessionIdStart + 12, sessionIdEnd);
-          } else {
-            sessionId =
-                _urlTextController.text.toString().substring(sessionIdStart + 12);
+        try {
+          int sessionIdStart = _urlTextController.text.toString().indexOf(
+              'npSessionId=');
+          if (sessionIdStart >= 0) {
+            int sessionIdEnd = _urlTextController.text.toString().indexOf(
+                '&', sessionIdStart);
+            if (sessionIdEnd > sessionIdStart) {
+              sessionId = _urlTextController.text.toString().substring(
+                  sessionIdStart + 12, sessionIdEnd);
+            } else {
+              sessionId =
+                  _urlTextController.text.toString().substring(sessionIdStart + 12);
+            }
           }
-        }
-        int serverIdStart = _urlTextController.text.toString().indexOf('npServerId=');
-        if (serverIdStart >= 0) {
-          int serverIdEnd = _urlTextController.text.toString().indexOf(
-              '&', serverIdStart);
-          if (serverIdEnd > serverIdStart) {
-            serverId = _urlTextController.text.toString().substring(
-                serverIdStart + 11, serverIdEnd);
-          } else {
-            serverId =
-                _urlTextController.text.toString().substring(serverIdStart + 11);
+          int serverIdStart = _urlTextController.text.toString().indexOf('npServerId=');
+          if (serverIdStart >= 0) {
+            int serverIdEnd = _urlTextController.text.toString().indexOf(
+                '&', serverIdStart);
+            if (serverIdEnd > serverIdStart) {
+              serverId = _urlTextController.text.toString().substring(
+                  serverIdStart + 11, serverIdEnd);
+            } else {
+              serverId =
+                  _urlTextController.text.toString().substring(serverIdStart + 11);
+            }
           }
+        } on Exception catch (e) {
+          debugPrint("Error parsing URL: " + _urlTextController.text);
         }
       }
-      else {
+      if ("" == serverId || "" == sessionId) {
+        showToastMessage("Invalid Link");
         setState(() {
           sleep(new Duration(milliseconds: 1000));
           isAttemptingToJoinSessionFromText = false;
@@ -314,7 +321,8 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           connected = true;
         });
-      } else if(messageObj is SentMessageMessage) {
+      }
+      else if(messageObj is SentMessageMessage) {
         setState(() {
           this.userMessages.add(messageObj.userMessage);
           this.chatMessages.add(new ChatMessage(createdAt: DateTime.fromMillisecondsSinceEpoch(messageObj.userMessage.timestamp), text: messageObj.userMessage.body, user: new ChatUser.fromJson({
@@ -323,7 +331,8 @@ class _MyHomePageState extends State<MyHomePage> {
             'avatar': messageObj.userMessage.userIcon
           })));
         });
-      } else if(messageObj is VideoIdAndMessageCatchupMessage) {
+      }
+      else if(messageObj is VideoIdAndMessageCatchupMessage) {
         this.userMessages.addAll(messageObj.userMessages);
         this.chatMessages.addAll(messageObj.userMessages.map((userMessage) {
           return new ChatMessage(text: userMessage.body, user: new ChatUser.fromJson({
@@ -346,7 +355,24 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         });
       }
+      else if(messageObj is ErrorMessage) {
+        this.connected = false;
+        this.clearAllVariables();
+        showToastMessage(messageObj.errorMessage);
+      }
     }
+  }
+
+  void showToastMessage(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 35.0
+    );
   }
 
   void joinSession(String userIdForJoin, String nickNameForJoin, String sessionIdForJoin) {
@@ -369,8 +395,20 @@ class _MyHomePageState extends State<MyHomePage> {
     messenger.sendMessage(message);
   }
 
+  void disconnect() {
+    currentChannel.sink.close();
+  }
+
   void clearAllVariables() {
     setState(() {
+      if(serverTimeTimer != null) {
+        serverTimeTimer.cancel();
+        serverTimeTimer = null;
+      }
+      if(pingTimer != null) {
+        pingTimer.cancel();
+        pingTimer = null;
+      }
       currentChannel = null;
       userId = null;
       sessionId = null;
@@ -382,21 +420,14 @@ class _MyHomePageState extends State<MyHomePage> {
       isAttemptingToJoinSessionFromQR = false;
       userMessages.clear();
       chatMessages.clear();
+
     });
   }
 
   @override
   void dispose() {
     debugPrint("Disposing...");
-    currentChannel.sink.close();
-    if(serverTimeTimer != null) {
-      serverTimeTimer.cancel();
-      serverTimeTimer = null;
-    }
-    if(pingTimer != null) {
-      pingTimer.cancel();
-      pingTimer = null;
-    }
+    disconnect();
     clearAllVariables();
     super.dispose();
   }
@@ -469,6 +500,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } on Exception {}
     setState(() {
       connected = false;
+      disconnect();
       clearAllVariables();
     });
   }

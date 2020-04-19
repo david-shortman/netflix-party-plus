@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessage.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/SentMessageMessage.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ServerTimeMessage.dart';
@@ -35,6 +36,8 @@ class ReceivedMessageUtility {
         if (messageContentMap['value'] is Map) {
           if (messageContentMap['value'].containsKey('videoId')) {
             return new VideoIdAndMessageCatchupMessage(messageContentMap['value']);
+          } else if (messageContentMap['value'].containsKey('errorMessage')) {
+            return new ErrorMessage(messageContentMap['value']);
           }
         }
     }
