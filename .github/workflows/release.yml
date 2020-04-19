@@ -12,16 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Build
-      - uses: subosito/flutter-action@v1
+        uses: subosito/flutter-action@v1
         with:
           flutter-version: '1.12.13+hotfix.9'
       - run: cd flutter_app && flutter pub get
       - run: cd flutter_app && flutter build ios --release --no-codesign
       - name: Run fastlane deploy
-      - uses: maierj/fastlane-action@v1.4.0
-        with:
-          lane: 'beta'
-          subdirectory: './flutter_app/ios'
+        uses: maierj/fastlane-action@v1.4.0
         env:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD}}
           APPLE_ACCOUNT: ${{ secrets.APPLE_ACCOUNT }}
@@ -31,3 +28,6 @@ jobs:
           FASTLANE_SESION: ${{ secrets.FASTLANE_SESSION }}
           LANG: en_US.UTF-8
           LC_ALL: en_US.UTF-8
+        with:
+          lane: 'beta'
+          subdirectory: './flutter_app/ios'
