@@ -1,5 +1,1 @@
-enum SerializedMessageType {
-  EMPTY,
-  MAP,
-  ARRAY
-}
+enum SerializedMessageType { EMPTY, MAP, ARRAY }

@@ -6,13 +6,12 @@ import 'package:flutterapp/domains/messages/outgoing-messages/join-session/UserS
 import 'package:flutterapp/theming/UserColors.dart';
 
 class ChatStream {
-  static Widget getChatStream({
-    BuildContext context,
-    List<ChatMessage> messages,
-    Function(ChatMessage) onSend,
-    UserSettings userSettings,
-    ScrollController scrollController
-    }) {
+  static Widget getChatStream(
+      {BuildContext context,
+      List<ChatMessage> messages,
+      Function(ChatMessage) onSend,
+      UserSettings userSettings,
+      ScrollController scrollController}) {
     String icon = userSettings.getIcon();
     return DashChat(
       messages: messages,
@@ -21,20 +20,29 @@ class ChatStream {
           name: userSettings.getNickname(),
           uid: userSettings.getId(),
           avatar: icon,
-          containerColor: UserColors.getColor(icon)
-      ),
+          containerColor: UserColors.getColor(icon)),
       scrollController: scrollController,
       messageTextBuilder: (text) {
-        return new Text(text, style: new TextStyle(color: Colors.white),);
+        return new Text(
+          text,
+          style: new TextStyle(color: Colors.white),
+        );
       },
       showUserAvatar: true,
       messageTimeBuilder: (text) {
-        return new Text(text, style: new TextStyle(color: Colors.white, fontSize: 10),);
+        return new Text(
+          text,
+          style: new TextStyle(color: Colors.white, fontSize: 10),
+        );
       },
-      messageContainerDecoration: new BoxDecoration(color: Theme.of(context).cardColor),
-      inputContainerStyle: new BoxDecoration(color: Theme.of(context).dialogBackgroundColor),
+      messageContainerDecoration:
+          new BoxDecoration(color: Theme.of(context).cardColor),
+      inputContainerStyle:
+          new BoxDecoration(color: Theme.of(context).dialogBackgroundColor),
       avatarBuilder: (chatUser) {
-        return new SvgPicture.asset('assets/avatars/${chatUser.avatar}', height: 35);
-      },);
+        return new SvgPicture.asset('assets/avatars/${chatUser.avatar}',
+            height: 35);
+      },
+    );
   }
 }

@@ -49,5 +49,5 @@ class UserColors {
         return Colors.deepOrangeAccent;
     }
     return Colors.teal;
-    }
+  }
 }

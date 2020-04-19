@@ -7,6 +7,4 @@ class SentMessageMessage extends ReceivedMessage {
   SentMessageMessage(Map<String, dynamic> objectFromMessage) {
     userMessage = new UserMessage(objectFromMessage);
   }
-
-
 }
