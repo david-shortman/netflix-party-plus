@@ -15,7 +15,6 @@ class ChatStream {
     }) {
     String icon = userSettings.getIcon();
     return DashChat(
-      scrollToBottom: false,
       messages: messages,
       onSend: onSend,
       user: ChatUser(

@@ -317,9 +317,6 @@ class _MyHomePageState extends State<MyHomePage> {
         pingTimer = Timer.periodic(Duration(milliseconds: sidMessage.pingInterval), (Timer t) => currentChannel.sink.add("2"));
         setState(() {
           connected = true;
-          Future.delayed(new Duration(milliseconds: 200), () async {
-            _scrollToBottomOfChatStream();
-          });
         });
       }
       else if(messageObj is SentMessageMessage) {
