@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [ 'release-*' ]
+    branches: [ 'releases/**' ]
     paths:
       - 'flutter_app/**'
 
