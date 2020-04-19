@@ -14,7 +14,5 @@ class UpdateMessage extends ReceivedMessage {
     this.lastKnownTimeUpdatedAt = objectFromMessage['lastKnownTimeUpdatedAt'];
     this.state = objectFromMessage['state'];
     this.videoDuration = objectFromMessage['videoDuration'];
-
   }
-
 }

@@ -6,6 +6,4 @@ class UserIdMessage extends ReceivedMessage {
   UserIdMessage(this.userId) {
     this.messageType = "UserId";
   }
-
-
 }

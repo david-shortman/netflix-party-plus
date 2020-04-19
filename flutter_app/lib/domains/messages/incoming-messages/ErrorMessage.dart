@@ -6,5 +6,4 @@ class ErrorMessage extends ReceivedMessage {
   ErrorMessage(Map<String, dynamic> objectFromMessage) {
     errorMessage = objectFromMessage['errorMessage'] as String;
   }
-
 }

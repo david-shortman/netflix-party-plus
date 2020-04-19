@@ -13,7 +13,6 @@ class MessageArray implements Mappable {
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      'messageArray': propertyBagList
-    };
-  }}
+    return {'messageArray': propertyBagList};
+  }
+}

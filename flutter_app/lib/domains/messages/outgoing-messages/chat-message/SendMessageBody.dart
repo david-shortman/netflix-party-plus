@@ -9,13 +9,8 @@ class SendMessageBody implements MessageContent {
   String _userIcon;
   String _userNickname;
 
-  SendMessageBody(String text,
-      bool isSystemMessage,
-      int timestamp,
-      String userId,
-      String permId,
-      String userIcon,
-      String userNickname) {
+  SendMessageBody(String text, bool isSystemMessage, int timestamp,
+      String userId, String permId, String userIcon, String userNickname) {
     _text = text;
     _isSystemMessage = isSystemMessage;
     _timestamp = timestamp;
@@ -26,8 +21,7 @@ class SendMessageBody implements MessageContent {
   }
 
   @override
-  Map<String, dynamic> toMap() =>
-      {
+  Map<String, dynamic> toMap() => {
         'body': _text,
         'isSystemMessage': _isSystemMessage,
         'timestamp': _timestamp,

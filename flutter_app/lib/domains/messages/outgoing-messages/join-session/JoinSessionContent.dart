@@ -7,15 +7,15 @@ class JoinSessionContent implements MessageContent {
   String _permId;
   UserSettings _userSettings;
 
-  JoinSessionContent(String sessionId, String permId, UserSettings userSettings) {
+  JoinSessionContent(
+      String sessionId, String permId, UserSettings userSettings) {
     _sessionId = sessionId;
     _permId = permId;
     _userSettings = userSettings;
   }
 
   @override
-  Map<String, dynamic> toMap() =>
-      {
+  Map<String, dynamic> toMap() => {
         'sessionId': _sessionId,
         'permId': _permId,
         'userSettings': _userSettings.toMap()

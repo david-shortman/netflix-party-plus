@@ -6,9 +6,7 @@ class UserSettings implements Mappable {
   String _userId;
   String _userNickname;
 
-  UserSettings(bool recentlyUpdated,
-      String userIcon,
-      String userId,
+  UserSettings(bool recentlyUpdated, String userIcon, String userId,
       String userNickname) {
     _recentlyUpdated = recentlyUpdated;
     _userIcon = userIcon;
@@ -29,8 +27,7 @@ class UserSettings implements Mappable {
   }
 
   @override
-  Map<String, dynamic> toMap() =>
-      {
+  Map<String, dynamic> toMap() => {
         'recentlyUpdated': _recentlyUpdated,
         'userIcon': _userIcon,
         'userId': _userId,
