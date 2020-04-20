@@ -390,13 +390,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _scrollToBottomOfChatStream() {
-    if (_chatStreamScrollController.position !=
-        _chatStreamScrollController.position.maxScrollExtent) {
-      _chatStreamScrollController.animateTo(
-          _chatStreamScrollController.position.maxScrollExtent + 5,
-          duration: new Duration(milliseconds: 300),
-          curve: Curves.linear);
-    }
+    _chatStreamScrollController.animateTo(
+        _chatStreamScrollController.position.maxScrollExtent + 5,
+        duration: new Duration(milliseconds: 300),
+        curve: Curves.linear);
   }
 
   void showToastMessage(String message) {
