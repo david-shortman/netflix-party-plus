@@ -89,7 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int videoDuration = 655550;
   List<UserMessage> userMessages = new List();
   List<ChatMessage> _chatMessages = new List();
-  ChatMessage _someoneIsTypingMessage = ChatMessage(text: "Someone is typing...", user: new ChatUser(uid: "10", avatar: ""));
+  ChatMessage _someoneIsTypingMessage = ChatMessage(
+      text: "Someone is typing...", user: new ChatUser(uid: "10", avatar: ""));
 
   _MyHomePageState() {
     _loadUsernameAndIcon();
@@ -129,7 +130,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           IconButton(
-            icon: SvgPicture.asset(_icon != null ? 'assets/avatars/$_icon' : '',
+            icon: SvgPicture.asset(
+                _icon != null ? 'assets/avatars/${_icon}' : '',
                 height: 85),
             onPressed: () {
               goToAccountSettings(context);
@@ -154,15 +156,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return Padding(
       padding: new EdgeInsets.fromLTRB(10, 1, 10, 10),
       child: ChatStream.getChatStream(
-        context: context,
-        messages: _chatMessages,
-        onSend: (message) {
-          postMessageText(message.text);
-        },
-        userSettings: new UserSettings(false, _icon, _userId, _username),
-        scrollController: _chatStreamScrollController,
-        messenger: messenger
-      ),
+          context: context,
+          messages: _chatMessages,
+          onSend: (message) {
+            postMessageText(message.text);
+          },
+          userSettings: new UserSettings(false, _icon, _userId, _username),
+          scrollController: _chatStreamScrollController,
+          messenger: messenger),
     );
   }
 
