@@ -9,8 +9,6 @@ class SingleValueDynamicMessageContent implements MessageContent {
 
   @override
   Map<String, dynamic> toMap() {
-    return {
-      'value': _value
-    };
+    return {'value': _value};
   }
 }

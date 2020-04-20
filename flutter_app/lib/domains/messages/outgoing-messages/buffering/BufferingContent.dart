@@ -8,8 +8,5 @@ class BufferingContent implements MessageContent {
   }
 
   @override
-  Map<String, dynamic> toMap() =>
-      {
-        'buffering': _isBuffering
-      };
+  Map<String, dynamic> toMap() => {'buffering': _isBuffering};
 }

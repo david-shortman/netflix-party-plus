@@ -49,20 +49,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Netflix Party Harder',
-      theme: PartyHarderTheme.getLightTheme(),
-      darkTheme: PartyHarderTheme.getDarkTheme(),
-      home:  MyHomePage(
         title: 'Netflix Party Harder',
-      )
-    );
+        theme: PartyHarderTheme.getLightTheme(),
+        darkTheme: PartyHarderTheme.getDarkTheme(),
+        home: MyHomePage(
+          title: 'Netflix Party Harder',
+        ));
   }
 }
 
 class MyHomePage extends StatefulWidget {
   final String title;
-  MyHomePage({Key key, @required this.title})
-      : super(key: key);
+  MyHomePage({Key key, @required this.title}) : super(key: key);
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -98,7 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -106,7 +103,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: connected ? _getConnectedWidget() : _getNotConnectedWidget(),
       bottomNavigationBar: _getBottomAppBarWidget(),
-      floatingActionButton: Visibility(visible: connected, child: _getPlayControlButton()),
+      floatingActionButton:
+          Visibility(visible: connected, child: _getPlayControlButton()),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
@@ -124,9 +122,11 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 disconnectButtonPressed();
               },
-            ),),
+            ),
+          ),
           IconButton(
-            icon: SvgPicture.asset('assets/avatars/${_icon ?? 'Alien.svg'}', height: 85),
+            icon: SvgPicture.asset('assets/avatars/${_icon ?? 'Alien.svg'}',
+                height: 85),
             onPressed: () {
               goToAccountSettings(context);
             },
@@ -137,10 +137,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _getNotConnectedWidget() {
-    return SingleChildScrollView(child: Padding(padding: new EdgeInsets.all(10), child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: getNotConnectedWidgets(),
-    )));
+    return SingleChildScrollView(
+        child: Padding(
+            padding: new EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: getNotConnectedWidgets(),
+            )));
   }
 
   Widget _getConnectedWidget() {
@@ -178,18 +181,21 @@ class _MyHomePageState extends State<MyHomePage> {
     if (connected) {
       _sendBroadcastUserSettingsMessage();
     }
-
   }
 
   _sendBroadcastUserSettingsMessage() {
-    sendMessage(BroadcastUserSettingsMessage(BroadCastUserSettingsContent(UserSettings(true, _icon, _userId, _username))));
+    sendMessage(BroadcastUserSettingsMessage(BroadCastUserSettingsContent(
+        UserSettings(true, _icon, _userId, _username))));
   }
 
   void postMessageText(String messageText) {
     int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
-    int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
+    int millisecondsSinceLastUpdate =
+        currentTimeInMilliseconds - currentLocalTime;
     int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-    SendMessageContent sendMessageContent = new SendMessageContent(new SendMessageBody(messageText, false, expectedServerTime, _userId, _userId, _icon, _username));
+    SendMessageContent sendMessageContent = new SendMessageContent(
+        new SendMessageBody(messageText, false, expectedServerTime, _userId,
+            _userId, _icon, _username));
     sendMessage(new SendMessageMessage(sendMessageContent));
   }
 
@@ -210,89 +216,97 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _connectToServer() {
-      sessionJoined = false;
-      sessionId = "";
-      String serverId = "";
-      int varStart = _urlTextController.text.toString().indexOf('?');
-      if (varStart >= 0) {
-        try {
-          int sessionIdStart = _urlTextController.text.toString().indexOf(
-              'npSessionId=');
-          if (sessionIdStart >= 0) {
-            int sessionIdEnd = _urlTextController.text.toString().indexOf(
-                '&', sessionIdStart);
-            if (sessionIdEnd > sessionIdStart) {
-              sessionId = _urlTextController.text.toString().substring(
-                  sessionIdStart + 12, sessionIdEnd);
-            } else {
-              sessionId =
-                  _urlTextController.text.toString().substring(sessionIdStart + 12);
-            }
+    sessionJoined = false;
+    sessionId = "";
+    String serverId = "";
+    int varStart = _urlTextController.text.toString().indexOf('?');
+    if (varStart >= 0) {
+      try {
+        int sessionIdStart =
+            _urlTextController.text.toString().indexOf('npSessionId=');
+        if (sessionIdStart >= 0) {
+          int sessionIdEnd =
+              _urlTextController.text.toString().indexOf('&', sessionIdStart);
+          if (sessionIdEnd > sessionIdStart) {
+            sessionId = _urlTextController.text
+                .toString()
+                .substring(sessionIdStart + 12, sessionIdEnd);
+          } else {
+            sessionId = _urlTextController.text
+                .toString()
+                .substring(sessionIdStart + 12);
           }
-          int serverIdStart = _urlTextController.text.toString().indexOf('npServerId=');
-          if (serverIdStart >= 0) {
-            int serverIdEnd = _urlTextController.text.toString().indexOf(
-                '&', serverIdStart);
-            if (serverIdEnd > serverIdStart) {
-              serverId = _urlTextController.text.toString().substring(
-                  serverIdStart + 11, serverIdEnd);
-            } else {
-              serverId =
-                  _urlTextController.text.toString().substring(serverIdStart + 11);
-            }
-          }
-        } on Exception catch (e) {
-          debugPrint("Error parsing URL: " + _urlTextController.text + e.toString());
         }
+        int serverIdStart =
+            _urlTextController.text.toString().indexOf('npServerId=');
+        if (serverIdStart >= 0) {
+          int serverIdEnd =
+              _urlTextController.text.toString().indexOf('&', serverIdStart);
+          if (serverIdEnd > serverIdStart) {
+            serverId = _urlTextController.text
+                .toString()
+                .substring(serverIdStart + 11, serverIdEnd);
+          } else {
+            serverId = _urlTextController.text
+                .toString()
+                .substring(serverIdStart + 11);
+          }
+        }
+      } on Exception catch (e) {
+        debugPrint(
+            "Error parsing URL: " + _urlTextController.text + e.toString());
       }
-      if ("" == serverId || "" == sessionId) {
-        showToastMessage("Invalid Link");
-        setState(() {
-          sleep(new Duration(milliseconds: 1000));
-          isAttemptingToJoinSessionFromText = false;
-          isAttemptingToJoinSessionFromQR = false;
-        });
-        return;
-      }
-      debugPrint("ServerId: "+serverId);
-      debugPrint("SessionId: "+sessionId);
-      connectAndSetupListener(serverId);
+    }
+    if ("" == serverId || "" == sessionId) {
+      showToastMessage("Invalid Link");
+      setState(() {
+        sleep(new Duration(milliseconds: 1000));
+        isAttemptingToJoinSessionFromText = false;
+        isAttemptingToJoinSessionFromQR = false;
+      });
+      return;
+    }
+    debugPrint("ServerId: " + serverId);
+    debugPrint("SessionId: " + sessionId);
+    connectAndSetupListener(serverId);
   }
 
   void connectAndSetupListener(String serverId) {
-    currentChannel = new IOWebSocketChannel.connect("wss://"+serverId+".netflixparty.com/socket.io/?EIO=3&transport=websocket");
+    currentChannel = new IOWebSocketChannel.connect("wss://" +
+        serverId +
+        ".netflixparty.com/socket.io/?EIO=3&transport=websocket");
     messenger.setChannel(currentChannel);
-    currentChannel.stream.listen(
-        _onReceivedStreamMessage,
-        onError: (error, StackTrace stackTrace){
-          debugPrint('onError');
-        },
-        onDone: (){
-          debugPrint('Communication Closed');
-        }
-    );
+    currentChannel.stream.listen(_onReceivedStreamMessage,
+        onError: (error, StackTrace stackTrace) {
+      debugPrint('onError');
+    }, onDone: () {
+      debugPrint('Communication Closed');
+    });
   }
 
   void _onReceivedStreamMessage(message) {
     // TODO: clean up this method
     debugPrint('got $message');
     ReceivedMessage messageObj = ReceivedMessageUtility.fromString(message);
-    if(messageObj is UserIdMessage) {
+    if (messageObj is UserIdMessage) {
       _userId = messageObj.userId;
       sendGetServerTimeMessage();
-    } else if(messageObj is ServerTimeMessage) {
+    } else if (messageObj is ServerTimeMessage) {
       if (!sessionJoined) {
         joinSession(sessionId);
       }
-    } else if(messageObj is UpdateMessage) {
+    } else if (messageObj is UpdateMessage) {
       lastKnownMoviePosition = messageObj.lastKnownTime;
       videoDuration = messageObj.videoDuration;
       currentServerTime = messageObj.lastKnownTimeUpdatedAt;
       currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-      debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
+      debugPrint("last Known time - " +
+          messageObj.lastKnownTime.toString() +
+          " at " +
+          messageObj.lastKnownTimeUpdatedAt.toString());
       sendNotBufferingMessage();
 
-      if(messageObj.state == "playing") {
+      if (messageObj.state == "playing") {
         setState(() {
           this.isPlaying = true;
         });
@@ -302,51 +316,59 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       }
     } else {
-      if(messageObj is SidMessage) {
+      if (messageObj is SidMessage) {
         SidMessage sidMessage = messageObj;
         this.sidMessage = sidMessage;
-        if(serverTimeTimer != null) {
+        if (serverTimeTimer != null) {
           serverTimeTimer.cancel();
           serverTimeTimer = null;
         }
-        serverTimeTimer = Timer.periodic(Duration(milliseconds: 5000), (Timer t) => sendGetServerTimeMessage());
+        serverTimeTimer = Timer.periodic(Duration(milliseconds: 5000),
+            (Timer t) => sendGetServerTimeMessage());
         if (pingTimer != null) {
           pingTimer.cancel();
           pingTimer = null;
         }
-        pingTimer = Timer.periodic(Duration(milliseconds: sidMessage.pingInterval), (Timer t) => currentChannel.sink.add("2"));
+        pingTimer = Timer.periodic(
+            Duration(milliseconds: sidMessage.pingInterval),
+            (Timer t) => currentChannel.sink.add("2"));
         setState(() {
           connected = true;
         });
-      }
-      else if(messageObj is SentMessageMessage) {
+      } else if (messageObj is SentMessageMessage) {
         setState(() {
           this.userMessages.add(messageObj.userMessage);
-          this._chatMessages.add(new ChatMessage(createdAt: DateTime.fromMillisecondsSinceEpoch(messageObj.userMessage.timestamp), text: messageObj.userMessage.body, user: _buildChatUser(messageObj.userMessage)));
+          this._chatMessages.add(new ChatMessage(
+              createdAt: DateTime.fromMillisecondsSinceEpoch(
+                  messageObj.userMessage.timestamp),
+              text: messageObj.userMessage.body,
+              user: _buildChatUser(messageObj.userMessage)));
           _scrollToBottomOfChatStream();
         });
-      }
-      else if(messageObj is VideoIdAndMessageCatchupMessage) {
+      } else if (messageObj is VideoIdAndMessageCatchupMessage) {
         this.userMessages.addAll(messageObj.userMessages);
         this._chatMessages.addAll(messageObj.userMessages.map((userMessage) {
-          return new ChatMessage(text: userMessage.body, user: _buildChatUser(userMessage));
+          return new ChatMessage(
+              text: userMessage.body, user: _buildChatUser(userMessage));
         }));
         _scrollToBottomOfChatStream();
         lastKnownMoviePosition = messageObj.lastKnownTime;
         currentServerTime = messageObj.lastKnownTimeUpdatedAt;
         currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-        debugPrint("last Known time - "+ messageObj.lastKnownTime.toString()+" at "+messageObj.lastKnownTimeUpdatedAt.toString());
+        debugPrint("last Known time - " +
+            messageObj.lastKnownTime.toString() +
+            " at " +
+            messageObj.lastKnownTimeUpdatedAt.toString());
         sendNotBufferingMessage();
         debugPrint(messageObj.state);
         setState(() {
-          if(messageObj.state == "playing") {
+          if (messageObj.state == "playing") {
             this.isPlaying = true;
           } else {
             this.isPlaying = false;
           }
         });
-      }
-      else if(messageObj is ErrorMessage) {
+      } else if (messageObj is ErrorMessage) {
         this.connected = false;
         this.clearAllVariables();
         showToastMessage(messageObj.errorMessage);
@@ -360,11 +382,14 @@ class _MyHomePageState extends State<MyHomePage> {
       'name': userMessage.userNickname,
       'avatar': UserAvatar.formatIconName(userMessage.userIcon),
       'containerColor': UserColors.getColor(userMessage.userIcon)
-      });
+    });
   }
 
   void _scrollToBottomOfChatStream() {
-    _chatStreamScrollController.animateTo(_chatStreamScrollController.position.maxScrollExtent + 50, duration: new Duration(milliseconds: 300), curve: Curves.bounceIn);
+    _chatStreamScrollController.animateTo(
+        _chatStreamScrollController.position.maxScrollExtent + 50,
+        duration: new Duration(milliseconds: 300),
+        curve: Curves.bounceIn);
   }
 
   void showToastMessage(String message) {
@@ -375,13 +400,14 @@ class _MyHomePageState extends State<MyHomePage> {
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.black,
         textColor: Colors.white,
-        fontSize: 35.0
-    );
+        fontSize: 35.0);
   }
 
   void joinSession(String sessionIdForJoin) {
-    UserSettings userSettings = new UserSettings(true, _icon, _userId, _username);
-    JoinSessionContent joinSessionContent = new JoinSessionContent(sessionIdForJoin, _userId, userSettings);
+    UserSettings userSettings =
+        new UserSettings(true, _icon, _userId, _username);
+    JoinSessionContent joinSessionContent =
+        new JoinSessionContent(sessionIdForJoin, _userId, userSettings);
     sendMessage(new JoinSessionMessage(joinSessionContent));
     sessionJoined = true;
     setState(() {
@@ -391,7 +417,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void sendGetServerTimeMessage() {
-    GetServerTimeContent getServerTimeContent = new GetServerTimeContent("1.7.8");
+    GetServerTimeContent getServerTimeContent =
+        new GetServerTimeContent("1.7.8");
     sendMessage(new GetServerTimeMessage(getServerTimeContent));
   }
 
@@ -405,11 +432,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void clearAllVariables() {
     setState(() {
-      if(serverTimeTimer != null) {
+      if (serverTimeTimer != null) {
         serverTimeTimer.cancel();
         serverTimeTimer = null;
       }
-      if(pingTimer != null) {
+      if (pingTimer != null) {
         pingTimer.cancel();
         pingTimer = null;
       }
@@ -424,7 +451,6 @@ class _MyHomePageState extends State<MyHomePage> {
       isAttemptingToJoinSessionFromQR = false;
       userMessages.clear();
       _chatMessages.clear();
-
     });
   }
 
@@ -435,7 +461,7 @@ class _MyHomePageState extends State<MyHomePage> {
     clearAllVariables();
     super.dispose();
   }
-  
+
   //WIDGET FUNCTIONS
 
   goToAccountSettings(buildContext) async {
@@ -453,30 +479,63 @@ class _MyHomePageState extends State<MyHomePage> {
       textInputAction: TextInputAction.go,
       onFieldSubmitted: _onSubmitPressedInUrlField,
       controller: _urlTextController,
-      decoration: InputDecoration(labelText: 'Enter URL', suffixIcon: IconButton(icon: Icon(Icons.cancel), onPressed: () {
-        WidgetsBinding.instance.addPostFrameCallback( (_) => _urlTextController.clear());
-      },)),
+      decoration: InputDecoration(
+          labelText: 'Enter URL',
+          suffixIcon: IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: () {
+              WidgetsBinding.instance
+                  .addPostFrameCallback((_) => _urlTextController.clear());
+            },
+          )),
     ));
     widgets.add(Padding(
       padding: new EdgeInsets.fromLTRB(50, 10, 50, 10),
       child: ProgressButton(
-        child: Text(isAttemptingToJoinSessionFromText ? "" : "Connect", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+        child: Text(
+          isAttemptingToJoinSessionFromText ? "" : "Connect",
+          style:
+              new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         onPressed: _onConnectPressed,
-        buttonState: isAttemptingToJoinSessionFromText ? ButtonState.inProgress : ButtonState.normal,
+        buttonState: isAttemptingToJoinSessionFromText
+            ? ButtonState.inProgress
+            : ButtonState.normal,
         backgroundColor: Theme.of(context).primaryColor,
         progressColor: Colors.white,
       ),
     ));
-    widgets.add(Padding(padding: new EdgeInsets.fromLTRB(0, 10, 0, 10), child: Text("OR")));
-    widgets.add(Padding(padding: new EdgeInsets.fromLTRB(0, 4, 0, 4), child: Align(alignment: Alignment.centerLeft, child: Text("1. Copy the link from Netflix Party on your computer"))));
-    widgets.add(Padding(padding: new EdgeInsets.fromLTRB(0, 4, 0, 4), child: Align(alignment: Alignment.centerLeft,child: Text("2. Visit the-qrcode-generator.com"))));
-    widgets.add(Padding(padding: new EdgeInsets.fromLTRB(0, 4, 0, 4), child: Align(alignment: Alignment.centerLeft,child: Text("3. Paste the link there to create a scannable QR code"))));
+    widgets.add(Padding(
+        padding: new EdgeInsets.fromLTRB(0, 10, 0, 10), child: Text("OR")));
+    widgets.add(Padding(
+        padding: new EdgeInsets.fromLTRB(0, 4, 0, 4),
+        child: Align(
+            alignment: Alignment.centerLeft,
+            child:
+                Text("1. Copy the link from Netflix Party on your computer"))));
+    widgets.add(Padding(
+        padding: new EdgeInsets.fromLTRB(0, 4, 0, 4),
+        child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text("2. Visit the-qrcode-generator.com"))));
+    widgets.add(Padding(
+        padding: new EdgeInsets.fromLTRB(0, 4, 0, 4),
+        child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+                "3. Paste the link there to create a scannable QR code"))));
     widgets.add(Padding(
       padding: new EdgeInsets.fromLTRB(50, 10, 50, 10),
       child: ProgressButton(
-        child: Text(isAttemptingToJoinSessionFromQR ? "" : "Scan QR Code", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+        child: Text(
+          isAttemptingToJoinSessionFromQR ? "" : "Scan QR Code",
+          style:
+              new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         onPressed: _onScanQRPressed,
-        buttonState: isAttemptingToJoinSessionFromQR ? ButtonState.inProgress : ButtonState.normal,
+        buttonState: isAttemptingToJoinSessionFromQR
+            ? ButtonState.inProgress
+            : ButtonState.normal,
         backgroundColor: Theme.of(context).primaryColor,
         progressColor: Colors.white,
       ),
@@ -511,18 +570,31 @@ class _MyHomePageState extends State<MyHomePage> {
       color: Theme.of(context).primaryColor,
       shape: new CircleBorder(),
       onPressed: isPlaying ? _onPausePressed : _onPlayPressed,
-      child: Icon(isPlaying ? Icons.pause : Icons.play_arrow, size: 50, color: Colors.white,),
+      child: Icon(
+        isPlaying ? Icons.pause : Icons.play_arrow,
+        size: 50,
+        color: Colors.white,
+      ),
     );
   }
 
   void _onPlayPressed() {
-    debugPrint('sending play with movie time: ' + lastKnownMoviePosition.toString());
+    debugPrint(
+        'sending play with movie time: ' + lastKnownMoviePosition.toString());
     int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
-    int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
+    int millisecondsSinceLastUpdate =
+        currentTimeInMilliseconds - currentLocalTime;
     int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
     this.currentServerTime = expectedServerTime;
     currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-    UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "playing", null, null, videoDuration, false);
+    UpdateSessionContent updateSessionContent = new UpdateSessionContent(
+        lastKnownMoviePosition,
+        currentServerTime,
+        "playing",
+        null,
+        null,
+        videoDuration,
+        false);
     sendMessage(new UpdateSessionMessage(updateSessionContent));
     setState(() {
       isPlaying = true;
@@ -531,20 +603,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _onPausePressed() {
     int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
-    int millisecondsSinceLastUpdate = currentTimeInMilliseconds - currentLocalTime;
-    int expectedMovieTime = lastKnownMoviePosition + millisecondsSinceLastUpdate;
+    int millisecondsSinceLastUpdate =
+        currentTimeInMilliseconds - currentLocalTime;
+    int expectedMovieTime =
+        lastKnownMoviePosition + millisecondsSinceLastUpdate;
     int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
 
     currentServerTime = expectedServerTime;
     lastKnownMoviePosition = expectedMovieTime;
     currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
 
-    debugPrint('sending pause with movie time: ' + expectedMovieTime.toString());
-    UpdateSessionContent updateSessionContent = new UpdateSessionContent(lastKnownMoviePosition, currentServerTime, "paused", null, null, videoDuration, false);
+    debugPrint(
+        'sending pause with movie time: ' + expectedMovieTime.toString());
+    UpdateSessionContent updateSessionContent = new UpdateSessionContent(
+        lastKnownMoviePosition,
+        currentServerTime,
+        "paused",
+        null,
+        null,
+        videoDuration,
+        false);
     sendMessage(new UpdateSessionMessage(updateSessionContent));
     setState(() {
       isPlaying = false;
     });
   }
 }
-

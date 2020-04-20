@@ -1,4 +1,3 @@
 import 'package:flutterapp/domains/mappable/Mappable.dart';
 
-class MessageContent extends Mappable {
-}
+class MessageContent extends Mappable {}

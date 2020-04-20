@@ -8,8 +8,5 @@ class GetServerTimeContent implements MessageContent {
   }
 
   @override
-  Map<String, dynamic> toMap() =>
-      {
-        'version': _version
-      };
+  Map<String, dynamic> toMap() => {'version': _version};
 }
