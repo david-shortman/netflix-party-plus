@@ -80,7 +80,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
       if (imageName == _iconName) {
         widget = Container(
             decoration: BoxDecoration(
-              color: Color.fromRGBO(69, 182, 254, 1),
+              color: Theme.of(context).primaryColor,
             ),
             child: Padding(padding: const EdgeInsets.all(8.0), child: image));
       }
@@ -99,17 +99,35 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
         body: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(children: [
-              new TextFormField(
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Nickname",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(fontSize: 20, fontFamily: "San Francisco"),
+                  )),
+              Padding(
+                padding: EdgeInsets.all(4),
+              ),
+              CupertinoTextField(
+                textInputAction: TextInputAction.go,
                 controller: _usernameController,
-                decoration: InputDecoration(
-                    labelText: 'Enter Username',
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.cancel),
-                      onPressed: () {
-                        WidgetsBinding.instance.addPostFrameCallback(
-                            (_) => _usernameController.clear());
-                      },
-                    )),
+                placeholder: 'Enter Username',
+                style: Theme.of(context).primaryTextTheme.body1,
+                clearButtonMode: OverlayVisibilityMode.editing,
+              ),
+              Padding(
+                padding: EdgeInsets.all(10),
+              ),
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Avatar icon",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(fontSize: 20, fontFamily: "San Francisco"),
+                  )),
+              Padding(
+                padding: EdgeInsets.all(4),
               ),
               Expanded(
                   child: GridView.count(
