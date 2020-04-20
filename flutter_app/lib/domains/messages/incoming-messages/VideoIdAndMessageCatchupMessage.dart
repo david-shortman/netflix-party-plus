@@ -11,13 +11,13 @@ class VideoIdAndMessageCatchupMessage extends ReceivedMessage {
   VideoIdAndMessageCatchupMessage(Map<String, dynamic> objectFromMessage) {
     videoId = objectFromMessage['videoId'];
     var messageArray = objectFromMessage['messages'] as List<dynamic>;
-    userMessages = new List<UserMessage>();
+    userMessages = List<UserMessage>();
     state = objectFromMessage['state'];
     lastKnownTime = objectFromMessage['lastKnownTime'];
     lastKnownTimeUpdatedAt = objectFromMessage['lastKnownTimeUpdatedAt'];
     Iterator<dynamic> messageIterator = messageArray.iterator;
     while (messageIterator.moveNext()) {
-      userMessages.add(new UserMessage(messageIterator.current));
+      userMessages.add(UserMessage(messageIterator.current));
     }
   }
 }
