@@ -1,4 +1,4 @@
-name: Dart CI
+name: Format PR
 
 on:
   pull_request:
