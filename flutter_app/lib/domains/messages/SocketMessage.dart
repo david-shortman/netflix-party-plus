@@ -35,16 +35,15 @@ class SocketMessage {
 
         int propertyBagListLength = messageArray.propertyBagList.length;
         if (propertyBagListLength == 1) {
-          content = SingleValueDynamicMessageContent(
-              messageArray.propertyBagList[0]);
+          content =
+              SingleValueDynamicMessageContent(messageArray.propertyBagList[0]);
         } else if (propertyBagListLength > 1) {
           type = messageArray.propertyBagList[0];
           if (!(content is Map)) {
             content = SingleValueDynamicMessageContent(
                 messageArray.propertyBagList[1]);
           } else {
-            content =
-                DynamicMessageContent(messageArray.propertyBagList[1]);
+            content = DynamicMessageContent(messageArray.propertyBagList[1]);
           }
         } else {
           content = EmptyMessageContent();

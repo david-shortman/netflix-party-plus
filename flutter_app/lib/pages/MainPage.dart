@@ -198,9 +198,14 @@ class _MyHomePageState extends State<MyHomePage> {
     int millisecondsSinceLastUpdate =
         currentTimeInMilliseconds - currentLocalTime;
     int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-    SendMessageContent sendMessageContent = SendMessageContent(
-        SendMessageBody(messageText, false, expectedServerTime, _userId,
-            _userId, _icon, _username));
+    SendMessageContent sendMessageContent = SendMessageContent(SendMessageBody(
+        messageText,
+        false,
+        expectedServerTime,
+        _userId,
+        _userId,
+        _icon,
+        _username));
     sendMessage(SendMessageMessage(sendMessageContent));
   }
 
@@ -426,8 +431,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void joinSession(String sessionIdForJoin) {
-    UserSettings userSettings =
-        UserSettings(true, _icon, _userId, _username);
+    UserSettings userSettings = UserSettings(true, _icon, _userId, _username);
     JoinSessionContent joinSessionContent =
         JoinSessionContent(sessionIdForJoin, _userId, userSettings);
     sendMessage(JoinSessionMessage(joinSessionContent));
@@ -439,8 +443,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void sendGetServerTimeMessage() {
-    GetServerTimeContent getServerTimeContent =
-        GetServerTimeContent("1.7.8");
+    GetServerTimeContent getServerTimeContent = GetServerTimeContent("1.7.8");
     sendMessage(GetServerTimeMessage(getServerTimeContent));
   }
 
@@ -525,8 +528,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: ProgressButton(
         child: Text(
           isAttemptingToJoinSessionFromText ? "" : "Connect to Party",
-          style:
-              TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: _onConnectPressed,
         buttonState: isAttemptingToJoinSessionFromText
@@ -564,8 +566,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: ProgressButton(
         child: Text(
           isAttemptingToJoinSessionFromQR ? "" : "Scan QR Code",
-          style:
-              TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: _onScanQRPressed,
         buttonState: isAttemptingToJoinSessionFromQR

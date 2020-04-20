@@ -36,8 +36,7 @@ class ReceivedMessageUtility {
         }
         if (messageContentMap['value'] is Map) {
           if (messageContentMap['value'].containsKey('videoId')) {
-            return VideoIdAndMessageCatchupMessage(
-                messageContentMap['value']);
+            return VideoIdAndMessageCatchupMessage(messageContentMap['value']);
           } else if (messageContentMap['value'].containsKey('errorMessage')) {
             return ErrorMessage(messageContentMap['value']);
           }
