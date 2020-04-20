@@ -8,7 +8,5 @@ class TypingContent implements MessageContent {
   }
 
   @override
-  Map<String, dynamic> toMap() => {
-        'typing': _typing
-      };
+  Map<String, dynamic> toMap() => {'typing': _typing};
 }
