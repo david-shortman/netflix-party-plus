@@ -12,11 +12,21 @@ class ChatStream {
       List<ChatMessage> messages,
       Function(ChatMessage) onSend,
       UserSettings userSettings,
-      ScrollController scrollController}) {
+      ScrollController scrollController,
+      Messenger messenger}) {
     String icon = userSettings.getIcon();
     return DashChat(
       messages: messages,
-      onSend: onSend,
+      onSend: (text) {
+        onSend(text);
+      },
+      onTextChange: (text) {
+        debugPrint('henlo $text');
+        messenger.sendMessage(new TypingMessage(new TypingContent(true)));
+        Future.delayed(new Duration(seconds: 3), () async {
+          messenger.sendMessage(new TypingMessage(new TypingContent(false)));
+        });
+      },
       user: ChatUser(
           name: userSettings.getNickname(),
           uid: userSettings.getId(),

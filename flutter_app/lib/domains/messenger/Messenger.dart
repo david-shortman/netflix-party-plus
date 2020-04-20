@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutterapp/domains/messages/SocketMessage.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -12,6 +13,7 @@ class Messenger {
 
   void sendMessage(SocketMessage message) {
     _channel.sink.add(message.buildString(_currentSequenceNum));
+    debugPrint('sent ${message.buildString(_currentSequenceNum)}');
     _currentSequenceNum++;
   }
 }

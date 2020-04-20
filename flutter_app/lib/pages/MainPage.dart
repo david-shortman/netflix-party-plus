@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/SetPresenceMessage.dart';
 import 'package:flutterapp/theming/AppTheme.dart';
 import 'package:flutterapp/theming/AvatarColors.dart';
 import 'package:flutterapp/widgets/ChatStream.dart';
@@ -17,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../domains/avatar/Avatar.dart';
-import '../pages/UserSettingsScreen.dart';
+import 'UserSettingsScreen.dart';
 import '../domains/messages/SocketMessage.dart';
 import '../domains/messages/incoming-messages/ReceivedMessage.dart';
 import '../domains/messages/incoming-messages/ReceivedMessageUtility.dart';
@@ -88,6 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int videoDuration = 655550;
   List<UserMessage> userMessages = new List();
   List<ChatMessage> _chatMessages = new List();
+  ChatMessage _someoneIsTypingMessage = ChatMessage(
+      text: "Someone is typing...", user: new ChatUser(uid: "10", avatar: ""));
 
   _MyHomePageState() {
     _loadUsernameAndIcon();
@@ -127,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           IconButton(
-            icon: SvgPicture.asset('assets/avatars/${_icon ?? 'Alien.svg'}',
+            icon: SvgPicture.asset(_icon != null ? 'assets/avatars/$_icon' : '',
                 height: 85),
             onPressed: () {
               goToAccountSettings(context);
@@ -152,14 +155,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return Padding(
       padding: new EdgeInsets.fromLTRB(10, 1, 10, 10),
       child: ChatStream.getChatStream(
-        context: context,
-        messages: _chatMessages,
-        onSend: (message) {
-          postMessageText(message.text);
-        },
-        userSettings: new UserSettings(false, _icon, _userId, _username),
-        scrollController: _chatStreamScrollController,
-      ),
+          context: context,
+          messages: _chatMessages,
+          onSend: (message) {
+            postMessageText(message.text);
+          },
+          userSettings: new UserSettings(false, _icon, _userId, _username),
+          scrollController: _chatStreamScrollController,
+          messenger: messenger),
     );
   }
 
@@ -296,6 +299,21 @@ class _MyHomePageState extends State<MyHomePage> {
     } else if (messageObj is ServerTimeMessage) {
       if (!sessionJoined) {
         joinSession(sessionId);
+      }
+    } else if (messageObj is SetPresenceMessage) {
+      if (messageObj.anyoneTyping) {
+        if (!_chatMessages.contains(_someoneIsTypingMessage)) {
+          debugPrint("adding someone typing message");
+          setState(() {
+            _chatMessages.add(_someoneIsTypingMessage);
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
+          });
+        }
+      } else {
+        setState(() {
+          _chatMessages.remove(_someoneIsTypingMessage);
+        });
       }
     } else if (messageObj is UpdateMessage) {
       lastKnownMoviePosition = messageObj.lastKnownTime;

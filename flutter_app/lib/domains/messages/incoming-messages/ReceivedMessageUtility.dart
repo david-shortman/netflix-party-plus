@@ -4,6 +4,7 @@ import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessage.da
 import 'package:flutterapp/domains/messages/incoming-messages/SentMessageMessage.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ServerTimeMessage.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/SidMessage.dart';
+import 'package:flutterapp/domains/messages/incoming-messages/SetPresenceMessage.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/UserIdMessage.dart';
 import 'package:flutterapp/domains/messages/SocketMessage.dart';
 
@@ -27,6 +28,8 @@ class ReceivedMessageUtility {
         return new SentMessageMessage(messageContentMap['value']);
       case "update":
         return new UpdateMessage(messageContentMap['value']);
+      case "setPresence":
+        return new SetPresenceMessage(messageContentMap['value']);
       case "unknown":
         if (messageContentMap['value'] is int) {
           return new ServerTimeMessage(messageContentMap['value']);
