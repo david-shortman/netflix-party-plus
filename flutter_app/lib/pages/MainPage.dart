@@ -6,7 +6,6 @@ import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutterapp/changelog/ChangelogService.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
@@ -199,7 +198,7 @@ class _MainPageState extends State<MainPage> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String lastViewedChangelog =
             await prefs.getString("lastViewedChangelog");
-        if (lastViewedChangelog != ChangelogService.getLatestVersion) {
+        if (lastViewedChangelog != ChangelogService.getLatestVersion()) {
           _isShowingChangelogDialog = true;
           await _showChangelogDialog();
           _isShowingChangelogDialog = false;
