@@ -7,12 +7,14 @@ import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockChangelog extends Mock implements ChangelogService {}
+
 class MockChangelogDialog extends Mock implements ChangelogDialogFactory {}
 
 void main() {
   group('changelog modal', () {
-
-    testWidgets("should show changelog dialog when user has not seen the latest changelog", (WidgetTester tester) async {
+    testWidgets(
+        "should show changelog dialog when user has not seen the latest changelog",
+        (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
       when(ChangelogService.getLatestVersion()).thenReturn('0.0.0');
 
@@ -24,12 +26,11 @@ void main() {
     });
   });
 
-
   testWidgets("login page test", (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
         home: LoginSignUpPage(
-          onSignedIn: () => {},
-        )));
+      onSignedIn: () => {},
+    )));
     expect(find.text("Create an account"), findsOneWidget);
     await tester.tap(find.byType(FlatButton));
     await tester.pump();
@@ -55,10 +56,10 @@ void main() {
     List<String> settings = ["nintendo", "reggie", "switch"];
     await tester.pumpWidget(MaterialApp(
         home: ManageFeed(
-          uid: "Rk7RdNGX8ic5YZxRuScAdVr7CnJ2",
-          feedName: "Nintendo",
-          settings: settings,
-        )));
+      uid: "Rk7RdNGX8ic5YZxRuScAdVr7CnJ2",
+      feedName: "Nintendo",
+      settings: settings,
+    )));
     Finder finder = find.widgetWithIcon(IconButton, Icons.add);
     expect(finder, findsOneWidget);
     await tester.tap(finder);
@@ -71,10 +72,10 @@ void main() {
     List<String> settings = ["nintendo", "reggie", "switch"];
     await tester.pumpWidget(MaterialApp(
         home: ManageFeed(
-          uid: "Rk7RdNGX8ic5YZxRuScAdVr7CnJ2",
-          feedName: "Nintendo",
-          settings: settings,
-        )));
+      uid: "Rk7RdNGX8ic5YZxRuScAdVr7CnJ2",
+      feedName: "Nintendo",
+      settings: settings,
+    )));
     Finder finder = find.widgetWithText(TextFormField, "nintendo");
     expect(finder, findsOneWidget);
     expect(find.widgetWithText(Dismissible, "nintendo"), findsOneWidget);

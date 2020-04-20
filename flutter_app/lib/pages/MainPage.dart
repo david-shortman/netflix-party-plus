@@ -198,7 +198,7 @@ class _MainPageState extends State<MainPage> {
       if (!_isShowingChangelogDialog) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String lastViewedChangelog =
-        await prefs.getString("lastViewedChangelog");
+            await prefs.getString("lastViewedChangelog");
         if (lastViewedChangelog != ChangelogService.getLatestVersion) {
           _isShowingChangelogDialog = true;
           await _showChangelogDialog();
