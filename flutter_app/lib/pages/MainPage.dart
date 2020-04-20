@@ -130,8 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           IconButton(
-            icon: SvgPicture.asset(
-                _icon != null ? 'assets/avatars/$_icon' : '',
+            icon: SvgPicture.asset(_icon != null ? 'assets/avatars/$_icon' : '',
                 height: 85),
             onPressed: () {
               goToAccountSettings(context);
