@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutterapp/domains/messages/outgoing-messages/join-session/UserSettings.dart';
-import 'package:flutterapp/theming/UserColors.dart';
+import 'package:flutterapp/theming/AvatarColors.dart';
 
 class ChatStream {
   static Widget getChatStream(
@@ -21,7 +21,7 @@ class ChatStream {
           name: userSettings.getNickname(),
           uid: userSettings.getId(),
           avatar: icon,
-          containerColor: UserColors.getColor(icon)),
+          containerColor: AvatarColors.getColor(icon)),
       scrollController: scrollController,
       messageTextBuilder: (text) {
         return new Text(

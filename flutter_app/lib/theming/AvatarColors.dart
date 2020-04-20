@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutterapp/domains/avatar/Avatar.dart';
 
-class UserColors {
+class AvatarColors {
   static Color getColor(String iconName) {
     iconName = UserAvatar.formatIconName(iconName);
     switch (iconName) {

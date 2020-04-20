@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
 import 'package:flutterapp/theming/AppTheme.dart';
-import 'package:flutterapp/theming/UserColors.dart';
+import 'package:flutterapp/theming/AvatarColors.dart';
 import 'package:flutterapp/widgets/ChatStream.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:progress_button/progress_button.dart';
@@ -385,7 +385,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'uid': userMessage.userId,
       'name': userMessage.userNickname,
       'avatar': UserAvatar.formatIconName(userMessage.userIcon),
-      'containerColor': UserColors.getColor(userMessage.userIcon)
+      'containerColor': AvatarColors.getColor(userMessage.userIcon)
     });
   }
 
