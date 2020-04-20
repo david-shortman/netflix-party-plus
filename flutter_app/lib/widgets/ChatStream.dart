@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutterapp/domains/messages/outgoing-messages/join-session/UserSettings.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/typing/TypingContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/typing/TypingMessage.dart';
+import 'package:flutterapp/domains/messenger/Messenger.dart';
 import 'package:flutterapp/theming/UserColors.dart';
 
 class ChatStream {
@@ -12,11 +15,21 @@ class ChatStream {
       List<ChatMessage> messages,
       Function(ChatMessage) onSend,
       UserSettings userSettings,
-      ScrollController scrollController}) {
+      ScrollController scrollController,
+      Messenger messenger}) {
     String icon = userSettings.getIcon();
     return DashChat(
       messages: messages,
-      onSend: onSend,
+      onSend: (text) {
+        onSend(text);
+      },
+      onTextChange: (text) {
+        debugPrint('henlo $text');
+        messenger.sendMessage(new TypingMessage(new TypingContent(true)));
+        Future.delayed(new Duration(seconds: 3), () async {
+          messenger.sendMessage(new TypingMessage(new TypingContent(false)));
+        });
+      },
       user: ChatUser(
           name: userSettings.getNickname(),
           uid: userSettings.getId(),
