@@ -14,13 +14,13 @@ class MockSocketMessage extends Mock implements SocketMessage {}
 void main() {
   group('messenger unit tests', () {
     test('that when sendMessage is called the message is built and sent', () {
-      Messenger messenger = new Messenger();
-      IOWebSocketChannel mockIOWebSocketChannel = new MockIOWebSocketChannel();
-      MockWebSocketSink mockWebSocketSink = new MockWebSocketSink();
+      Messenger messenger = Messenger();
+      IOWebSocketChannel mockIOWebSocketChannel = MockIOWebSocketChannel();
+      MockWebSocketSink mockWebSocketSink = MockWebSocketSink();
       when(mockIOWebSocketChannel.sink).thenReturn(mockWebSocketSink);
 
       String message = "what's up";
-      SocketMessage mockSocketMessage = new MockSocketMessage();
+      SocketMessage mockSocketMessage = MockSocketMessage();
       int sequenceNumber = 0;
       when(mockSocketMessage.buildString(sequenceNumber)).thenReturn(message);
 

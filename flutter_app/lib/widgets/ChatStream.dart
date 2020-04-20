@@ -25,9 +25,9 @@ class ChatStream {
       },
       onTextChange: (text) {
         debugPrint('henlo $text');
-        messenger.sendMessage(new TypingMessage(new TypingContent(true)));
-        Future.delayed(new Duration(seconds: 3), () async {
-          messenger.sendMessage(new TypingMessage(new TypingContent(false)));
+        messenger.sendMessage(TypingMessage(TypingContent(true)));
+        Future.delayed(Duration(seconds: 3), () async {
+          messenger.sendMessage(TypingMessage(TypingContent(false)));
         });
       },
       user: ChatUser(
@@ -37,21 +37,21 @@ class ChatStream {
           containerColor: AvatarColors.getColor(icon)),
       scrollController: scrollController,
       messageTextBuilder: (text) {
-        return new Text(
+        return Text(
           text,
-          style: new TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white),
         );
       },
       showUserAvatar: true,
       scrollToBottom: false,
       messageTimeBuilder: (text) {
-        return new Text(
+        return Text(
           text,
-          style: new TextStyle(color: Colors.white, fontSize: 10),
+          style: TextStyle(color: Colors.white, fontSize: 10),
         );
       },
       sendButtonBuilder: (onPressed) {
-        return new CupertinoButton(
+        return CupertinoButton(
             child: Icon(CupertinoIcons.up_arrow),
             color: Theme.of(context).primaryColor,
             padding: EdgeInsets.all(3),
@@ -60,14 +60,14 @@ class ChatStream {
             onPressed: onPressed);
       },
       inputToolbarPadding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-      messageContainerDecoration: new BoxDecoration(
+      messageContainerDecoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(15)),
-      inputContainerStyle: new BoxDecoration(
+      inputContainerStyle: BoxDecoration(
           color: Theme.of(context).dialogBackgroundColor,
           borderRadius: BorderRadius.circular(30)),
       avatarBuilder: (chatUser) {
-        return new SvgPicture.asset('assets/avatars/${chatUser.avatar}',
+        return SvgPicture.asset('assets/avatars/${chatUser.avatar}',
             height: 35);
       },
     );

@@ -12,8 +12,8 @@ class UserSettingsScreen extends StatefulWidget {
 class _UserSettingsScreenState extends State<UserSettingsScreen> {
   TextEditingController _usernameController = TextEditingController();
   String _iconName = "";
-  List<Widget> images = new List<Widget>();
-  List<Widget> imageWidgets = new List();
+  List<Widget> images = List<Widget>();
+  List<Widget> imageWidgets = List();
 
   _UserSettingsScreenState() {
     _setUsernameTextFieldFromSharedPreferences();
@@ -42,17 +42,16 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
 
   _usernameChanged() {
     _updateUsernameInPreferences();
-    //
   }
 
   _updateUsernameInPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("username", _usernameController.text);
+    await prefs.setString("username", _usernameController.text);
   }
 
   _updateIconInPreferences(String iconName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("userIcon", iconName);
+    await prefs.setString("userIcon", iconName);
     setState(() {
       this._iconName = iconName;
     });
@@ -67,7 +66,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   }
 
   _getImageWidgets() {
-    List<Widget> returnWidgets = new List<Widget>();
+    List<Widget> returnWidgets = List<Widget>();
     images.forEach((inputImage) {
       SvgPicture image = inputImage;
       String imageName =
@@ -92,9 +91,9 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
   @override
   Widget build(BuildContext ctxt) {
     _usernameController.addListener(_usernameChanged);
-    return new Scaffold(
-        appBar: new AppBar(
-          title: new Text("User Settings"),
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("User Settings"),
         ),
         body: Padding(
             padding: const EdgeInsets.all(20.0),

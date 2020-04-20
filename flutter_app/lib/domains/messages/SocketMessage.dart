@@ -23,31 +23,31 @@ class SocketMessage {
 
     switch (serializedMessageType) {
       case SerializedMessageType.EMPTY:
-        content = new EmptyMessageContent();
+        content = EmptyMessageContent();
         break;
       case SerializedMessageType.MAP:
         message = message.substring(indexOfOpenBrace);
-        content = new DynamicMessageContent(json.decode(message));
+        content = DynamicMessageContent(json.decode(message));
         break;
       case SerializedMessageType.ARRAY:
         message = message.substring(indexOfOpenBracket);
-        MessageArray messageArray = new MessageArray(message);
+        MessageArray messageArray = MessageArray(message);
 
         int propertyBagListLength = messageArray.propertyBagList.length;
         if (propertyBagListLength == 1) {
-          content = new SingleValueDynamicMessageContent(
+          content = SingleValueDynamicMessageContent(
               messageArray.propertyBagList[0]);
         } else if (propertyBagListLength > 1) {
           type = messageArray.propertyBagList[0];
           if (!(content is Map)) {
-            content = new SingleValueDynamicMessageContent(
+            content = SingleValueDynamicMessageContent(
                 messageArray.propertyBagList[1]);
           } else {
             content =
-                new DynamicMessageContent(messageArray.propertyBagList[1]);
+                DynamicMessageContent(messageArray.propertyBagList[1]);
           }
         } else {
-          content = new EmptyMessageContent();
+          content = EmptyMessageContent();
         }
         break;
     }

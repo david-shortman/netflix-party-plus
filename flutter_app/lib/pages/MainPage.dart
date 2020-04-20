@@ -68,7 +68,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   IOWebSocketChannel currentChannel;
-  Messenger messenger = new Messenger();
+  Messenger messenger = Messenger();
   String _userId;
   String sessionId;
   int currentServerTime = 0;
@@ -87,10 +87,10 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isPlaying = false;
   bool connected = false;
   int videoDuration = 655550;
-  List<UserMessage> userMessages = new List();
-  List<ChatMessage> _chatMessages = new List();
+  List<UserMessage> userMessages = List();
+  List<ChatMessage> _chatMessages = List();
   ChatMessage _someoneIsTypingMessage = ChatMessage(
-      text: "Someone is typing...", user: new ChatUser(uid: "10", avatar: ""));
+      text: "Someone is typing...", user: ChatUser(uid: "10", avatar: ""));
 
   _MyHomePageState() {
     _loadUsernameAndIcon();
@@ -113,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _getBottomAppBarWidget() {
     return BottomAppBar(
-      child: new Row(
+      child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _getNotConnectedWidget() {
     return SingleChildScrollView(
         child: Padding(
-            padding: new EdgeInsets.all(10),
+            padding: EdgeInsets.all(10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: getNotConnectedWidgets(),
@@ -153,14 +153,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _getConnectedWidget() {
     return Padding(
-      padding: new EdgeInsets.fromLTRB(10, 1, 10, 10),
+      padding: EdgeInsets.fromLTRB(10, 1, 10, 10),
       child: ChatStream.getChatStream(
           context: context,
           messages: _chatMessages,
           onSend: (message) {
             postMessageText(message.text);
           },
-          userSettings: new UserSettings(false, _icon, _userId, _username),
+          userSettings: UserSettings(false, _icon, _userId, _username),
           scrollController: _chatStreamScrollController,
           messenger: messenger),
     );
@@ -194,19 +194,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void postMessageText(String messageText) {
-    int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
+    int currentTimeInMilliseconds = (DateTime.now().millisecondsSinceEpoch);
     int millisecondsSinceLastUpdate =
         currentTimeInMilliseconds - currentLocalTime;
     int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-    SendMessageContent sendMessageContent = new SendMessageContent(
-        new SendMessageBody(messageText, false, expectedServerTime, _userId,
+    SendMessageContent sendMessageContent = SendMessageContent(
+        SendMessageBody(messageText, false, expectedServerTime, _userId,
             _userId, _icon, _username));
-    sendMessage(new SendMessageMessage(sendMessageContent));
+    sendMessage(SendMessageMessage(sendMessageContent));
   }
 
   void sendNotBufferingMessage() {
-    BufferingContent bufferingContent = new BufferingContent(false);
-    sendMessage(new BufferingMessage(bufferingContent));
+    BufferingContent bufferingContent = BufferingContent(false);
+    sendMessage(BufferingMessage(bufferingContent));
   }
 
   void _onSubmitPressedInUrlField(String s) {
@@ -265,7 +265,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if ("" == serverId || "" == sessionId) {
       showToastMessage("Invalid Link");
       setState(() {
-        sleep(new Duration(milliseconds: 1000));
+        sleep(Duration(milliseconds: 1000));
         isAttemptingToJoinSessionFromText = false;
         isAttemptingToJoinSessionFromQR = false;
       });
@@ -277,7 +277,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void connectAndSetupListener(String serverId) {
-    currentChannel = new IOWebSocketChannel.connect("wss://" +
+    currentChannel = IOWebSocketChannel.connect("wss://" +
         serverId +
         ".netflixparty.com/socket.io/?EIO=3&transport=websocket");
     messenger.setChannel(currentChannel);
@@ -319,7 +319,7 @@ class _MyHomePageState extends State<MyHomePage> {
       lastKnownMoviePosition = messageObj.lastKnownTime;
       videoDuration = messageObj.videoDuration;
       currentServerTime = messageObj.lastKnownTimeUpdatedAt;
-      currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
+      currentLocalTime = (DateTime.now().millisecondsSinceEpoch);
       debugPrint("last Known time - " +
           messageObj.lastKnownTime.toString() +
           " at " +
@@ -358,7 +358,7 @@ class _MyHomePageState extends State<MyHomePage> {
       } else if (messageObj is SentMessageMessage) {
         setState(() {
           this.userMessages.add(messageObj.userMessage);
-          this._chatMessages.add(new ChatMessage(
+          this._chatMessages.add(ChatMessage(
               createdAt: DateTime.fromMillisecondsSinceEpoch(
                   messageObj.userMessage.timestamp),
               text: messageObj.userMessage.body,
@@ -369,14 +369,14 @@ class _MyHomePageState extends State<MyHomePage> {
       } else if (messageObj is VideoIdAndMessageCatchupMessage) {
         this.userMessages.addAll(messageObj.userMessages);
         this._chatMessages.addAll(messageObj.userMessages.map((userMessage) {
-          return new ChatMessage(
+          return ChatMessage(
               text: userMessage.body, user: _buildChatUser(userMessage));
         }));
         WidgetsBinding.instance
             .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
         lastKnownMoviePosition = messageObj.lastKnownTime;
         currentServerTime = messageObj.lastKnownTimeUpdatedAt;
-        currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
+        currentLocalTime = (DateTime.now().millisecondsSinceEpoch);
         debugPrint("last Known time - " +
             messageObj.lastKnownTime.toString() +
             " at " +
@@ -399,7 +399,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   ChatUser _buildChatUser(UserMessage userMessage) {
-    return new ChatUser.fromJson({
+    return ChatUser.fromJson({
       'uid': userMessage.userId,
       'name': userMessage.userNickname,
       'avatar': UserAvatar.formatIconName(userMessage.userIcon),
@@ -410,7 +410,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _scrollToBottomOfChatStream() {
     _chatStreamScrollController.animateTo(
         _chatStreamScrollController.position.maxScrollExtent + 5,
-        duration: new Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 300),
         curve: Curves.linear);
   }
 
@@ -427,10 +427,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void joinSession(String sessionIdForJoin) {
     UserSettings userSettings =
-        new UserSettings(true, _icon, _userId, _username);
+        UserSettings(true, _icon, _userId, _username);
     JoinSessionContent joinSessionContent =
-        new JoinSessionContent(sessionIdForJoin, _userId, userSettings);
-    sendMessage(new JoinSessionMessage(joinSessionContent));
+        JoinSessionContent(sessionIdForJoin, _userId, userSettings);
+    sendMessage(JoinSessionMessage(joinSessionContent));
     sessionJoined = true;
     setState(() {
       isAttemptingToJoinSessionFromText = false;
@@ -440,8 +440,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void sendGetServerTimeMessage() {
     GetServerTimeContent getServerTimeContent =
-        new GetServerTimeContent("1.7.8");
-    sendMessage(new GetServerTimeMessage(getServerTimeContent));
+        GetServerTimeContent("1.7.8");
+    sendMessage(GetServerTimeMessage(getServerTimeContent));
   }
 
   void sendMessage(SocketMessage message) {
@@ -490,13 +490,13 @@ class _MyHomePageState extends State<MyHomePage> {
     print("go to account settings");
     await Navigator.push(
       context,
-      new MaterialPageRoute(builder: (context) => UserSettingsScreen()),
+      MaterialPageRoute(builder: (context) => UserSettingsScreen()),
     );
     _loadUsernameAndIcon();
   }
 
   List<Widget> getNotConnectedWidgets() {
-    List<Widget> widgets = new List<Widget>();
+    List<Widget> widgets = List<Widget>();
     widgets.add(Padding(
       padding: EdgeInsets.all(6),
     ));
@@ -521,12 +521,12 @@ class _MyHomePageState extends State<MyHomePage> {
       clearButtonMode: OverlayVisibilityMode.editing,
     ));
     widgets.add(Padding(
-      padding: new EdgeInsets.fromLTRB(50, 10, 50, 10),
+      padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
       child: ProgressButton(
         child: Text(
           isAttemptingToJoinSessionFromText ? "" : "Connect to Party",
           style:
-              new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: _onConnectPressed,
         buttonState: isAttemptingToJoinSessionFromText
@@ -537,35 +537,35 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     ));
     widgets.add(Padding(
-        padding: new EdgeInsets.fromLTRB(0, 10, 0, 10),
+        padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
         child: Text(
           "OR",
           style: TextStyle(fontWeight: FontWeight.bold),
         )));
     widgets.add(Padding(
-        padding: new EdgeInsets.fromLTRB(0, 4, 0, 4),
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Align(
             alignment: Alignment.centerLeft,
             child:
                 Text("1. Copy the link from Netflix Party on your computer"))));
     widgets.add(Padding(
-        padding: new EdgeInsets.fromLTRB(0, 4, 0, 4),
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Align(
             alignment: Alignment.centerLeft,
             child: Text("2. Visit the-qrcode-generator.com"))));
     widgets.add(Padding(
-        padding: new EdgeInsets.fromLTRB(0, 4, 0, 4),
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
                 "3. Paste the link there to create a scannable QR code"))));
     widgets.add(Padding(
-      padding: new EdgeInsets.fromLTRB(50, 10, 50, 10),
+      padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
       child: ProgressButton(
         child: Text(
           isAttemptingToJoinSessionFromQR ? "" : "Scan QR Code",
           style:
-              new TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: _onScanQRPressed,
         buttonState: isAttemptingToJoinSessionFromQR
@@ -592,7 +592,9 @@ class _MyHomePageState extends State<MyHomePage> {
       this.currentChannel.sink.close();
       this.serverTimeTimer.cancel();
       this.pingTimer.cancel();
-    } on Exception {}
+    } on Exception {
+      debugPrint("Failed to disconnect");
+    }
     setState(() {
       connected = false;
       disconnect();
@@ -601,7 +603,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _getPlayControlButton() {
-    return new CupertinoButton(
+    return CupertinoButton(
         child: Icon(
             isPlaying
                 ? CupertinoIcons.pause_solid
@@ -617,13 +619,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onPlayPressed() {
     debugPrint(
         'sending play with movie time: ' + lastKnownMoviePosition.toString());
-    int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
+    int currentTimeInMilliseconds = (DateTime.now().millisecondsSinceEpoch);
     int millisecondsSinceLastUpdate =
         currentTimeInMilliseconds - currentLocalTime;
     int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
     this.currentServerTime = expectedServerTime;
-    currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
-    UpdateSessionContent updateSessionContent = new UpdateSessionContent(
+    currentLocalTime = (DateTime.now().millisecondsSinceEpoch);
+    UpdateSessionContent updateSessionContent = UpdateSessionContent(
         lastKnownMoviePosition,
         currentServerTime,
         "playing",
@@ -631,14 +633,14 @@ class _MyHomePageState extends State<MyHomePage> {
         null,
         videoDuration,
         false);
-    sendMessage(new UpdateSessionMessage(updateSessionContent));
+    sendMessage(UpdateSessionMessage(updateSessionContent));
     setState(() {
       isPlaying = true;
     });
   }
 
   void _onPausePressed() {
-    int currentTimeInMilliseconds = (new DateTime.now().millisecondsSinceEpoch);
+    int currentTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
     int millisecondsSinceLastUpdate =
         currentTimeInMilliseconds - currentLocalTime;
     int expectedMovieTime =
@@ -647,11 +649,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
     currentServerTime = expectedServerTime;
     lastKnownMoviePosition = expectedMovieTime;
-    currentLocalTime = (new DateTime.now().millisecondsSinceEpoch);
+    currentLocalTime = (DateTime.now().millisecondsSinceEpoch);
 
     debugPrint(
         'sending pause with movie time: ' + expectedMovieTime.toString());
-    UpdateSessionContent updateSessionContent = new UpdateSessionContent(
+    UpdateSessionContent updateSessionContent = UpdateSessionContent(
         lastKnownMoviePosition,
         currentServerTime,
         "paused",
@@ -659,7 +661,7 @@ class _MyHomePageState extends State<MyHomePage> {
         null,
         videoDuration,
         false);
-    sendMessage(new UpdateSessionMessage(updateSessionContent));
+    sendMessage(UpdateSessionMessage(updateSessionContent));
     setState(() {
       isPlaying = false;
     });
