@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutterapp/domains/messages/outgoing-messages/join-session/UserSettings.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/typing/TypingContent.dart';
+import 'package:flutterapp/domains/messages/outgoing-messages/typing/TypingMessage.dart';
+import 'package:flutterapp/domains/messenger/Messenger.dart';
 import 'package:flutterapp/theming/AvatarColors.dart';
 
 class ChatStream {
