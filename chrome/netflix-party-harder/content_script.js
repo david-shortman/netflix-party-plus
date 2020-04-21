@@ -1089,7 +1089,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
         }
         /* line 24, ../sass/layout/_chatlayout.scss */
         #chat-wrapper #chat-container #chat-header-container #chat-menu-container #function-title {
-          width: 50%;
+          width: 60%; /* NPH */
           height: 100%;
           display: flex;
           align-items: center;
@@ -1103,7 +1103,8 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
         }
         /* line 33, ../sass/layout/_chatlayout.scss */
         #chat-wrapper #chat-container #chat-header-container #chat-menu-container #function-user {
-          width: 50%;
+          margin-left: auto; /* NPH */
+          width: 40%; /* NPH */
           height: 100%;
           display: flex;
           flex-flow: wrap row;
@@ -1111,7 +1112,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
         }
         /* line 37, ../sass/layout/_chatlayout.scss */
         #chat-wrapper #chat-container #chat-header-container #chat-menu-container #function-user #link-icon {
-          width: 50%;
+          width: 30%; /* NPH */
           height: 100%;
           display: flex;
           flex-flow: wrap row;
@@ -1521,6 +1522,22 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
           width: 100%;
           height: 100%;
         }
+
+        /* NPH */
+        .hide-sidebar-btn button {
+          margin-top: 4px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 12px;
+          font-weight: 500;
+          width: 100%;
+          height: 100%;
+          border-radius: 50px;
+          background: #5c5c5c;
+          color: #e2e2e2;
+          transition: 0.5s ease;
+        }
+        /* END NPH */
+
         /* line 96, ../sass/modules/_setting.scss */
         #settings-save .section-d .section-d-inner .btns button {
           font-family: 'Poppins', sans-serif;
@@ -1592,6 +1609,33 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
           curosr: pointer;
         }
 
+        /* NPH */
+        .tooltip {
+          position: relative;
+          display: inline-block;
+          border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+        }
+        
+        /* Tooltip text */
+        .tooltip .tooltiptext {
+          visibility: hidden;
+          width: 250px;
+          background-color: black;
+          color: #fff;
+          text-align: center;
+          padding: 5px 0;
+          border-radius: 6px;
+          font-size:16px;
+         
+          position: absolute;
+          z-index: 2;
+        }
+        
+        /* Show the tooltip text when you mouse over the tooltip container */
+        .tooltip:hover .tooltiptext {
+          visibility: visible;
+        }
+        /* END NPH */
 
       </style>
 
@@ -1614,7 +1658,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
             <ul id="chat-menu-container">
               <li id="function-title">
                 <div id="title">
-                  <h1>Netflix Party</h1>
+                  <h1>Netflix Party <em>Harder</em></h1> <!-- NPH -->
                 </div>
               </li>
               <li id="function-user">
@@ -1654,6 +1698,15 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
             </div>
 
           </div>
+
+          <!-- NPH -->
+          <div class="tooltip">
+            <div class="hide-sidebar-btn">
+                <button id="hide-sidebar">Hide chat</button>
+            </div>
+            <span class="tooltiptext tooltip-bottom">To show the chat again, you'll have to click the extension's icon and check the "Show Chat" checkbox</span>
+          </div>
+          <!-- END NPH -->
 
           <div id="setting-edit" class="chat-settings-container" style="display:none">
 
@@ -1780,7 +1833,12 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
         setPresenceVisible(false);
         // setPresenceText();
         // jQuery('#presence-indicator').hide();
-
+      
+      // NPH
+	    var hideSidebarListener = function(e) {
+	      hideSidebar();
+	    }
+	    jQuery('#hide-sidebar').click(hideSidebarListener);
 
 	    var userIconListener = function(e) {
 	      console.log('userIcon button clicked');
@@ -1953,6 +2011,12 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
         jQuery('.sizing-wrapper').css('right', '0px');
       }
     };
+
+    // NPH
+    var hideSidebar = function() {
+      jQuery("#chat-wrapper").hide();
+      jQuery(".sizing-wrapper").css("right", "0px");
+    }
 
     // show or hide the icon container
     var toggleIconContainer = function() {
