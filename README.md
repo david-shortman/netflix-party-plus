@@ -1,6 +1,8 @@
-![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Tests/badge.svg) ![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Build/badge.svg)
+[![](https://img.shields.io/badge/dynamic/json.svg?label=r/NetflixPartyHarder%20subscribers&query=$.data.subscribers&url=https://www.reddit.com/r/NetflixPartyHarder/about.json)](https://www.reddit.com/r/NetflixPartyHarder/)
 
-![](https://codecov.io/gh/david-shortman/netflix-party-enhancement-suite/branch/master/graph/badge.svg)
+[![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Tests/badge.svg)](https://github.com/david-shortman/netflix-party-enhancement-suite/actions?query=workflow%3ATests) [![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Build/badge.svg)](https://github.com/david-shortman/netflix-party-enhancement-suite/actions?query=workflow%3ABuild)
+
+[![](https://codecov.io/gh/david-shortman/netflix-party-enhancement-suite/branch/master/graph/badge.svg)](https://codecov.io/gh/david-shortman/netflix-party-enhancement-suite)
 # netflix-party-enhancement-suite
 A set of enhancements to the Netflix Party experience
 
@@ -30,3 +32,4 @@ Features:
   - Automatically join your friends' parties
   - Providing a scannable QR code to open in the remote app
 - Cross browser support
+ 
