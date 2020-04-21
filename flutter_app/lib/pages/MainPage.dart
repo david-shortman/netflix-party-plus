@@ -7,10 +7,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutterapp/changelog/ChangelogService.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
 import 'package:flutterapp/domains/messages/incoming-messages/SetPresenceMessage.dart';
 import 'package:flutterapp/theming/AppTheme.dart';
 import 'package:flutterapp/theming/AvatarColors.dart';
+import 'package:flutterapp/widgets/ChangelogDialogFactory.dart';
 import 'package:flutterapp/widgets/ChatStream.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -54,21 +56,21 @@ class MyApp extends StatelessWidget {
         title: 'Netflix Party Harder',
         theme: PartyHarderTheme.getLightTheme(),
         darkTheme: PartyHarderTheme.getDarkTheme(),
-        home: MyHomePage(
+        home: MainPage(
           title: 'Netflix Party Harder',
         ));
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MainPage extends StatefulWidget {
   final String title;
-  MyHomePage({Key key, @required this.title}) : super(key: key);
+  MainPage({Key key, @required this.title}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MainPageState createState() => _MainPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MainPageState extends State<MainPage> {
   IOWebSocketChannel currentChannel;
   Messenger messenger = Messenger();
   String _userId;
@@ -88,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _icon;
   bool isPlaying = false;
   bool connected = false;
+  bool _isShowingChangelogDialog = false;
   int videoDuration = 655550;
   List<UserMessage> userMessages = List();
   List<ChatMessage> _chatMessages = List();
@@ -97,8 +100,9 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController _messageTextEditingController = TextEditingController();
   String messageInputText;
 
-  _MyHomePageState() {
+  _MainPageState() {
     _loadUsernameAndIcon();
+    _dispatchShowChangelogIntent();
   }
 
   @override
@@ -264,6 +268,21 @@ class _MyHomePageState extends State<MyHomePage> {
     if (connected) {
       _sendBroadcastUserSettingsMessage();
     }
+  }
+
+  _dispatchShowChangelogIntent() {
+    Future.delayed(Duration(milliseconds: 300), () async {
+      if (!_isShowingChangelogDialog) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String lastViewedChangelog =
+            await prefs.getString("lastViewedChangelog");
+        if (lastViewedChangelog != ChangelogService.getLatestVersion()) {
+          _isShowingChangelogDialog = true;
+          await _showChangelogDialog();
+          _isShowingChangelogDialog = false;
+        }
+      }
+    });
   }
 
   _sendBroadcastUserSettingsMessage() {
@@ -744,5 +763,13 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       isPlaying = false;
     });
+  }
+
+  Future<void> _showChangelogDialog() async {
+    await showCupertinoDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return ChangelogDialogFactory.getChangelogDialog(context);
+        });
   }
 }
