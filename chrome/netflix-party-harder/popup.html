@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Netflix Party</title>
+    <link rel="stylesheet" href="normalize.css">
+    <link rel="stylesheet" href="popup.css">
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="popup.js"></script>
+  </head>
+  <body>
+    <div class="no-error">
+      <div class="disconnected">
+        <h2>Create a Netflix Party</h2>
+        <p>
+          <label><input type="checkbox" id="control-lock"> Only I have control</label>
+        </p>
+        <p>
+          <button id="create-session" type="button">Start the party</button>
+        </p>
+
+        <p >
+          <small><span id="testsettings"> Please make sure to tell your guests that they need to click on the red NP icon to join a party after clicking on your party invite link.</span></small> 
+        </p>
+
+      </div>
+      <div class="loading hidden">
+        <i class="spinner fa fa-circle-o-notch fa-spin"></i>
+      </div>  
+      <div class="connected hidden">
+        <p>Share the URL below so others can join the party. The recipient(s) should navigate to this URL and <strong>then click on the red Netflix Party icon</strong> to join.</p>
+        <input id="share-url" type="text" readonly="true" autocomplete="off" autofocus />
+        <p class="copy-val">
+          <small><a href="#" id="copy-btn">Copy URL</a></small>
+        </p>
+        <p>
+          <label><input type="checkbox" id="show-chat"> Show chat</label>
+        </p>
+        <p>
+          <button id="leave-session" type="button">Disconnect</button>
+        </p>
+
+        <p >
+          <small><span id="testsettings"> Please make sure to tell your guests that they need to click on the red NP icon to join a party after clicking on your party invite link.</span></small> 
+        </p>
+      </div>
+    </div>
+    <div class="some-error hidden">
+      <p id="error-msg" class="error"></p>
+      <p><button id="close-error" type="button">Dismiss</button></p>
+    </div>
+  </body>
+</html>
