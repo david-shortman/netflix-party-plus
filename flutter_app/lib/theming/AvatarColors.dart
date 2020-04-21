@@ -36,7 +36,7 @@ class AvatarColors {
       case "Pizza.svg":
         return Colors.deepOrangeAccent;
       case "Poohbear.svg":
-        return Colors.yellow;
+        return Colors.yellow[800];
       case "Popcorn.svg":
         return Colors.yellowAccent;
       case "SailorCat.svg":
