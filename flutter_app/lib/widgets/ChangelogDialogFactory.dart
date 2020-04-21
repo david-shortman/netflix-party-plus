@@ -19,7 +19,13 @@ class ChangelogDialogFactory {
                   alignment: Alignment.centerLeft,
                   child: MarkdownBody(
                     data: ChangelogService.getCurrentChangelog(),
-                    styleSheet: MarkdownStyleSheet(p: TextStyle(fontSize: 18, color: Theme.of(context).primaryTextTheme.body1.color)),
+                    styleSheet: MarkdownStyleSheet(
+                        p: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context)
+                                .primaryTextTheme
+                                .body1
+                                .color)),
                   )))
         ],
       ),
