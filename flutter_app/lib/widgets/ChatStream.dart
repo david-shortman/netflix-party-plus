@@ -12,23 +12,27 @@ import 'package:flutterapp/theming/AvatarColors.dart';
 class ChatStream {
   static Widget getChatStream(
       {BuildContext context,
+      Function setTextState,
       List<ChatMessage> messages,
       Function(ChatMessage) onSend,
       UserSettings userSettings,
       ScrollController scrollController,
+      TextEditingController textEditingController,
+      String text,
       Messenger messenger}) {
     String icon = userSettings.getIcon();
+    TextEditingController textEditingController = TextEditingController();
     return DashChat(
       messages: messages,
-      onSend: (text) {
-        onSend(text);
-      },
-      onTextChange: (text) {
-        debugPrint('henlo $text');
+      onSend: onSend,
+      text: text,
+      textController: textEditingController,
+      onTextChange: (newText) {
         messenger.sendMessage(TypingMessage(TypingContent(true)));
         Future.delayed(Duration(seconds: 3), () async {
           messenger.sendMessage(TypingMessage(TypingContent(false)));
         });
+        setTextState(newText);
       },
       user: ChatUser(
           name: userSettings.getNickname(),
@@ -57,7 +61,10 @@ class ChatStream {
             padding: EdgeInsets.all(3),
             minSize: 30,
             borderRadius: BorderRadius.circular(500),
-            onPressed: onPressed);
+            onPressed: () {
+              debugPrint("pressed");
+              onPressed();
+            });
       },
       inputToolbarPadding: EdgeInsets.fromLTRB(0, 0, 10, 0),
       messageContainerDecoration: BoxDecoration(

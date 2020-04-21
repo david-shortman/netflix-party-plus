@@ -15,8 +15,10 @@ import 'package:flutterapp/theming/AvatarColors.dart';
 import 'package:flutterapp/widgets/ChangelogDialogFactory.dart';
 import 'package:flutterapp/widgets/ChatStream.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:progress_button/progress_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../domains/avatar/Avatar.dart';
@@ -94,6 +96,9 @@ class _MainPageState extends State<MainPage> {
   List<ChatMessage> _chatMessages = List();
   ChatMessage _someoneIsTypingMessage = ChatMessage(
       text: "Someone is typing...", user: ChatUser(uid: "10", avatar: ""));
+  bool _isKeyboardVisible = false;
+  TextEditingController _messageTextEditingController = TextEditingController();
+  String messageInputText;
 
   _MainPageState() {
     _loadUsernameAndIcon();
@@ -101,48 +106,110 @@ class _MainPageState extends State<MainPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    KeyboardVisibilityNotification().addNewListener(
+        onChange: (isVisible) => _isKeyboardVisible = isVisible);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Theme.of(context).primaryColor,
       ),
-      body: connected ? _getConnectedWidget() : _getNotConnectedWidget(),
-      bottomNavigationBar: _getBottomAppBarWidget(),
-      floatingActionButton:
-          Visibility(visible: connected, child: _getPlayControlButton()),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
-
-  Widget _getBottomAppBarWidget() {
-    return BottomAppBar(
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
         children: <Widget>[
+          connected ? _getConnectedWidget() : _getNotConnectedWidget(),
           Visibility(
-            visible: connected,
-            child: CupertinoButton(
-              child: Text(
-                "Disconnect",
-                style: TextStyle(color: Theme.of(context).primaryColor),
-              ),
-              onPressed: () {
-                disconnectButtonPressed();
-              },
-            ),
-          ),
-          IconButton(
-            icon: SvgPicture.asset(_icon != null ? 'assets/avatars/$_icon' : '',
-                height: 85),
-            onPressed: () {
-              goToAccountSettings(context);
-            },
-          ),
+              visible: !_isKeyboardVisible,
+              child: SlidingUpPanel(
+                backdropEnabled: true,
+                parallaxEnabled: true,
+                maxHeight: 400,
+                minHeight: connected ? 100 : 80,
+                panelBuilder: (sc) => _panel(sc),
+                isDraggable: connected,
+              ))
         ],
       ),
     );
+  }
+
+  Widget _panel(ScrollController sc) {
+    return MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: Container(
+          color: Colors.black87,
+          child: ListView(
+            controller: sc,
+            children: <Widget>[
+              SizedBox(
+                height: 12.0,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Visibility(
+                    visible: connected,
+                    child: Container(
+                      width: 30,
+                      height: 5,
+                      decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(12.0))),
+                    ),
+                  )
+                ],
+              ),
+              SizedBox(
+                height: 8,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Visibility(
+                    visible: connected,
+                    child: CupertinoButton(
+                      child: Text(
+                        "Disconnect",
+                        style: TextStyle(color: Theme.of(context).primaryColor),
+                      ),
+                      onPressed: () {
+                        disconnectButtonPressed();
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: SvgPicture.asset(
+                        _icon != null ? 'assets/avatars/$_icon' : '',
+                        height: 85),
+                    onPressed: () {
+                      goToAccountSettings(context);
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 5.0,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Visibility(
+                    visible: connected,
+                    child: _getPlayControlButton(),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ));
   }
 
   Widget _getNotConnectedWidget() {
@@ -155,10 +222,20 @@ class _MainPageState extends State<MainPage> {
             )));
   }
 
+  void _setTextState(String text) {
+    setState(() {
+      messageInputText = text;
+    });
+  }
+
   Widget _getConnectedWidget() {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(10, 1, 10, 10),
+    Size currentScreenSize = MediaQuery.of(context).size;
+    double screenRatio = currentScreenSize.height / currentScreenSize.width;
+    return SizedBox(
+      height: MediaQuery.of(context).size.height - (105 * screenRatio),
       child: ChatStream.getChatStream(
+          setTextState: _setTextState,
+          text: messageInputText,
           context: context,
           messages: _chatMessages,
           onSend: (message) {
@@ -166,6 +243,7 @@ class _MainPageState extends State<MainPage> {
           },
           userSettings: UserSettings(false, _icon, _userId, _username),
           scrollController: _chatStreamScrollController,
+          textEditingController: _messageTextEditingController,
           messenger: messenger),
     );
   }

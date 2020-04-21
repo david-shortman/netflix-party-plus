@@ -1,11 +1,12 @@
 class ChangelogService {
   static String getLatestVersion() {
-    return '0.1.1';
+    return '0.1.2';
   }
 
   static String getCurrentChangelog() {
-    return '''- Shows indictor that someone is typing
+    return '''- Added sliding panel for media controls
+- Added indictor that someone is typing
 - Colored message bubbles for each partier
-- Design tweaks''';
+- Some other design tweaks''';
   }
 }
