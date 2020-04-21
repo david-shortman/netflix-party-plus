@@ -24,7 +24,7 @@ Features:
 
 ## Party Harder Extension
 
-Status: Concept
+Status: WIP
 
 Features:
 - Make the Netflix Party experience more seamless by
