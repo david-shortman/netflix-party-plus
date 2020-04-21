@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutterapp/changelog/ChangelogService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +19,7 @@ class ChangelogDialogFactory {
                   alignment: Alignment.centerLeft,
                   child: MarkdownBody(
                     data: ChangelogService.getCurrentChangelog(),
-                    styleSheet: MarkdownStyleSheet(p: TextStyle(fontSize: 18)),
+                    styleSheet: MarkdownStyleSheet(p: TextStyle(fontSize: 18, color: Theme.of(context).primaryTextTheme.body1.color)),
                   )))
         ],
       ),

@@ -143,7 +143,7 @@ class _MainPageState extends State<MainPage> {
         context: context,
         removeTop: true,
         child: Container(
-          color: Colors.black87,
+          color: Theme.of(context).bottomAppBarColor,
           child: ListView(
             controller: sc,
             children: <Widget>[
