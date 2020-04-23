@@ -1,4 +1,4 @@
-package com.jrlambs.flutterapp
+package com.jrlambs.np_plus
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

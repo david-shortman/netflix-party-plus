@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutterapp/domains/messages/SocketMessage.dart';
+import 'package:np_plus/domains/messages/SocketMessage.dart';
 import 'package:web_socket_channel/io.dart';
 
 class Messenger {

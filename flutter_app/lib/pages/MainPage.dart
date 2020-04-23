@@ -7,13 +7,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutterapp/changelog/ChangelogService.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/SetPresenceMessage.dart';
-import 'package:flutterapp/theming/AppTheme.dart';
-import 'package:flutterapp/theming/AvatarColors.dart';
-import 'package:flutterapp/widgets/ChangelogDialogFactory.dart';
-import 'package:flutterapp/widgets/ChatStream.dart';
+import 'package:np_plus/changelog/ChangelogService.dart';
+import 'package:np_plus/domains/messages/incoming-messages/ErrorMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/SetPresenceMessage.dart';
+import 'package:np_plus/theming/AppTheme.dart';
+import 'package:np_plus/theming/AvatarColors.dart';
+import 'package:np_plus/widgets/ChangelogDialogFactory.dart';
+import 'package:np_plus/widgets/ChatStream.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:progress_button/progress_button.dart';
@@ -305,7 +305,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   _sendBroadcastUserSettingsMessage() {
     sendMessage(BroadcastUserSettingsMessage(BroadCastUserSettingsContent(
-        UserSettings(true, _icon, _userId, _username))));
+        UserSettings(true, UserAvatar.getNPName(_icon), _userId, _username))));
   }
 
   void postMessageText(String messageText) {

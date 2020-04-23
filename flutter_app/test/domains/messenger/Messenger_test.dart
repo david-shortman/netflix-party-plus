@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutterapp/domains/messages/SocketMessage.dart';
-import 'package:flutterapp/domains/messenger/Messenger.dart';
+import 'package:np_plus/domains/messages/SocketMessage.dart';
+import 'package:np_plus/domains/messenger/Messenger.dart';
 import 'package:mockito/mockito.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';

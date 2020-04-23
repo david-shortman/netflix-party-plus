@@ -1,4 +1,4 @@
-import 'package:flutterapp/domains/messages/outgoing-messages/join-session/UserSettings.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/join-session/UserSettings.dart';
 
 import '../../MessageContent.dart';
 

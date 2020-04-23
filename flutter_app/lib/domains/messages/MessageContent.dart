@@ -1,3 +1,3 @@
-import 'package:flutterapp/domains/mappable/Mappable.dart';
+import 'package:np_plus/domains/mappable/Mappable.dart';
 
 class MessageContent extends Mappable {}

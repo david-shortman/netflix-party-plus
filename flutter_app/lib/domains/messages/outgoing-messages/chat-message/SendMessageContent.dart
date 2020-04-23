@@ -1,4 +1,4 @@
-import 'package:flutterapp/domains/messages/MessageContent.dart';
+import 'package:np_plus/domains/messages/MessageContent.dart';
 
 import 'SendMessageBody.dart';
 

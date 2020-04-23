@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutterapp/domains/messages/MessageArray.dart';
-import 'package:flutterapp/domains/messages/outgoing-messages/dynamic/DynamicMessageContent.dart';
-import 'package:flutterapp/domains/messages/outgoing-messages/dynamic/SingleValueDynamicMessageContent.dart';
-import 'package:flutterapp/domains/messages/outgoing-messages/empty-message/EmptyMessage.dart';
+import 'package:np_plus/domains/messages/MessageArray.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/dynamic/DynamicMessageContent.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/dynamic/SingleValueDynamicMessageContent.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/empty-message/EmptyMessage.dart';
 
 import 'MessageContent.dart';
 import 'SerializedMessageType.dart';
