@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/SentMessageMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/ServerTimeMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/SidMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/SetPresenceMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/UserIdMessage.dart';
-import 'package:flutterapp/domains/messages/SocketMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/ErrorMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/ReceivedMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/SentMessageMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/ServerTimeMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/SidMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/SetPresenceMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/UserIdMessage.dart';
+import 'package:np_plus/domains/messages/SocketMessage.dart';
 
 import 'UpdateMessage.dart';
 import 'VideoIdAndMessageCatchupMessage.dart';

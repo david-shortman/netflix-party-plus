@@ -1,4 +1,4 @@
-import 'package:flutterapp/domains/messages/incoming-messages/ReceivedMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/ReceivedMessage.dart';
 
 class ArrayMessage extends ReceivedMessage {
   String message;

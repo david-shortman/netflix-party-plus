@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterapp/domains/avatar/Avatar.dart';
+import 'package:np_plus/domains/avatar/Avatar.dart';
 
 class AvatarColors {
   static Color getColor(String iconName) {
@@ -38,11 +38,11 @@ class AvatarColors {
       case "Poohbear.svg":
         return Colors.yellow[800];
       case "Popcorn.svg":
-        return Colors.yellowAccent;
+        return Colors.yellow[700];
       case "SailorCat.svg":
         return Colors.deepPurpleAccent;
       case "Sailormoon.svg":
-        return Colors.pinkAccent;
+        return Colors.pink[200];
       case "Snow-White.svg":
         return Colors.blueAccent;
       case "Wolverine.svg":

@@ -1,4 +1,4 @@
-import 'package:flutterapp/domains/messages/MessageContent.dart';
+import 'package:np_plus/domains/messages/MessageContent.dart';
 
 class SendMessageBody implements MessageContent {
   String _text;

@@ -1,4 +1,4 @@
-import 'package:flutterapp/domains/messages/outgoing-messages/server-time/GetServerTimeContent.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/server-time/GetServerTimeContent.dart';
 
 import '../../SocketMessage.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:flutterapp/changelog/ChangelogService.dart';
+import 'package:np_plus/changelog/ChangelogService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChangelogDialogFactory {

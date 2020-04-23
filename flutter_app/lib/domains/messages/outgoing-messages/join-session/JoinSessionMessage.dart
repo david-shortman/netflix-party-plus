@@ -1,4 +1,4 @@
-import 'package:flutterapp/domains/messages/outgoing-messages/join-session/JoinSessionContent.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/join-session/JoinSessionContent.dart';
 
 import '../../SocketMessage.dart';
 

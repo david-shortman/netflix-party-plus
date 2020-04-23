@@ -1,4 +1,4 @@
-import 'package:flutterapp/domains/messages/outgoing-messages/chat-message/SendMessageContent.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/chat-message/SendMessageContent.dart';
 
 import '../../SocketMessage.dart';
 

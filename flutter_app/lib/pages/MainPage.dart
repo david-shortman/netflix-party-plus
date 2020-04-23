@@ -7,13 +7,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutterapp/changelog/ChangelogService.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/ErrorMessage.dart';
-import 'package:flutterapp/domains/messages/incoming-messages/SetPresenceMessage.dart';
-import 'package:flutterapp/theming/AppTheme.dart';
-import 'package:flutterapp/theming/AvatarColors.dart';
-import 'package:flutterapp/widgets/ChangelogDialogFactory.dart';
-import 'package:flutterapp/widgets/ChatStream.dart';
+import 'package:np_plus/changelog/ChangelogService.dart';
+import 'package:np_plus/domains/messages/incoming-messages/ErrorMessage.dart';
+import 'package:np_plus/domains/messages/incoming-messages/SetPresenceMessage.dart';
+import 'package:np_plus/theming/AppTheme.dart';
+import 'package:np_plus/theming/AvatarColors.dart';
+import 'package:np_plus/widgets/ChangelogDialogFactory.dart';
+import 'package:np_plus/widgets/ChatStream.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:progress_button/progress_button.dart';
@@ -70,7 +70,7 @@ class MainPage extends StatefulWidget {
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   IOWebSocketChannel currentChannel;
   Messenger messenger = Messenger();
   String _userId;
@@ -89,7 +89,7 @@ class _MainPageState extends State<MainPage> {
   String _username;
   String _icon;
   bool isPlaying = false;
-  bool connected = false;
+  bool _shouldShowChat = false;
   bool _isShowingChangelogDialog = false;
   int videoDuration = 655550;
   List<UserMessage> userMessages = List();
@@ -99,6 +99,7 @@ class _MainPageState extends State<MainPage> {
   bool _isKeyboardVisible = false;
   TextEditingController _messageTextEditingController = TextEditingController();
   String messageInputText;
+  bool _isConnected = false;
 
   _MainPageState() {
     _loadUsernameAndIcon();
@@ -106,10 +107,27 @@ class _MainPageState extends State<MainPage> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_shouldShowChat && !_isConnected) {
+        showToastMessage("Reconnecting...");
+        _connectToServer();
+      }
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     KeyboardVisibilityNotification().addNewListener(
         onChange: (isVisible) => _isKeyboardVisible = isVisible);
+    _loadLastPartyUrl();
+  }
+
+  void _loadLastPartyUrl() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _urlTextController.text = prefs.getString("lastPartyUrl") ?? "";
   }
 
   @override
@@ -122,16 +140,16 @@ class _MainPageState extends State<MainPage> {
       ),
       body: Stack(
         children: <Widget>[
-          connected ? _getConnectedWidget() : _getNotConnectedWidget(),
+          _shouldShowChat ? _getConnectedWidget() : _getNotConnectedWidget(),
           Visibility(
               visible: !_isKeyboardVisible,
               child: SlidingUpPanel(
                 backdropEnabled: true,
                 parallaxEnabled: true,
                 maxHeight: 400,
-                minHeight: connected ? 100 : 80,
+                minHeight: _shouldShowChat ? 100 : 80,
                 panelBuilder: (sc) => _panel(sc),
-                isDraggable: connected,
+                isDraggable: _shouldShowChat,
               ))
         ],
       ),
@@ -154,7 +172,7 @@ class _MainPageState extends State<MainPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Visibility(
-                    visible: connected,
+                    visible: _shouldShowChat,
                     child: Container(
                       width: 30,
                       height: 5,
@@ -174,7 +192,7 @@ class _MainPageState extends State<MainPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Visibility(
-                    visible: connected,
+                    visible: _shouldShowChat,
                     child: CupertinoButton(
                       child: Text(
                         "Disconnect",
@@ -202,7 +220,7 @@ class _MainPageState extends State<MainPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Visibility(
-                    visible: connected,
+                    visible: _shouldShowChat,
                     child: _getPlayControlButton(),
                   ),
                 ],
@@ -265,7 +283,7 @@ class _MainPageState extends State<MainPage> {
     });
     print("_username is now " + _username);
     print("_icon is now " + _icon);
-    if (connected) {
+    if (_shouldShowChat) {
       _sendBroadcastUserSettingsMessage();
     }
   }
@@ -287,7 +305,7 @@ class _MainPageState extends State<MainPage> {
 
   _sendBroadcastUserSettingsMessage() {
     sendMessage(BroadcastUserSettingsMessage(BroadCastUserSettingsContent(
-        UserSettings(true, _icon, _userId, _username))));
+        UserSettings(true, UserAvatar.getNPName(_icon), _userId, _username))));
   }
 
   void postMessageText(String messageText) {
@@ -322,7 +340,13 @@ class _MainPageState extends State<MainPage> {
     _connectToServer();
   }
 
+  void _updateLastJoinedPartyUrl() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString("lastPartyUrl", _urlTextController.text);
+  }
+
   void _connectToServer() {
+    _updateLastJoinedPartyUrl();
     sessionJoined = false;
     sessionId = "";
     String serverId = "";
@@ -382,12 +406,18 @@ class _MainPageState extends State<MainPage> {
     currentChannel = IOWebSocketChannel.connect("wss://" +
         serverId +
         ".netflixparty.com/socket.io/?EIO=3&transport=websocket");
+    setState(() {
+      _isConnected = true;
+    });
     messenger.setChannel(currentChannel);
     currentChannel.stream.listen(_onReceivedStreamMessage,
         onError: (error, StackTrace stackTrace) {
       debugPrint('onError');
     }, onDone: () {
       debugPrint('Communication Closed');
+      setState(() {
+        _isConnected = false;
+      });
     });
   }
 
@@ -455,7 +485,7 @@ class _MainPageState extends State<MainPage> {
             Duration(milliseconds: sidMessage.pingInterval),
             (Timer t) => currentChannel.sink.add("2"));
         setState(() {
-          connected = true;
+          _shouldShowChat = true;
         });
       } else if (messageObj is SentMessageMessage) {
         setState(() {
@@ -493,7 +523,7 @@ class _MainPageState extends State<MainPage> {
           }
         });
       } else if (messageObj is ErrorMessage) {
-        this.connected = false;
+        this._shouldShowChat = false;
         this.clearAllVariables();
         showToastMessage(messageObj.errorMessage);
       }
@@ -550,6 +580,9 @@ class _MainPageState extends State<MainPage> {
 
   void disconnect() {
     currentChannel.sink.close();
+    setState(() {
+      _isConnected = false;
+    });
   }
 
   void clearAllVariables() {
@@ -579,6 +612,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void dispose() {
     debugPrint("Disposing...");
+    WidgetsBinding.instance.removeObserver(this);
     disconnect();
     clearAllVariables();
     super.dispose();
@@ -694,7 +728,7 @@ class _MainPageState extends State<MainPage> {
       debugPrint("Failed to disconnect");
     }
     setState(() {
-      connected = false;
+      _shouldShowChat = false;
       disconnect();
       clearAllVariables();
     });

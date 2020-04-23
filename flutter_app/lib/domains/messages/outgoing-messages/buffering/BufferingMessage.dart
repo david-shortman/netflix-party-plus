@@ -1,4 +1,4 @@
-import 'package:flutterapp/domains/messages/outgoing-messages/buffering/BufferingContent.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/buffering/BufferingContent.dart';
 
 import '../../SocketMessage.dart';
 
