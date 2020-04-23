@@ -1,4 +1,4 @@
-[![](https://img.shields.io/badge/dynamic/json.svg?label=r/NetflixPartyHarder%20subscribers&query=$.data.subscribers&url=https://www.reddit.com/r/NetflixPartyHarder/about.json)](https://www.reddit.com/r/NetflixPartyHarder/)
+[![](https://img.shields.io/badge/dynamic/json.svg?label=r/NetflixPartyPlus%20subscribers&query=$.data.subscribers&url=https://www.reddit.com/r/NetflixPartyPlus/about.json)](https://www.reddit.com/r/NetflixPartyPlus/)
 
 [![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Tests/badge.svg)](https://github.com/david-shortman/netflix-party-enhancement-suite/actions?query=workflow%3ATests) [![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Build/badge.svg)](https://github.com/david-shortman/netflix-party-enhancement-suite/actions?query=workflow%3ABuild)
 
