@@ -1,20 +1,5 @@
 'use strict';
 
-//////////////////////////////////////////////////////////////////////////
-// Google Analytics                                                     //
-//////////////////////////////////////////////////////////////////////////
-
-// inject Google Analytics
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-71812070-2']);
-_gaq.push(['_trackPageview']);
-
-(function() {
-  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-  ga.src = 'https://ssl.google-analytics.com/ga.js';
-  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-})();
-
 // log events
 function logEvent(eventType) {
   var numTries = 0;
@@ -61,45 +46,19 @@ function logEvent(eventType) {
 
 chrome.runtime.onInstalled.addListener(function(details){
     if(details.reason == "install"){
-        console.log("This is a first install!");
         var thisVersion = chrome.runtime.getManifest().version;
-        _gaq.push(['_trackEvent', 'install: ' + thisVersion, 'clicked']);
-        logEvent('install');
         chrome.tabs.create({'url': "https://www.netflixparty.com/tutorial"}, function() {
           console.log('created new tab after install');
         });
-    } else if(details.reason == "update"){
-        var thisVersion = chrome.runtime.getManifest().version;
-        console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
-        _gaq.push(['_trackEvent', 'update: ' + details.previousVersion + ' -> ' + thisVersion, 'clicked']);
-        logEvent('update-' + thisVersion); // 16 chars max
     }
 });
-
-chrome.storage.onChanged.addListener(function(changes, areaName) {
-  console.log("storage change: " + JSON.stringify(changes) + " for " + JSON.stringify(areaName));
-});
-
 
 //////////////////////////////////////////////////////////////////////////
 // Autoupdate                                                           //
 //////////////////////////////////////////////////////////////////////////
 chrome.runtime.onUpdateAvailable.addListener(function(details) {
-  // console.log("updating to version " + details.version);
-  _gaq.push(['_trackEvent', 'auto-update ->' + details.version, 'clicked']);
   chrome.runtime.reload();
 });
-
-// chrome.runtime.requestUpdateCheck(function(status) {
-//   if (status == "update_available") {
-//     console.log("update pending...");
-//   } else if (status == "no_update") {
-//     console.log("no update found");
-//   } else if (status == "throttled") {
-//     console.log("Oops, I'm asking too frequently - I need to back off.");
-//   }
-// });
-
 
 //////////////////////////////////////////////////////////////////////////
 // User Authentication                                                  //
@@ -178,18 +137,6 @@ chrome.runtime.onMessage.addListener(
     }
   }
 );
-
-//////////////////////////////////////////////////////////////////////////
-// Track tabs                                                           //
-//////////////////////////////////////////////////////////////////////////
-// function my_listener(tabId, changeInfo, tab) {
-//   // If updated tab matches this one
-//   if (changeInfo.status == "complete") {  
-//     _gaq.push(['_trackEvent', 'tab-update', 'clicked']);
-//   }
-// }
-
-// chrome.tabs.onUpdated.addListener(my_listener);
 
 //////////////////////////////////////////////////////////////////////////
 // Background Logic                                                     //

@@ -201,7 +201,7 @@ $(function() {
         // NPH
         var urlSegments = tabs[0].url.split('/');
         var videoId = urlSegments[urlSegments.length - 1].split('?')[0];
-        $('#qr-code').attr("src", `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fwww.netflix.com%2Fwatch%2F${videoId}%3FnpSessionId%3D${sessionId}%26npServerId%3D${serverIdFromUrl}`);
+        $('#qr-code').attr("src", `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlWithSessionId)}`);
         // END NPH
       };
 
