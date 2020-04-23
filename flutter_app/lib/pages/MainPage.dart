@@ -108,7 +108,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(state == AppLifecycleState.resumed){
+    if (state == AppLifecycleState.resumed) {
       if (_shouldShowChat && !_isConnected) {
         showToastMessage("Reconnecting...");
         _connectToServer();
