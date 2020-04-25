@@ -15,7 +15,8 @@ class PlaybackInfo {
     if (newServerTimeAtLastUpdate != null) {
       serverTimeAtLastVideoStateUpdate = newServerTimeAtLastUpdate;
     } else {
-      serverTimeAtLastVideoStateUpdate = playbackInfo.serverTimeAtLastVideoStateUpdate;
+      serverTimeAtLastVideoStateUpdate =
+          playbackInfo.serverTimeAtLastVideoStateUpdate;
     }
     if (newLastKnownMoviePosition != null) {
       lastKnownMoviePosition = newLastKnownMoviePosition;

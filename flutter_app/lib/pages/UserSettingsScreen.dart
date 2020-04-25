@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:np_plus/domains/user/LocalUser.dart';
+import 'package:np_plus/services/LocalUserService.dart';
+import '../main.dart';
 
 class UserSettingsScreen extends StatefulWidget {
   @override
@@ -10,87 +12,66 @@ class UserSettingsScreen extends StatefulWidget {
 }
 
 class _UserSettingsScreenState extends State<UserSettingsScreen> {
+  final _localUserService = getIt.get<LocalUserService>();
+
   TextEditingController _usernameController = TextEditingController();
   String _iconName = "";
-  List<Widget> images = List<Widget>();
-  List<Widget> imageWidgets = List();
+  List<Widget> _images = List<Widget>();
+
+  List<String> avatars = [
+    "Alien.svg",
+    "Batman.svg",
+    "ChickenLeg.svg",
+    "Chocobar.svg",
+    "Cinderella.svg",
+    "Cookie.svg",
+    "CptAmerica.svg",
+    "DeadPool.svg",
+    "Goofy.svg",
+    "Hamburger.svg",
+    "hotdog.svg",
+    "IceCream.svg",
+    "IronMan.svg",
+    "Mulan.svg",
+    "Pizza.svg",
+    "Poohbear.svg",
+    "Popcorn.svg",
+    "SailorCat.svg",
+    "Sailormoon.svg",
+    "Snow-White.svg",
+    "Wolverine.svg"
+  ];
 
   _UserSettingsScreenState() {
-    _setUsernameTextFieldFromSharedPreferences();
-    images.add(SvgPicture.asset("assets/avatars/Alien.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Batman.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/ChickenLeg.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Chocobar.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Cinderella.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Cookie.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/CptAmerica.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/DeadPool.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Goofy.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Hamburger.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/hotdog.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/IceCream.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/IronMan.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Mulan.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Pizza.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Poohbear.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Popcorn.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/SailorCat.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Sailormoon.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Snow-White.svg", height: 85));
-    images.add(SvgPicture.asset("assets/avatars/Wolverine.svg", height: 85));
+    _images = avatars
+        .map((avatar) => SvgPicture.asset("assets/avatars/$avatar", height: 85))
+        .toList();
+    _loadSavedLocalUserDetails();
   }
 
-  _usernameChanged() {
-    _updateUsernameInPreferences();
+  @override
+  void dispose() {
+    super.dispose();
+    _localUserService.updateProfile(
+        username: _usernameController.text, icon: _iconName);
   }
 
-  _updateUsernameInPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("username", _usernameController.text);
-  }
-
-  _updateIconInPreferences(String iconName) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("userIcon", iconName);
+  void onIconSelected(String icon) async {
     setState(() {
-      this._iconName = iconName;
+      this._iconName = icon;
     });
   }
 
-  _setUsernameTextFieldFromSharedPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  void _loadSavedLocalUserDetails() async {
+    LocalUser localUser = await _localUserService.getLocalUser();
+    _usernameController.text = localUser.username ?? "Mobile User";
     setState(() {
-      _usernameController.text = prefs.getString("username");
-      _iconName = prefs.getString("userIcon") ?? "";
+      _iconName = localUser.icon ?? "Batman.svg";
     });
-  }
-
-  _getImageWidgets() {
-    List<Widget> returnWidgets = List<Widget>();
-    images.forEach((inputImage) {
-      SvgPicture image = inputImage;
-      String imageName =
-          (image.pictureProvider as ExactAssetPicture).assetName.substring(14);
-      Widget widget = GestureDetector(
-          onTap: () {
-            _updateIconInPreferences(imageName);
-          },
-          child: Padding(padding: const EdgeInsets.all(8.0), child: image));
-      if (imageName == _iconName) {
-        widget = Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-            ),
-            child: Padding(padding: const EdgeInsets.all(8.0), child: image));
-      }
-      returnWidgets.add(widget);
-    });
-    return returnWidgets;
   }
 
   @override
   Widget build(BuildContext ctxt) {
-    _usernameController.addListener(_usernameChanged);
     return Scaffold(
         appBar: AppBar(
           title: Text("User Settings"),
@@ -133,7 +114,29 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
                       crossAxisCount: 4,
                       crossAxisSpacing: 4.0,
                       mainAxisSpacing: 8.0,
-                      children: _getImageWidgets()))
+                      children: _getAvatarIconButtons()))
             ])));
+  }
+
+  List<Widget> _getAvatarIconButtons() {
+    List<Widget> returnWidgets = List<Widget>();
+    _images.forEach((inputImage) {
+      SvgPicture image = inputImage;
+      String imageName =
+          (image.pictureProvider as ExactAssetPicture).assetName.substring(14);
+      Widget widget = GestureDetector(
+          onTap: () => onIconSelected(imageName),
+          child: Padding(padding: const EdgeInsets.all(8.0), child: image));
+      if (imageName == _iconName) {
+        widget = Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              color: Theme.of(context).primaryColor,
+            ),
+            child: Padding(padding: const EdgeInsets.all(8.0), child: image));
+      }
+      returnWidgets.add(widget);
+    });
+    return returnWidgets;
   }
 }

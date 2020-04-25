@@ -7,6 +7,7 @@ class SocketMessenger {
   int _sequenceNum = 0;
 
   SocketMessenger();
+
   void establishConnection(
       String url,
       Function(ReceivedMessage) onReceivedMessage,
@@ -14,6 +15,7 @@ class SocketMessenger {
       Function onConnectionOpened) {
     _channel = IOWebSocketChannel.connect(url);
     _channel.stream.listen(onReceivedMessage, onDone: onConnectionClosed);
+    onConnectionOpened();
   }
 
   void closeConnection() {

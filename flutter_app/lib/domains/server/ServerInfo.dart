@@ -25,7 +25,9 @@ class NPServerInfo {
   }
 
   int getServerTimeAdjustedForTimeSinceLastServerTimeUpdate() {
-    return _serverTime + DateTime.now().millisecondsSinceEpoch - _serverTimeLastUpdatedTime;
+    return _serverTime +
+        DateTime.now().millisecondsSinceEpoch -
+        _serverTimeLastUpdatedTime;
   }
 
   NPServerInfo();

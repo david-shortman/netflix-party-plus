@@ -14,8 +14,12 @@ import 'package:np_plus/domains/server/ServerInfo.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
 import 'package:np_plus/main.dart';
 import 'package:np_plus/playback/PlaybackInfo.dart';
+import 'package:np_plus/services/LocalUserService.dart';
+import 'package:np_plus/store/LocalUserStore.dart';
 import 'package:np_plus/store/NPServerInfoStore.dart';
+import 'package:np_plus/store/ChatMessagesStore.dart';
 import 'package:np_plus/store/PlaybackInfoStore.dart';
+import 'package:np_plus/services/SomeoneIsTypingService.dart';
 import 'package:np_plus/theming/AppTheme.dart';
 import 'package:np_plus/theming/AvatarColors.dart';
 import 'package:np_plus/widgets/ChangelogDialogFactory.dart';
@@ -54,11 +58,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Netflix Party Harder',
+        title: 'NP+',
         theme: PartyHarderTheme.getLightTheme(),
         darkTheme: PartyHarderTheme.getDarkTheme(),
         home: MainPage(
-          title: 'Netflix Party Harder',
+          title: 'NP+',
         ));
   }
 }
@@ -74,12 +78,16 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   final serverTime = getIt.get<NPServerInfoStore>();
 
-  SocketMessenger _messenger = SocketMessenger();
+  final _messenger = getIt.get<SocketMessenger>();
 
-  LocalUser _user = LocalUser();
+  final _localUserService = getIt.get<LocalUserService>();
 
   final _npServerInfoStore = getIt.get<NPServerInfoStore>();
   final _playbackInfoStore = getIt.get<PlaybackInfoStore>();
+  final _chatMessagesStore =
+      getIt.get<ChatMessagesStore>();
+  final _someoneIsTypingService = getIt.get<SomeoneIsTypingService>();
+  final _localUserStore = getIt.get<LocalUserStore>();
 
   // Video info
   int _videoDuration = 655550;
@@ -88,7 +96,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   // Connection info
   bool _hasJoinedSession = false;
   bool _isConnected = false;
-  String _userId;
 
   // Widget state
   bool _isAttemptingToJoinSessionFromText = false;
@@ -96,8 +103,6 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   bool _shouldShowPartyPage = false;
   bool _isShowingChangelogDialog = false;
   TextEditingController _urlTextController = TextEditingController();
-  ScrollController _chatStreamScrollController = ScrollController();
-  List<ChatMessage> _chatMessages = List();
   bool _isKeyboardVisible = false;
   UniqueKey chatUniqueKey = UniqueKey();
 
@@ -105,21 +110,19 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   Timer _getServerTimeTimer;
   Timer _pingServerTimer;
 
-  // Constant
-  ChatMessage _someoneIsTypingMessage = ChatMessage(
-      text: "Someone is typing...", user: ChatUser(uid: "10", avatar: ""));
-
   _MainPageState() {
-    _loadUserInfo();
-    _dispatchShowChangelog();
-    _npServerInfoStore.stream$.listen((npServerInfo) {
-      DateTime serverTime = DateTime.fromMillisecondsSinceEpoch(npServerInfo.getServerTime());
-       // debugPrint('NPSeverInfo updated: ${serverTime.hour}:${serverTime.minute}:${serverTime.second} ${npServerInfo.getSessionId()} ${npServerInfo.getServerId()}');
-    });
-    _playbackInfoStore.stream$.listen((playbackInfo) {
-      DateTime localTimeAtLastUpdate = DateTime.fromMillisecondsSinceEpoch(playbackInfo.serverTimeAtLastVideoStateUpdate);
-      debugPrint('Playback Info updated: videoPosition(${(playbackInfo.lastKnownMoviePosition / 60000).floor()}:${((playbackInfo.lastKnownMoviePosition % 60000) / 1000).floor()}) serverTimeLastUpdated(${localTimeAtLastUpdate.hour}:${localTimeAtLastUpdate.minute}:${localTimeAtLastUpdate.second}) isPlaying(${playbackInfo.isPlaying})');
-    });
+    _setupLocalUserListener();
+    _dispatchShowChangelogIntent();
+  }
+
+  void _setupLocalUserListener() {
+    _localUserStore.stream$.listen(_onLocalUserChanged);
+  }
+
+  void _onLocalUserChanged(LocalUser localUser) {
+    if (_hasJoinedSession) {
+      _sendBroadcastUserSettingsMessage(localUser);
+    }
   }
 
   @override
@@ -221,16 +224,22 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                       },
                     ),
                   ),
-                  IconButton(
-                    icon: SvgPicture.asset(
-                        _user.icon != null
-                            ? 'assets/avatars/${_user.icon}'
-                            : '',
-                        height: 85),
-                    onPressed: () {
-                      _navigateToAccountSettings(context);
-                    },
-                  ),
+                  StreamBuilder(
+                      stream: _localUserStore.stream$,
+                      initialData: LocalUser(),
+                      builder: (context, localUserSnapshot) {
+                        LocalUser localUser = localUserSnapshot.data;
+                        return IconButton(
+                          icon: SvgPicture.asset(
+                              localUserSnapshot.data.icon != null
+                                  ? 'assets/avatars/${localUser.icon}'
+                                  : '',
+                              height: 85),
+                          onPressed: () {
+                            _navigateToAccountSettings(context);
+                          },
+                        );
+                      }),
                 ],
               ),
               SizedBox(
@@ -241,7 +250,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                 children: <Widget>[
                   Visibility(
                     visible: _shouldShowPartyPage,
-                    child: _getPlayControlButton(),
+                    child: _getPlaybackControlButton(),
                   ),
                 ],
               )
@@ -348,29 +357,36 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     double screenRatio = currentScreenSize.height / currentScreenSize.width;
     return SizedBox(
         height: MediaQuery.of(context).size.height - (105 * screenRatio),
-        child: Chat(
-          key: chatUniqueKey,
-          messenger: _messenger,
-          user: _user,
-          chatMessages: _chatMessages,
-          chatStreamScrollController: _chatStreamScrollController,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(6, 0, 6, 0),
+          child: Chat(
+            key: chatUniqueKey,
+          ),
         ));
   }
 
-  Widget _getPlayControlButton() {
-    return CupertinoButton(
-        child: Icon(
-            _playbackInfoStore.playbackInfo.isPlaying
-                ? CupertinoIcons.pause_solid
-                : CupertinoIcons.play_arrow_solid,
-            size: 40),
-        color: Theme.of(context).primaryColor,
-        padding: EdgeInsets.fromLTRB(35, 0, 30, 4),
-        minSize: 55,
-        borderRadius: BorderRadius.circular(500),
-        onPressed: _playbackInfoStore.playbackInfo.isPlaying
-            ? _onPausePressed
-            : _onPlayPressed);
+  Widget _getPlaybackControlButton() {
+    return StreamBuilder(
+        stream: _playbackInfoStore.stream$,
+        builder: (context, playbackInfoSnapshot) {
+          return CupertinoButton(
+              child: Icon(
+                  playbackInfoSnapshot.hasData
+                      ? (playbackInfoSnapshot.data.isPlaying
+                          ? CupertinoIcons.pause_solid
+                          : CupertinoIcons.play_arrow_solid)
+                      : CupertinoIcons.play_arrow_solid,
+                  size: 40),
+              color: Theme.of(context).primaryColor,
+              padding: EdgeInsets.fromLTRB(35, 0, 30, 4),
+              minSize: 55,
+              borderRadius: BorderRadius.circular(500),
+              onPressed: playbackInfoSnapshot.hasData
+                  ? (_playbackInfoStore.playbackInfo.isPlaying
+                      ? _onPausePressed
+                      : _onPlayPressed)
+                  : _onPlayPressed);
+        });
   }
 
   Future<void> _showChangelogDialog() async {
@@ -436,9 +452,13 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     _showToastMessage(errorMessage.errorMessage);
   }
 
-  void _onUserIdMessageReceived(UserIdMessage userIdMessage) {
-    _userId = userIdMessage.userId;
-    _user.id = _userId;
+  void _onUserIdMessageReceived(UserIdMessage userIdMessage) async {
+    _localUserStore.updateLocalUser(LocalUser(
+      username: _localUserStore.localUser.username,
+      icon: _localUserStore.localUser.icon,
+      id: userIdMessage.userId,
+    ));
+    await _localUserService.updateSavedLocalUser(_localUserStore.localUser);
     _sendGetServerTimeMessage();
   }
 
@@ -450,33 +470,19 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   void _onSetPresenceMessageReceived(SetPresenceMessage setPresenceMessage) {
-    setState(() {
-      if (setPresenceMessage.anyoneTyping &&
-          !_chatMessages.contains(_someoneIsTypingMessage)) {
-        setState(() {
-          if (setPresenceMessage.anyoneTyping &&
-              !_chatMessages.contains(_someoneIsTypingMessage)) {
-            _chatMessages.add(_someoneIsTypingMessage);
-          } else {
-            _chatMessages.remove(_someoneIsTypingMessage);
-          }
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
-        });
-      }
-    });
+    setPresenceMessage.anyoneTyping
+        ? _someoneIsTypingService.setSomeoneTyping()
+        : _someoneIsTypingService.setNoOneTyping();
   }
 
   void _onSentMessageMessageReceived(SentMessageMessage sentMessageMessage) {
-    setState(() {
-      this._chatMessages.add(ChatMessage(
+    _chatMessagesStore.pushNewChatMessages(List.from([
+      ChatMessage(
           createdAt: DateTime.fromMillisecondsSinceEpoch(
               sentMessageMessage.userMessage.timestamp),
           text: sentMessageMessage.userMessage.body,
-          user: _buildChatUser(sentMessageMessage.userMessage)));
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
-    });
+          user: _buildChatUser(sentMessageMessage.userMessage))
+    ]));
   }
 
   void _onSidMessageReceived(SidMessage sidMessage) {
@@ -515,11 +521,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         serverTimeAtLastVideoStateUpdate: catchupMessage.lastKnownTimeUpdatedAt,
         lastKnownMoviePosition: catchupMessage.lastKnownTime,
         isPlaying: catchupMessage.state == VideoState.PLAYING));
-    setState(() {
-      _addChatMessages(catchupMessage.userMessages);
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
-    });
+    _addChatMessages(catchupMessage.userMessages);
     _sendNotBufferingMessage();
   }
 
@@ -549,8 +551,8 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   void _onPlayPressed() {
     _playbackInfoStore.updateAsPlaying();
-    debugPrint('playing at: ${(_playbackInfoStore.playbackInfo.lastKnownMoviePosition / 60000).floor()}:${((_playbackInfoStore.playbackInfo.lastKnownMoviePosition % 60000) / 1000).floor()}');
-    int estimatedServerTime = _npServerInfoStore.npServerInfo.getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
+    int estimatedServerTime = _npServerInfoStore.npServerInfo
+        .getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
     _updateSessionContent(
         VideoState.PLAYING,
         _playbackInfoStore.playbackInfo.lastKnownMoviePosition,
@@ -560,9 +562,10 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
 
   void _onPausePressed() {
     _playbackInfoStore.updateAsPaused();
-    _playbackInfoStore.updateLastKnownMoviePosition(_getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate());
-    debugPrint('pausing at: ${(_playbackInfoStore.playbackInfo.lastKnownMoviePosition / 60000).floor()}:${((_playbackInfoStore.playbackInfo.lastKnownMoviePosition % 60000) / 1000).floor()}');
-    int estimatedServerTime = _npServerInfoStore.npServerInfo.getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
+    _playbackInfoStore.updateLastKnownMoviePosition(
+        _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate());
+    int estimatedServerTime = _npServerInfoStore.npServerInfo
+        .getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
     _updateSessionContent(
         VideoState.PAUSED,
         _playbackInfoStore.playbackInfo.lastKnownMoviePosition,
@@ -571,20 +574,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   }
 
   void _loadUserInfo() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      _user = LocalUser(
-          username: prefs.getString('username') ?? "Mobile User",
-          icon: prefs.getString('userIcon') ?? "Batman.svg",
-          id: _userId);
-      if (_shouldShowPartyPage) {
-        _sendBroadcastUserSettingsMessage(_user);
-      }
-    });
+    if (_shouldShowPartyPage) {
+      _sendBroadcastUserSettingsMessage(_localUserStore.localUser);
+    }
   }
 
-  void _dispatchShowChangelog() {
+  void _dispatchShowChangelogIntent() {
     Future.delayed(Duration(milliseconds: 300), () async {
       if (!_isShowingChangelogDialog) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -644,21 +639,18 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     _hasJoinedSession = false;
     _npServerInfoStore
         .updateNPServerInfo(NPServerInfo.fromUrl(url: _urlTextController.text));
-    setState(() {
-      if (_npServerInfoStore.npServerInfo.isIncomplete()) {
-        _onConnectFailed();
-      }
-      _connectAndSetupListener(_npServerInfoStore.npServerInfo.getServerId());
-    });
+    if (_npServerInfoStore.npServerInfo.isIncomplete()) {
+      _onConnectFailed();
+    }
+    _connectAndSetupListener(_npServerInfoStore.npServerInfo.getServerId());
   }
 
   void _addChatMessages(List<UserMessage> userMessages) {
-    setState(() {
-      _chatMessages.addAll(userMessages.map((userMessage) {
-        return ChatMessage(
-            text: userMessage.body, user: _buildChatUser(userMessage));
-      }));
-    });
+    _chatMessagesStore
+        .pushNewChatMessages(userMessages.map((userMessage) {
+      return ChatMessage(
+          text: userMessage.body, user: _buildChatUser(userMessage));
+    }).toList());
   }
 
   ChatUser _buildChatUser(UserMessage userMessage) {
@@ -670,18 +662,14 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     });
   }
 
-  void _scrollToBottomOfChatStream() {
-    _chatStreamScrollController.animateTo(
-        _chatStreamScrollController.position.maxScrollExtent + 5,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.linear);
-  }
-
   void _joinSession(String sessionIdForJoin) {
-    UserSettings userSettings =
-        UserSettings(true, _user.icon, _user.id, _user.username);
-    JoinSessionContent joinSessionContent =
-        JoinSessionContent(sessionIdForJoin, _user.id, userSettings);
+    UserSettings userSettings = UserSettings(
+        true,
+        _localUserStore.localUser.icon,
+        _localUserStore.localUser.id,
+        _localUserStore.localUser.username);
+    JoinSessionContent joinSessionContent = JoinSessionContent(
+        sessionIdForJoin, _localUserStore.localUser.id, userSettings);
     _messenger.sendMessage(JoinSessionMessage(joinSessionContent));
     _hasJoinedSession = true;
     setState(() {
@@ -713,17 +701,16 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       _hasJoinedSession = false;
       _isAttemptingToJoinSessionFromText = false;
       _isAttemptingToJoinSessionFromQR = false;
-      _chatMessages.clear();
+      _chatMessagesStore.pushNewChatMessages(List.from([]));
     });
   }
 
   void _navigateToAccountSettings(buildContext) async {
-    print("go to account settings");
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => UserSettingsScreen()),
     );
-    _loadUserInfo();
+    await _loadUserInfo();
   }
 
   int _getMillisecondsPassedSinceLastVideoStateUpdate() {
