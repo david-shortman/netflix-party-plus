@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 class UserAvatar {
   static String formatIconName(String icon) {
     icon = icon.replaceAll(" ", "");

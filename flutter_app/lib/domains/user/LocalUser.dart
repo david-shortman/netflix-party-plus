@@ -1,7 +1,7 @@
 class LocalUser {
   String username;
   String icon;
-  String userId;
+  String id;
 
-  LocalUser({this.username, this.icon, this.userId});
+  LocalUser({this.username, this.icon, this.id});
 }
