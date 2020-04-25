@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:np_plus/domains/messenger/SocketMessenger.dart';
 
-import 'package:np_plus/pages/MainPage.dart';
+import 'package:np_plus/pages/AppContainer.dart';
 import 'package:np_plus/services/LocalUserService.dart';
 import 'package:np_plus/store/LocalUserStore.dart';
 import 'package:np_plus/store/NPServerInfoStore.dart';

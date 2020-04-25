@@ -31,7 +31,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import '../domains/avatar/Avatar.dart';
-import 'UserSettingsScreen.dart';
+import 'UserSettingsPage.dart';
 import '../domains/messages/incoming-messages/ReceivedMessage.dart';
 import '../domains/messages/incoming-messages/ReceivedMessageUtility.dart';
 import '../domains/messages/incoming-messages/SentMessageMessage.dart';
@@ -61,21 +61,21 @@ class MyApp extends StatelessWidget {
         title: 'NP+',
         theme: PartyHarderTheme.getLightTheme(),
         darkTheme: PartyHarderTheme.getDarkTheme(),
-        home: MainPage(
+        home: AppContainer(
           title: 'NP+',
         ));
   }
 }
 
-class MainPage extends StatefulWidget {
+class AppContainer extends StatefulWidget {
   final String title;
-  MainPage({Key key, @required this.title}) : super(key: key);
+  AppContainer({Key key, @required this.title}) : super(key: key);
 
   @override
-  _MainPageState createState() => _MainPageState();
+  _AppContainerState createState() => _AppContainerState();
 }
 
-class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
+class _AppContainerState extends State<AppContainer> with WidgetsBindingObserver {
   final serverTime = getIt.get<NPServerInfoStore>();
 
   final _messenger = getIt.get<SocketMessenger>();
@@ -110,7 +110,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   Timer _getServerTimeTimer;
   Timer _pingServerTimer;
 
-  _MainPageState() {
+  _AppContainerState() {
     _setupLocalUserListener();
     _dispatchShowChangelogIntent();
   }
@@ -708,7 +708,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   void _navigateToAccountSettings(buildContext) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => UserSettingsScreen()),
+      MaterialPageRoute(builder: (context) => UserSettingsPage()),
     );
     await _loadUserInfo();
   }

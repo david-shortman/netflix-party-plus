@@ -6,12 +6,12 @@ import 'package:np_plus/domains/user/LocalUser.dart';
 import 'package:np_plus/services/LocalUserService.dart';
 import '../main.dart';
 
-class UserSettingsScreen extends StatefulWidget {
+class UserSettingsPage extends StatefulWidget {
   @override
-  _UserSettingsScreenState createState() => _UserSettingsScreenState();
+  _UserSettingsPageState createState() => _UserSettingsPageState();
 }
 
-class _UserSettingsScreenState extends State<UserSettingsScreen> {
+class _UserSettingsPageState extends State<UserSettingsPage> {
   final _localUserService = getIt.get<LocalUserService>();
 
   TextEditingController _usernameController = TextEditingController();
@@ -42,7 +42,7 @@ class _UserSettingsScreenState extends State<UserSettingsScreen> {
     "Wolverine.svg"
   ];
 
-  _UserSettingsScreenState() {
+  _UserSettingsPageState() {
     _images = avatars
         .map((avatar) => SvgPicture.asset("assets/avatars/$avatar", height: 85))
         .toList();
