@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:dash_chat/dash_chat.dart';
@@ -8,8 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:np_plus/changelog/ChangelogService.dart';
+import 'package:np_plus/domains/media-controls/VideoState.dart';
 import 'package:np_plus/domains/messages/incoming-messages/ErrorMessage.dart';
 import 'package:np_plus/domains/messages/incoming-messages/SetPresenceMessage.dart';
+import 'package:np_plus/domains/server/ServerInfo.dart';
+import 'package:np_plus/domains/user/LocalUser.dart';
+import 'package:np_plus/playback/PlaybackInfo.dart';
 import 'package:np_plus/theming/AppTheme.dart';
 import 'package:np_plus/theming/AvatarColors.dart';
 import 'package:np_plus/widgets/ChangelogDialogFactory.dart';
@@ -19,11 +22,9 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:progress_button/progress_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:web_socket_channel/io.dart';
 
 import '../domains/avatar/Avatar.dart';
 import 'UserSettingsScreen.dart';
-import '../domains/messages/SocketMessage.dart';
 import '../domains/messages/incoming-messages/ReceivedMessage.dart';
 import '../domains/messages/incoming-messages/ReceivedMessageUtility.dart';
 import '../domains/messages/incoming-messages/SentMessageMessage.dart';
@@ -47,7 +48,7 @@ import '../domains/messages/outgoing-messages/server-time/GetServerTimeContent.d
 import '../domains/messages/outgoing-messages/server-time/GetServerTimeMessage.dart';
 import '../domains/messages/outgoing-messages/update-session/UpdateSessionContent.dart';
 import '../domains/messages/outgoing-messages/update-session/UpdateSessionMessage.dart';
-import '../domains/messenger/Messenger.dart';
+import '../domains/messenger/SocketMessenger.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -71,46 +72,53 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
-  IOWebSocketChannel currentChannel;
-  Messenger messenger = Messenger();
+  SocketMessenger _messenger = SocketMessenger();
+
+  LocalUser _user = LocalUser();
+
+  NPServerInfo _npServerInfo;
+
+  // Video info
+  int _videoDuration = 655550;
+  // TODO: capture video id
+
+  PlaybackInfo playbackInfo = PlaybackInfo(
+      localTimeAtLastUpdate: 0, lastKnownMoviePosition: 0, isPlaying: false);
+
+  // Connection info
+  bool _hasJoinedSession = false;
+  bool _isConnected = false;
   String _userId;
-  String sessionId;
-  int currentServerTime = 0;
-  int currentLocalTime = 0;
-  int lastKnownMoviePosition = 0;
-  bool sessionJoined = false;
-  bool isAttemptingToJoinSessionFromText = false;
-  bool isAttemptingToJoinSessionFromQR = false;
-  SidMessage sidMessage;
-  TextEditingController _urlTextController = TextEditingController();
-  ScrollController _chatStreamScrollController = ScrollController();
-  Timer serverTimeTimer;
-  Timer pingTimer;
-  String _username;
-  String _icon;
-  bool isPlaying = false;
-  bool _shouldShowChat = false;
+
+  // Widget state
+  bool _isAttemptingToJoinSessionFromText = false;
+  bool _isAttemptingToJoinSessionFromQR = false;
+  bool _shouldShowPartyPage = false;
   bool _isShowingChangelogDialog = false;
-  int videoDuration = 655550;
-  List<UserMessage> userMessages = List();
+  TextEditingController _urlTextController = TextEditingController();
+  TextEditingController _messageTextEditingController = TextEditingController();
+  String _messageInputText;
+  ScrollController _chatStreamScrollController = ScrollController();
   List<ChatMessage> _chatMessages = List();
+  bool _isKeyboardVisible = false;
+
+  Timer _getServerTimeTimer;
+  Timer _pingServerTimer;
+
+  // Constant
   ChatMessage _someoneIsTypingMessage = ChatMessage(
       text: "Someone is typing...", user: ChatUser(uid: "10", avatar: ""));
-  bool _isKeyboardVisible = false;
-  TextEditingController _messageTextEditingController = TextEditingController();
-  String messageInputText;
-  bool _isConnected = false;
 
   _MainPageState() {
-    _loadUsernameAndIcon();
-    _dispatchShowChangelogIntent();
+    _loadUserInfo();
+    _dispatchShowChangelog();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (_shouldShowChat && !_isConnected) {
-        showToastMessage("Reconnecting...");
+      if (_shouldShowPartyPage && !_isConnected) {
+        _showToastMessage("Reconnecting...");
         _connectToServer();
       }
     }
@@ -140,30 +148,32 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       ),
       body: Stack(
         children: <Widget>[
-          _shouldShowChat ? _getConnectedWidget() : _getNotConnectedWidget(),
+          _shouldShowPartyPage
+              ? _getPartyPage()
+              : _getLandingPage(),
           Visibility(
               visible: !_isKeyboardVisible,
               child: SlidingUpPanel(
                 backdropEnabled: true,
                 parallaxEnabled: true,
                 maxHeight: 400,
-                minHeight: _shouldShowChat ? 100 : 80,
+                minHeight: _shouldShowPartyPage ? 100 : 80,
                 panelBuilder: (sc) => _panel(sc),
-                isDraggable: _shouldShowChat,
+                isDraggable: _shouldShowPartyPage,
               ))
         ],
       ),
     );
   }
 
-  Widget _panel(ScrollController sc) {
+  Widget _panel(ScrollController scrollController) {
     return MediaQuery.removePadding(
         context: context,
         removeTop: true,
         child: Container(
           color: Theme.of(context).bottomAppBarColor,
           child: ListView(
-            controller: sc,
+            controller: scrollController,
             children: <Widget>[
               SizedBox(
                 height: 12.0,
@@ -172,7 +182,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Visibility(
-                    visible: _shouldShowChat,
+                    visible: _shouldShowPartyPage,
                     child: Container(
                       width: 30,
                       height: 5,
@@ -192,23 +202,25 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Visibility(
-                    visible: _shouldShowChat,
+                    visible: _shouldShowPartyPage,
                     child: CupertinoButton(
                       child: Text(
                         "Disconnect",
                         style: TextStyle(color: Theme.of(context).primaryColor),
                       ),
                       onPressed: () {
-                        disconnectButtonPressed();
+                        _onDisconnectButtonPressed();
                       },
                     ),
                   ),
                   IconButton(
                     icon: SvgPicture.asset(
-                        _icon != null ? 'assets/avatars/$_icon' : '',
+                        _user.icon != null
+                            ? 'assets/avatars/${_user.icon}'
+                            : '',
                         height: 85),
                     onPressed: () {
-                      goToAccountSettings(context);
+                      _navigateToAccountSettings(context);
                     },
                   ),
                 ],
@@ -220,7 +232,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Visibility(
-                    visible: _shouldShowChat,
+                    visible: _shouldShowPartyPage,
                     child: _getPlayControlButton(),
                   ),
                 ],
@@ -230,406 +242,17 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         ));
   }
 
-  Widget _getNotConnectedWidget() {
+  Widget _getLandingPage() {
     return SingleChildScrollView(
         child: Padding(
             padding: EdgeInsets.all(10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
-              children: getNotConnectedWidgets(),
+              children: _getLandingPageWidgets(),
             )));
   }
 
-  void _setTextState(String text) {
-    setState(() {
-      messageInputText = text;
-    });
-  }
-
-  Widget _getConnectedWidget() {
-    Size currentScreenSize = MediaQuery.of(context).size;
-    double screenRatio = currentScreenSize.height / currentScreenSize.width;
-    return SizedBox(
-      height: MediaQuery.of(context).size.height - (105 * screenRatio),
-      child: ChatStream.getChatStream(
-          setTextState: _setTextState,
-          text: messageInputText,
-          context: context,
-          messages: _chatMessages,
-          onSend: (message) {
-            postMessageText(message.text);
-          },
-          userSettings: UserSettings(false, _icon, _userId, _username),
-          scrollController: _chatStreamScrollController,
-          textEditingController: _messageTextEditingController,
-          messenger: messenger),
-    );
-  }
-
-  _loadUsernameAndIcon() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      _username = (prefs.getString('username') ?? "");
-      _icon = (prefs.getString('userIcon') ?? "");
-      if (_username == "") {
-        _username = "Mobile User";
-        prefs.setString("username", _username);
-      }
-      if (_icon == "") {
-        _icon = "Batman.svg";
-        prefs.setString("userIcon", _icon);
-      }
-    });
-    print("_username is now " + _username);
-    print("_icon is now " + _icon);
-    if (_shouldShowChat) {
-      _sendBroadcastUserSettingsMessage();
-    }
-  }
-
-  _dispatchShowChangelogIntent() {
-    Future.delayed(Duration(milliseconds: 300), () async {
-      if (!_isShowingChangelogDialog) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        String lastViewedChangelog =
-            await prefs.getString("lastViewedChangelog");
-        if (lastViewedChangelog != ChangelogService.getLatestVersion()) {
-          _isShowingChangelogDialog = true;
-          await _showChangelogDialog();
-          _isShowingChangelogDialog = false;
-        }
-      }
-    });
-  }
-
-  _sendBroadcastUserSettingsMessage() {
-    sendMessage(BroadcastUserSettingsMessage(BroadCastUserSettingsContent(
-        UserSettings(true, UserAvatar.getNPName(_icon), _userId, _username))));
-  }
-
-  void postMessageText(String messageText) {
-    int currentTimeInMilliseconds = (DateTime.now().millisecondsSinceEpoch);
-    int millisecondsSinceLastUpdate =
-        currentTimeInMilliseconds - currentLocalTime;
-    int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-    SendMessageContent sendMessageContent = SendMessageContent(SendMessageBody(
-        messageText,
-        false,
-        expectedServerTime,
-        _userId,
-        _userId,
-        _icon,
-        _username));
-    sendMessage(SendMessageMessage(sendMessageContent));
-  }
-
-  void sendNotBufferingMessage() {
-    BufferingContent bufferingContent = BufferingContent(false);
-    sendMessage(BufferingMessage(bufferingContent));
-  }
-
-  void _onSubmitPressedInUrlField(String s) {
-    _onConnectPressed();
-  }
-
-  void _onConnectPressed() {
-    setState(() {
-      isAttemptingToJoinSessionFromText = true;
-    });
-    _connectToServer();
-  }
-
-  void _updateLastJoinedPartyUrl() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("lastPartyUrl", _urlTextController.text);
-  }
-
-  void _connectToServer() {
-    _updateLastJoinedPartyUrl();
-    sessionJoined = false;
-    sessionId = "";
-    String serverId = "";
-    int varStart = _urlTextController.text.toString().indexOf('?');
-    if (varStart >= 0) {
-      try {
-        int sessionIdStart =
-            _urlTextController.text.toString().indexOf('npSessionId=');
-        if (sessionIdStart >= 0) {
-          int sessionIdEnd =
-              _urlTextController.text.toString().indexOf('&', sessionIdStart);
-          if (sessionIdEnd > sessionIdStart) {
-            sessionId = _urlTextController.text
-                .toString()
-                .substring(sessionIdStart + 12, sessionIdEnd);
-          } else {
-            sessionId = _urlTextController.text
-                .toString()
-                .substring(sessionIdStart + 12);
-          }
-        }
-        int serverIdStart =
-            _urlTextController.text.toString().indexOf('npServerId=');
-        if (serverIdStart >= 0) {
-          int serverIdEnd =
-              _urlTextController.text.toString().indexOf('&', serverIdStart);
-          if (serverIdEnd > serverIdStart) {
-            serverId = _urlTextController.text
-                .toString()
-                .substring(serverIdStart + 11, serverIdEnd);
-          } else {
-            serverId = _urlTextController.text
-                .toString()
-                .substring(serverIdStart + 11);
-          }
-        }
-      } on Exception catch (e) {
-        debugPrint(
-            "Error parsing URL: " + _urlTextController.text + e.toString());
-      }
-    }
-    if ("" == serverId || "" == sessionId) {
-      showToastMessage("Invalid Link");
-      setState(() {
-        sleep(Duration(milliseconds: 1000));
-        isAttemptingToJoinSessionFromText = false;
-        isAttemptingToJoinSessionFromQR = false;
-      });
-      return;
-    }
-    debugPrint("ServerId: " + serverId);
-    debugPrint("SessionId: " + sessionId);
-    connectAndSetupListener(serverId);
-  }
-
-  void connectAndSetupListener(String serverId) {
-    currentChannel = IOWebSocketChannel.connect("wss://" +
-        serverId +
-        ".netflixparty.com/socket.io/?EIO=3&transport=websocket");
-    setState(() {
-      _isConnected = true;
-    });
-    messenger.setChannel(currentChannel);
-    currentChannel.stream.listen(_onReceivedStreamMessage,
-        onError: (error, StackTrace stackTrace) {
-      debugPrint('onError');
-    }, onDone: () {
-      debugPrint('Communication Closed');
-      setState(() {
-        _isConnected = false;
-      });
-    });
-  }
-
-  void _onReceivedStreamMessage(message) {
-    // TODO: clean up this method
-    debugPrint('got $message');
-    ReceivedMessage messageObj = ReceivedMessageUtility.fromString(message);
-    if (messageObj is UserIdMessage) {
-      _userId = messageObj.userId;
-      sendGetServerTimeMessage();
-    } else if (messageObj is ServerTimeMessage) {
-      if (!sessionJoined) {
-        joinSession(sessionId);
-      }
-    } else if (messageObj is SetPresenceMessage) {
-      if (messageObj.anyoneTyping) {
-        if (!_chatMessages.contains(_someoneIsTypingMessage)) {
-          debugPrint("adding someone typing message");
-          setState(() {
-            _chatMessages.add(_someoneIsTypingMessage);
-            WidgetsBinding.instance
-                .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
-          });
-        }
-      } else {
-        setState(() {
-          _chatMessages.remove(_someoneIsTypingMessage);
-        });
-      }
-    } else if (messageObj is UpdateMessage) {
-      lastKnownMoviePosition = messageObj.lastKnownTime;
-      videoDuration = messageObj.videoDuration;
-      currentServerTime = messageObj.lastKnownTimeUpdatedAt;
-      currentLocalTime = (DateTime.now().millisecondsSinceEpoch);
-      debugPrint("last Known time - " +
-          messageObj.lastKnownTime.toString() +
-          " at " +
-          messageObj.lastKnownTimeUpdatedAt.toString());
-      sendNotBufferingMessage();
-
-      if (messageObj.state == "playing") {
-        setState(() {
-          this.isPlaying = true;
-        });
-      } else {
-        setState(() {
-          this.isPlaying = false;
-        });
-      }
-    } else {
-      if (messageObj is SidMessage) {
-        SidMessage sidMessage = messageObj;
-        this.sidMessage = sidMessage;
-        if (serverTimeTimer != null) {
-          serverTimeTimer.cancel();
-          serverTimeTimer = null;
-        }
-        serverTimeTimer = Timer.periodic(Duration(milliseconds: 5000),
-            (Timer t) => sendGetServerTimeMessage());
-        if (pingTimer != null) {
-          pingTimer.cancel();
-          pingTimer = null;
-        }
-        pingTimer = Timer.periodic(
-            Duration(milliseconds: sidMessage.pingInterval),
-            (Timer t) => currentChannel.sink.add("2"));
-        setState(() {
-          _shouldShowChat = true;
-        });
-      } else if (messageObj is SentMessageMessage) {
-        setState(() {
-          this.userMessages.add(messageObj.userMessage);
-          this._chatMessages.add(ChatMessage(
-              createdAt: DateTime.fromMillisecondsSinceEpoch(
-                  messageObj.userMessage.timestamp),
-              text: messageObj.userMessage.body,
-              user: _buildChatUser(messageObj.userMessage)));
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
-        });
-      } else if (messageObj is VideoIdAndMessageCatchupMessage) {
-        this.userMessages.addAll(messageObj.userMessages);
-        this._chatMessages.addAll(messageObj.userMessages.map((userMessage) {
-          return ChatMessage(
-              text: userMessage.body, user: _buildChatUser(userMessage));
-        }));
-        WidgetsBinding.instance
-            .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
-        lastKnownMoviePosition = messageObj.lastKnownTime;
-        currentServerTime = messageObj.lastKnownTimeUpdatedAt;
-        currentLocalTime = (DateTime.now().millisecondsSinceEpoch);
-        debugPrint("last Known time - " +
-            messageObj.lastKnownTime.toString() +
-            " at " +
-            messageObj.lastKnownTimeUpdatedAt.toString());
-        sendNotBufferingMessage();
-        debugPrint(messageObj.state);
-        setState(() {
-          if (messageObj.state == "playing") {
-            this.isPlaying = true;
-          } else {
-            this.isPlaying = false;
-          }
-        });
-      } else if (messageObj is ErrorMessage) {
-        this._shouldShowChat = false;
-        this.clearAllVariables();
-        showToastMessage(messageObj.errorMessage);
-      }
-    }
-  }
-
-  ChatUser _buildChatUser(UserMessage userMessage) {
-    return ChatUser.fromJson({
-      'uid': userMessage.userId,
-      'name': userMessage.userNickname,
-      'avatar': UserAvatar.formatIconName(userMessage.userIcon),
-      'containerColor': AvatarColors.getColor(userMessage.userIcon)
-    });
-  }
-
-  void _scrollToBottomOfChatStream() {
-    _chatStreamScrollController.animateTo(
-        _chatStreamScrollController.position.maxScrollExtent + 5,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.linear);
-  }
-
-  void showToastMessage(String message) {
-    Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 35.0);
-  }
-
-  void joinSession(String sessionIdForJoin) {
-    UserSettings userSettings = UserSettings(true, _icon, _userId, _username);
-    JoinSessionContent joinSessionContent =
-        JoinSessionContent(sessionIdForJoin, _userId, userSettings);
-    sendMessage(JoinSessionMessage(joinSessionContent));
-    sessionJoined = true;
-    setState(() {
-      isAttemptingToJoinSessionFromText = false;
-      isAttemptingToJoinSessionFromQR = false;
-    });
-  }
-
-  void sendGetServerTimeMessage() {
-    GetServerTimeContent getServerTimeContent = GetServerTimeContent("1.7.8");
-    sendMessage(GetServerTimeMessage(getServerTimeContent));
-  }
-
-  void sendMessage(SocketMessage message) {
-    messenger.sendMessage(message);
-  }
-
-  void disconnect() {
-    currentChannel.sink.close();
-    setState(() {
-      _isConnected = false;
-    });
-  }
-
-  void clearAllVariables() {
-    setState(() {
-      if (serverTimeTimer != null) {
-        serverTimeTimer.cancel();
-        serverTimeTimer = null;
-      }
-      if (pingTimer != null) {
-        pingTimer.cancel();
-        pingTimer = null;
-      }
-      currentChannel = null;
-      _userId = null;
-      sessionId = null;
-      currentServerTime = 0;
-      currentLocalTime = 0;
-      lastKnownMoviePosition = 0;
-      sessionJoined = false;
-      isAttemptingToJoinSessionFromText = false;
-      isAttemptingToJoinSessionFromQR = false;
-      userMessages.clear();
-      _chatMessages.clear();
-    });
-  }
-
-  @override
-  void dispose() {
-    debugPrint("Disposing...");
-    WidgetsBinding.instance.removeObserver(this);
-    disconnect();
-    clearAllVariables();
-    super.dispose();
-  }
-
-  //WIDGET FUNCTIONS
-
-  goToAccountSettings(buildContext) async {
-    print("go to account settings");
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => UserSettingsScreen()),
-    );
-    _loadUsernameAndIcon();
-  }
-
-  List<Widget> getNotConnectedWidgets() {
+  List<Widget> _getLandingPageWidgets() {
     List<Widget> widgets = List<Widget>();
     widgets.add(Padding(
       padding: EdgeInsets.all(6),
@@ -658,11 +281,11 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
       child: ProgressButton(
         child: Text(
-          isAttemptingToJoinSessionFromText ? "" : "Connect to Party",
+          _isAttemptingToJoinSessionFromText ? "" : "Connect to Party",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: _onConnectPressed,
-        buttonState: isAttemptingToJoinSessionFromText
+        buttonState: _isAttemptingToJoinSessionFromText
             ? ButtonState.inProgress
             : ButtonState.normal,
         backgroundColor: Theme.of(context).primaryColor,
@@ -680,7 +303,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         child: Align(
             alignment: Alignment.centerLeft,
             child:
-                Text("1. Copy the link from Netflix Party on your computer"))));
+            Text("1. Copy the link from Netflix Party on your computer"))));
     widgets.add(Padding(
         padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Align(
@@ -696,11 +319,11 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
       padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
       child: ProgressButton(
         child: Text(
-          isAttemptingToJoinSessionFromQR ? "" : "Scan QR Code",
+          _isAttemptingToJoinSessionFromQR ? "" : "Scan QR Code",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: _onScanQRPressed,
-        buttonState: isAttemptingToJoinSessionFromQR
+        buttonState: _isAttemptingToJoinSessionFromQR
             ? ButtonState.inProgress
             : ButtonState.normal,
         backgroundColor: Theme.of(context).primaryColor,
@@ -710,34 +333,37 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
     return widgets;
   }
 
-  void _onScanQRPressed() async {
-    var result = await BarcodeScanner.scan();
-    _urlTextController.text = result;
-    _connectToServer();
+  void _setChatInputTextState(String text) {
     setState(() {
-      isAttemptingToJoinSessionFromQR = true;
+      _messageInputText = text;
     });
   }
 
-  void disconnectButtonPressed() {
-    try {
-      this.currentChannel.sink.close();
-      this.serverTimeTimer.cancel();
-      this.pingTimer.cancel();
-    } on Exception {
-      debugPrint("Failed to disconnect");
-    }
-    setState(() {
-      _shouldShowChat = false;
-      disconnect();
-      clearAllVariables();
-    });
+  Widget _getPartyPage() {
+    Size currentScreenSize = MediaQuery.of(context).size;
+    double screenRatio = currentScreenSize.height / currentScreenSize.width;
+    return SizedBox(
+      height: MediaQuery.of(context).size.height - (105 * screenRatio),
+      child: ChatStream.getChatStream(
+          setTextState: _setChatInputTextState,
+          text: _messageInputText,
+          context: context,
+          messages: _chatMessages,
+          onSend: (message) {
+            _postMessageText(message.text);
+          },
+          userSettings:
+              UserSettings(false, _user.icon, _user.userId, _user.username),
+          scrollController: _chatStreamScrollController,
+          textEditingController: _messageTextEditingController,
+          messenger: _messenger),
+    );
   }
 
   Widget _getPlayControlButton() {
     return CupertinoButton(
         child: Icon(
-            isPlaying
+            playbackInfo.isPlaying
                 ? CupertinoIcons.pause_solid
                 : CupertinoIcons.play_arrow_solid,
             size: 40),
@@ -745,58 +371,7 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         padding: EdgeInsets.fromLTRB(35, 0, 30, 4),
         minSize: 55,
         borderRadius: BorderRadius.circular(500),
-        onPressed: isPlaying ? _onPausePressed : _onPlayPressed);
-  }
-
-  void _onPlayPressed() {
-    debugPrint(
-        'sending play with movie time: ' + lastKnownMoviePosition.toString());
-    int currentTimeInMilliseconds = (DateTime.now().millisecondsSinceEpoch);
-    int millisecondsSinceLastUpdate =
-        currentTimeInMilliseconds - currentLocalTime;
-    int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-    this.currentServerTime = expectedServerTime;
-    currentLocalTime = (DateTime.now().millisecondsSinceEpoch);
-    UpdateSessionContent updateSessionContent = UpdateSessionContent(
-        lastKnownMoviePosition,
-        currentServerTime,
-        "playing",
-        null,
-        null,
-        videoDuration,
-        false);
-    sendMessage(UpdateSessionMessage(updateSessionContent));
-    setState(() {
-      isPlaying = true;
-    });
-  }
-
-  void _onPausePressed() {
-    int currentTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
-    int millisecondsSinceLastUpdate =
-        currentTimeInMilliseconds - currentLocalTime;
-    int expectedMovieTime =
-        lastKnownMoviePosition + millisecondsSinceLastUpdate;
-    int expectedServerTime = currentServerTime + millisecondsSinceLastUpdate;
-
-    currentServerTime = expectedServerTime;
-    lastKnownMoviePosition = expectedMovieTime;
-    currentLocalTime = (DateTime.now().millisecondsSinceEpoch);
-
-    debugPrint(
-        'sending pause with movie time: ' + expectedMovieTime.toString());
-    UpdateSessionContent updateSessionContent = UpdateSessionContent(
-        lastKnownMoviePosition,
-        currentServerTime,
-        "paused",
-        null,
-        null,
-        videoDuration,
-        false);
-    sendMessage(UpdateSessionMessage(updateSessionContent));
-    setState(() {
-      isPlaying = false;
-    });
+        onPressed: playbackInfo.isPlaying ? _onPausePressed : _onPlayPressed);
   }
 
   Future<void> _showChangelogDialog() async {
@@ -805,5 +380,399 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
         builder: (BuildContext context) {
           return ChangelogDialogFactory.getChangelogDialog(context);
         });
+  }
+
+  void _onSubmitPressedInUrlField(String s) {
+    _onConnectPressed();
+  }
+
+  void _onConnectPressed() {
+    setState(() {
+      _isAttemptingToJoinSessionFromText = true;
+    });
+    _connectToServer();
+  }
+
+  void _onConnectFailed() {
+    _showToastMessage("Invalid Link");
+    setState(() {
+      _isAttemptingToJoinSessionFromText = false;
+      _isAttemptingToJoinSessionFromQR = false;
+    });
+  }
+
+  void _onConnectionOpened() {
+    setState(() {
+      _isConnected = true;
+    });
+  }
+
+  void _onConnectionClosed() {
+    setState(() {
+      _isConnected = false;
+    });
+  }
+
+  void _onReceivedStreamMessage(streamMessage) {
+    ReceivedMessage receivedMessage =
+        ReceivedMessageUtility.fromString(streamMessage);
+    if (receivedMessage is UserIdMessage) {
+      _onUserIdMessageReceived(receivedMessage);
+    } else if (receivedMessage is ServerTimeMessage) {
+      _onServerTimeMessageReceived(receivedMessage);
+    } else if (receivedMessage is SetPresenceMessage) {
+      _onSetPresenceMessageReceived(receivedMessage);
+    } else if (receivedMessage is UpdateMessage) {
+      _onUpdateMessageReceived(receivedMessage);
+    } else if (receivedMessage is SidMessage) {
+      _onSidMessageReceived(receivedMessage);
+    } else if (receivedMessage is SentMessageMessage) {
+      _onSentMessageMessageReceived(receivedMessage);
+    } else if (receivedMessage is VideoIdAndMessageCatchupMessage) {
+      _onCatchupMessageReceived(receivedMessage);
+    } else if (receivedMessage is ErrorMessage) {
+      _onErrorMessageReceived(receivedMessage);
+    }
+  }
+
+  void _onErrorMessageReceived(ErrorMessage errorMessage) {
+    this._shouldShowPartyPage = false;
+    this._clearState();
+    _showToastMessage(errorMessage.errorMessage);
+  }
+
+  void _onUserIdMessageReceived(UserIdMessage userIdMessage) {
+    _userId = userIdMessage.userId;
+    _user.userId = _userId;
+    _sendGetServerTimeMessage();
+  }
+
+  void _onServerTimeMessageReceived(ServerTimeMessage serverTimeMessage) {
+    if (!_hasJoinedSession) {
+      _joinSession(_npServerInfo.getSessionId());
+    }
+    _npServerInfo.currentServerTime = serverTimeMessage.serverTime;
+  }
+
+  void _onSetPresenceMessageReceived(SetPresenceMessage setPresenceMessage) {
+    setState(() {
+      if (setPresenceMessage.anyoneTyping &&
+          !_chatMessages.contains(_someoneIsTypingMessage)) {
+        _chatMessages.add(_someoneIsTypingMessage);
+        WidgetsBinding.instance
+            .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
+      } else {
+        _chatMessages.remove(_someoneIsTypingMessage);
+      }
+    });
+  }
+
+  void _onSentMessageMessageReceived(SentMessageMessage sentMessageMessage) {
+    setState(() {
+      this._chatMessages.add(ChatMessage(
+          createdAt: DateTime.fromMillisecondsSinceEpoch(
+              sentMessageMessage.userMessage.timestamp),
+          text: sentMessageMessage.userMessage.body,
+          user: _buildChatUser(sentMessageMessage.userMessage)));
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
+    });
+  }
+
+  void _onSidMessageReceived(SidMessage sidMessage) {
+    if (_getServerTimeTimer != null) {
+      _getServerTimeTimer.cancel();
+      _getServerTimeTimer = null;
+    }
+    _getServerTimeTimer = Timer.periodic(
+        Duration(milliseconds: 5000), (Timer t) => _sendGetServerTimeMessage());
+    if (_pingServerTimer != null) {
+      _pingServerTimer.cancel();
+      _pingServerTimer = null;
+    }
+    _pingServerTimer = Timer.periodic(
+        Duration(milliseconds: sidMessage.pingInterval),
+        (Timer t) => _messenger.sendRawMessage("2"));
+    setState(() {
+      _shouldShowPartyPage = true;
+    });
+  }
+
+  void _onUpdateMessageReceived(UpdateMessage updateMessage) {
+    playbackInfo.lastKnownMoviePosition = updateMessage.lastKnownTime;
+    _videoDuration = updateMessage.videoDuration;
+    _npServerInfo.currentServerTime = updateMessage.lastKnownTimeUpdatedAt;
+    playbackInfo.localTimeAtLastUpdate =
+        _getCurrentTimeMillisecondsSinceEpoch();
+
+    _sendNotBufferingMessage();
+
+    setState(() {
+      this.playbackInfo.isPlaying = updateMessage.state == VideoState.PLAYING;
+    });
+  }
+
+  void _onCatchupMessageReceived(
+      VideoIdAndMessageCatchupMessage catchupMessage) {
+    _addChatMessages(catchupMessage.userMessages);
+
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
+
+    playbackInfo.lastKnownMoviePosition = catchupMessage.lastKnownTime;
+    _npServerInfo.currentServerTime = catchupMessage.lastKnownTimeUpdatedAt;
+    playbackInfo.localTimeAtLastUpdate =
+        _getCurrentTimeMillisecondsSinceEpoch();
+
+    _sendNotBufferingMessage();
+
+    setState(() {
+      this.playbackInfo.isPlaying = catchupMessage.state == VideoState.PLAYING;
+    });
+  }
+
+  void _onScanQRPressed() async {
+    var result = await BarcodeScanner.scan();
+    _urlTextController.text = result;
+    _connectToServer();
+    setState(() {
+      _isAttemptingToJoinSessionFromQR = true;
+    });
+  }
+
+  void _onDisconnectButtonPressed() {
+    try {
+      this._messenger.closeConnection();
+      this._getServerTimeTimer.cancel();
+      this._pingServerTimer.cancel();
+    } on Exception {
+      debugPrint("Failed to disconnect");
+    }
+    setState(() {
+      _shouldShowPartyPage = false;
+      _disconnect();
+      _clearState();
+    });
+  }
+
+  void _onPlayPressed() {
+    _npServerInfo.currentServerTime =
+        _getCurrentServerTimeAdjustedForCurrentTime();
+    _updateSessionContent(VideoState.PLAYING,
+        playbackInfo.lastKnownMoviePosition, _npServerInfo.currentServerTime);
+    playbackInfo.localTimeAtLastUpdate =
+        _getCurrentTimeMillisecondsSinceEpoch();
+  }
+
+  void _onPausePressed() {
+    playbackInfo.lastKnownMoviePosition =
+        _getLastKnownMoviePositionAdjustedForCurrentTime();
+    _npServerInfo.currentServerTime =
+        _getCurrentServerTimeAdjustedForCurrentTime();
+    _updateSessionContent(VideoState.PAUSED,
+        playbackInfo.lastKnownMoviePosition, _npServerInfo.currentServerTime);
+    playbackInfo.localTimeAtLastUpdate =
+        _getCurrentTimeMillisecondsSinceEpoch();
+  }
+
+  void _loadUserInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      _user = LocalUser(
+          username: prefs.getString('username') ?? "Mobile User",
+          icon: prefs.getString('userIcon') ?? "Batman.svg",
+          userId: _userId);
+      if (_shouldShowPartyPage) {
+        _sendBroadcastUserSettingsMessage(_user);
+      }
+    });
+  }
+
+  void _dispatchShowChangelog() {
+    Future.delayed(Duration(milliseconds: 300), () async {
+      if (!_isShowingChangelogDialog) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String lastViewedChangelog =
+        await prefs.getString("lastViewedChangelog");
+        if (lastViewedChangelog != ChangelogService.getLatestVersion()) {
+          _isShowingChangelogDialog = true;
+          await _showChangelogDialog();
+          _isShowingChangelogDialog = false;
+        }
+      }
+    });
+  }
+
+  void _sendBroadcastUserSettingsMessage(LocalUser user) {
+    _messenger.sendMessage(BroadcastUserSettingsMessage(
+        BroadCastUserSettingsContent(UserSettings(true,
+            UserAvatar.getNPName(user.icon), user.userId, user.username))));
+  }
+
+  void _sendNotBufferingMessage() {
+    BufferingContent bufferingContent = BufferingContent(false);
+    _messenger.sendMessage(BufferingMessage(bufferingContent));
+  }
+
+  void _showToastMessage(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 35.0);
+  }
+
+  void _sendGetServerTimeMessage() {
+    GetServerTimeContent getServerTimeContent = GetServerTimeContent("1.7.8");
+    _messenger.sendMessage(GetServerTimeMessage(getServerTimeContent));
+  }
+
+  void _postMessageText(String messageText) {
+    _messenger.sendMessage(SendMessageMessage(SendMessageContent(
+        SendMessageBody(
+            messageText,
+            false,
+            _getCurrentServerTimeAdjustedForCurrentTime(),
+            _user.userId,
+            _user.userId,
+            _user.icon,
+            _user.username))));
+  }
+
+  void _connectAndSetupListener(String serverId) {
+    _messenger.establishConnection("wss://$serverId.netflixparty.com/socket.io/?EIO=3&transport=websocket", _onReceivedStreamMessage, _onConnectionClosed, _onConnectionOpened);
+  }
+
+  void _updateLastJoinedPartyUrl() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString("lastPartyUrl", _urlTextController.text);
+  }
+
+  void _connectToServer() {
+    _updateLastJoinedPartyUrl();
+    _hasJoinedSession = false;
+    _npServerInfo = NPServerInfo(url: _urlTextController.text);
+    if (_npServerInfo.isIncomplete()) {
+      _onConnectFailed();
+    }
+    _connectAndSetupListener(_npServerInfo.getServerId());
+  }
+
+  void _addChatMessages(List<UserMessage> userMessages) {
+    _chatMessages.addAll(userMessages.map((userMessage) {
+      return ChatMessage(
+          text: userMessage.body, user: _buildChatUser(userMessage));
+    }));
+  }
+
+  ChatUser _buildChatUser(UserMessage userMessage) {
+    return ChatUser.fromJson({
+      'uid': userMessage.userId,
+      'name': userMessage.userNickname,
+      'avatar': UserAvatar.formatIconName(userMessage.userIcon),
+      'containerColor': AvatarColors.getColor(userMessage.userIcon)
+    });
+  }
+
+  void _scrollToBottomOfChatStream() {
+    _chatStreamScrollController.animateTo(
+        _chatStreamScrollController.position.maxScrollExtent + 5,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.linear);
+  }
+
+  void _joinSession(String sessionIdForJoin) {
+    UserSettings userSettings =
+        UserSettings(true, _user.icon, _user.userId, _user.username);
+    JoinSessionContent joinSessionContent =
+        JoinSessionContent(sessionIdForJoin, _user.userId, userSettings);
+    _messenger.sendMessage(JoinSessionMessage(joinSessionContent));
+    _hasJoinedSession = true;
+    setState(() {
+      _isAttemptingToJoinSessionFromText = false;
+      _isAttemptingToJoinSessionFromQR = false;
+    });
+  }
+
+  void _disconnect() {
+    _messenger.closeConnection();
+    setState(() {
+      _isConnected = false;
+    });
+  }
+
+  void _clearState() {
+    setState(() {
+      if (_getServerTimeTimer != null) {
+        _getServerTimeTimer.cancel();
+        _getServerTimeTimer = null;
+      }
+      if (_pingServerTimer != null) {
+        _pingServerTimer.cancel();
+        _pingServerTimer = null;
+      }
+      _npServerInfo.currentServerTime = 0;
+      playbackInfo.localTimeAtLastUpdate = 0;
+      playbackInfo.lastKnownMoviePosition = 0;
+      _hasJoinedSession = false;
+      _isAttemptingToJoinSessionFromText = false;
+      _isAttemptingToJoinSessionFromQR = false;
+      _chatMessages.clear();
+    });
+  }
+
+  void _navigateToAccountSettings(buildContext) async {
+    print("go to account settings");
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => UserSettingsScreen()),
+    );
+    _loadUserInfo();
+  }
+
+  int _getCurrentServerTimeAdjustedForCurrentTime() {
+    return _npServerInfo.currentServerTime + _getMillisecondsSinceLastUpdate();
+  }
+
+  int _getCurrentTimeMillisecondsSinceEpoch() {
+    return DateTime.now().millisecondsSinceEpoch;
+  }
+
+  int _getMillisecondsSinceLastUpdate() {
+    return _getCurrentTimeMillisecondsSinceEpoch() -
+        playbackInfo.localTimeAtLastUpdate;
+  }
+
+  int _getLastKnownMoviePositionAdjustedForCurrentTime() {
+    return playbackInfo.lastKnownMoviePosition +
+        _getMillisecondsSinceLastUpdate();
+  }
+
+  void _updateSessionContent(
+      String mediaState, int videoPosition, int currentServerTime) {
+    UpdateSessionContent updateSessionContent = UpdateSessionContent(
+        videoPosition,
+        currentServerTime,
+        mediaState,
+        null,
+        null,
+        _videoDuration,
+        false);
+    _messenger.sendMessage(UpdateSessionMessage(updateSessionContent));
+    setState(() {
+      playbackInfo.isPlaying = mediaState == VideoState.PLAYING;
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _disconnect();
+    _clearState();
+    super.dispose();
   }
 }

@@ -6,7 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/join-session/UserSettings.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/typing/TypingContent.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/typing/TypingMessage.dart';
-import 'package:np_plus/domains/messenger/Messenger.dart';
+import 'package:np_plus/domains/messenger/SocketMessenger.dart';
 import 'package:np_plus/theming/AvatarColors.dart';
 
 class ChatStream {
@@ -19,7 +19,7 @@ class ChatStream {
       ScrollController scrollController,
       TextEditingController textEditingController,
       String text,
-      Messenger messenger}) {
+      SocketMessenger messenger}) {
     String icon = userSettings.getIcon();
     TextEditingController textEditingController = TextEditingController();
     return DashChat(
@@ -29,7 +29,7 @@ class ChatStream {
       textController: textEditingController,
       onTextChange: (newText) {
         messenger.sendMessage(TypingMessage(TypingContent(true)));
-        Future.delayed(Duration(seconds: 3), () async {
+        Future.delayed(Duration(milliseconds: 1500), () async {
           messenger.sendMessage(TypingMessage(TypingContent(false)));
         });
         setTextState(newText);
@@ -61,10 +61,7 @@ class ChatStream {
             padding: EdgeInsets.all(3),
             minSize: 30,
             borderRadius: BorderRadius.circular(500),
-            onPressed: () {
-              debugPrint("pressed");
-              onPressed();
-            });
+            onPressed: onPressed);
       },
       inputToolbarPadding: EdgeInsets.fromLTRB(0, 0, 10, 0),
       messageContainerDecoration: BoxDecoration(

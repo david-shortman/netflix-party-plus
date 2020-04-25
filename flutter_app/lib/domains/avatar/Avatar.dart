@@ -7,7 +7,6 @@ class UserAvatar {
   }
 
   static String getNPName(String icon) {
-    debugPrint('icon $icon');
     if (icon == "/SailorCat.svg") {
       return "/Sailor Cat.svg";
     }
