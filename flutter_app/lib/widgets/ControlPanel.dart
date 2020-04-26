@@ -125,9 +125,22 @@ class _ControlPanelState extends State<ControlPanel> {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        CupertinoButton(child: Icon(Icons.replay_10, color: Theme.of(context).primaryColor, size: 45,), onPressed: _onReplay10Pressed,),
+                        CupertinoButton(
+                          child: Icon(
+                            Icons.replay_10,
+                            color: Theme.of(context).primaryColor,
+                            size: 45,
+                          ),
+                          onPressed: _onReplay10Pressed,
+                        ),
                         _getPlaybackControlButton(),
-                        CupertinoButton(child: Icon(Icons.forward_10, color: Theme.of(context).primaryColor, size: 45,), onPressed: _onForward10Pressed),
+                        CupertinoButton(
+                            child: Icon(
+                              Icons.forward_10,
+                              color: Theme.of(context).primaryColor,
+                              size: 45,
+                            ),
+                            onPressed: _onForward10Pressed),
                       ]))
             ],
           ),
@@ -150,7 +163,8 @@ class _ControlPanelState extends State<ControlPanel> {
       _playbackInfoStore.updateLastKnownMoviePosition(
           _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate() + diff);
     } else {
-      _playbackInfoStore.updateLastKnownMoviePosition(_playbackInfoStore.playbackInfo.lastKnownMoviePosition + diff);
+      _playbackInfoStore.updateLastKnownMoviePosition(
+          _playbackInfoStore.playbackInfo.lastKnownMoviePosition + diff);
     }
     int estimatedServerTime = _partySessionStore.partySession
         .getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
