@@ -51,7 +51,9 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
   }
 
   void _setupNewChatMessagesListener() {
-    _chatMessagesStore.stream$.listen(_onChatMessagesChanged);
+    _chatMessagesStore.stream$
+        .debounceTime(Duration(milliseconds: 100))
+        .listen(_onChatMessagesChanged);
   }
 
   void _onChatMessagesChanged(List<ChatMessage> chatMessages) {
@@ -88,6 +90,8 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
           return Container();
         }
         LocalUser localUser = streamSnapshot.data['localUser'];
+        bool isDarkMode =
+            MediaQuery.of(context).platformBrightness == Brightness.dark;
         return DashChat(
           messages: streamSnapshot.data['chatMessages'],
           scrollController: _chatScrollController,
@@ -106,8 +110,16 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
             });
             _setChatInputTextState(newText);
           },
-          inputToolbarPadding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+          inputToolbarPadding: EdgeInsets.fromLTRB(6, 0, 12, 0),
           inputContainerStyle: BoxDecoration(
+              boxShadow: isDarkMode
+                  ? []
+                  : [
+                      BoxShadow(
+                          color: Theme.of(context).selectedRowColor,
+                          blurRadius: 2,
+                          spreadRadius: 2)
+                    ],
               color: Theme.of(context).dialogBackgroundColor,
               borderRadius: BorderRadius.circular(30)),
           sendButtonBuilder: (onPressed) {

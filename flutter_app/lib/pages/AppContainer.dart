@@ -19,6 +19,7 @@ import 'package:np_plus/widgets/ChangelogDialog.dart';
 import 'package:np_plus/pages/ChatFeedPage.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:np_plus/widgets/ControlPanel.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domains/avatar/Avatar.dart';
@@ -53,12 +54,13 @@ class _AppContainerState extends State<AppContainer>
   final _chatMessagesStore = getIt.get<ChatMessagesStore>();
   final _localUserStore = getIt.get<LocalUserStore>();
   final _partyService = getIt.get<PartyService>();
+  final BehaviorSubject<bool> _isKeyboardVisible =
+      BehaviorSubject.seeded(false);
 
   int _sessionLastActiveAtTime = 0;
 
   bool _isShowingChangelogDialog = false;
 
-  bool _isKeyboardVisible = false;
   UniqueKey chatUniqueKey = UniqueKey();
 
   _AppContainerState() {
@@ -94,11 +96,8 @@ class _AppContainerState extends State<AppContainer>
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addObserver(this);
-    KeyboardVisibilityNotification().addNewListener(onChange: (isVisible) {
-      setState(() {
-        _isKeyboardVisible = isVisible;
-      });
-    });
+    KeyboardVisibilityNotification()
+        .addNewListener(onChange: _isKeyboardVisible.add);
     return Scaffold(
         appBar: AppBar(
           title: RichText(
@@ -124,7 +123,15 @@ class _AppContainerState extends State<AppContainer>
             return Stack(
               children: <Widget>[
                 isSessionActive ? _getPartyPage() : LandingPage(),
-                Visibility(visible: !_isKeyboardVisible, child: ControlPanel())
+                StreamBuilder(
+                  stream: _isKeyboardVisible.stream,
+                  builder:
+                      (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
+                    return Visibility(
+                        visible: !isKeyboardVisibleSnapshot.data,
+                        child: ControlPanel());
+                  },
+                )
               ],
             );
           },
@@ -134,14 +141,19 @@ class _AppContainerState extends State<AppContainer>
   Widget _getPartyPage() {
     return Align(
       alignment: Alignment.bottomCenter,
-      child: SizedBox(
-          height: MediaQuery.of(context).size.height - 76,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(6, 0, 6, 110),
-            child: ChatFeedPage(
-              key: chatUniqueKey,
-            ),
-          )),
+      child: StreamBuilder(
+          stream: _isKeyboardVisible.stream,
+          builder: (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
+            double bottomPadding = isKeyboardVisibleSnapshot.data ? 10 : 110;
+            return SizedBox(
+                height: MediaQuery.of(context).size.height - 76,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(6, 0, 6, bottomPadding),
+                  child: ChatFeedPage(
+                    key: chatUniqueKey,
+                  ),
+                ));
+          }),
     );
   }
 
