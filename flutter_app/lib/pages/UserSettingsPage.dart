@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:np_plus/GetItInstance.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
 import 'package:np_plus/services/LocalUserService.dart';
 import '../vaults/DefaultsVault.dart';
-import '../main.dart';
 
 class UserSettingsPage extends StatefulWidget {
   @override
@@ -60,6 +61,7 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
   }
 
   void onIconSelected(String icon) async {
+    await HapticFeedback.lightImpact();
     setState(() {
       this._iconName = icon;
     });

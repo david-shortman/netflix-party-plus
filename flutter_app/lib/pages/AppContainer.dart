@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:np_plus/GetItInstance.dart';
 import 'package:np_plus/changelog/ChangelogService.dart';
 import 'package:np_plus/domains/server/ServerInfo.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
-import 'package:np_plus/main.dart';
 import 'package:np_plus/pages/LandingPage.dart';
 import 'package:np_plus/services/PartyService.dart';
 import 'package:np_plus/store/LocalUserStore.dart';
@@ -151,7 +151,7 @@ class _AppContainerState extends State<AppContainer>
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String lastViewedChangelog =
             await prefs.getString(PreferencePropertyVault.LAST_VIEWED_CHANGELOG_VERSION);
-        if (lastViewedChangelog != ChangelogService.getCurrentChangelog()) {
+        if (lastViewedChangelog != ChangelogService.getLatestVersion()) {
           _isShowingChangelogDialog = true;
           await _showChangelogDialog();
           _isShowingChangelogDialog = false;

@@ -1,8 +1,9 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:np_plus/GetItInstance.dart';
 import 'package:np_plus/domains/server/ServerInfo.dart';
-import 'package:np_plus/main.dart';
 import 'package:np_plus/services/PartyService.dart';
 import 'package:np_plus/services/ToastService.dart';
 import 'package:np_plus/store/PartySessionStore.dart';
@@ -87,12 +88,12 @@ class _LandingPageState extends State<LandingPage> {
         builder: (context,
             AsyncSnapshot<bool> isAttemptingToJoinSessionFromTextSnapshot) {
           bool isAttemptingToJoinSessionFromText =
-              isAttemptingToJoinSessionFromTextSnapshot.data;
+              isAttemptingToJoinSessionFromTextSnapshot.data != null ? isAttemptingToJoinSessionFromTextSnapshot.data : false;
           return Padding(
             padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
             child: ProgressButton(
               child: Text(
-                isAttemptingToJoinSessionFromText ?? LabelVault.CONNECT_TO_PARTY_BUTTON ? "" : LabelVault.CONNECT_TO_PARTY_BUTTON,
+                isAttemptingToJoinSessionFromText ? "" : LabelVault.CONNECT_TO_PARTY_BUTTON.toString(),
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -135,12 +136,10 @@ class _LandingPageState extends State<LandingPage> {
           builder: (context,
               AsyncSnapshot<bool> isAttemptingToJoinSessionFromQRSnapshot) {
             bool isAttemptingToJoinSessionFromQR =
-                isAttemptingToJoinSessionFromQRSnapshot.data;
+                isAttemptingToJoinSessionFromQRSnapshot.data != null ? isAttemptingToJoinSessionFromQRSnapshot.data : false;
             return ProgressButton(
               child: Text(
-                isAttemptingToJoinSessionFromQR ?? LabelVault.CONNECT_TO_PARTY_BUTTON
-                    ? ""
-                    : LabelVault.SCAN_QR_BUTTON,
+                  isAttemptingToJoinSessionFromQR != null ? isAttemptingToJoinSessionFromQR ? "" : LabelVault.SCAN_QR_BUTTON : LabelVault.SCAN_QR_BUTTON,
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -157,6 +156,7 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   void _onScanQRPressed() async {
+    await HapticFeedback.lightImpact();
     var result = await BarcodeScanner.scan();
     _urlTextController.text = result;
     _connectToServer();
@@ -164,6 +164,7 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   void _onConnectIntent() {
+    HapticFeedback.lightImpact();
     setState(() {
       _isAttemptingToJoinSessionFromText$.add(true);
     });

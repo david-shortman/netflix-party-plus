@@ -49,6 +49,6 @@ class ChangelogDialog extends StatelessWidget {
           ),
         )
       ],
-    );;
+    );
   }
 }

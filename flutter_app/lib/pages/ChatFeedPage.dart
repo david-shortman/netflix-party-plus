@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:np_plus/GetItInstance.dart';
 import 'package:np_plus/vaults/DefaultsVault.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/chat-message/SendMessageBody.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/chat-message/SendMessageContent.dart';
@@ -13,7 +14,6 @@ import 'package:np_plus/domains/messages/outgoing-messages/typing/TypingContent.
 import 'package:np_plus/domains/messages/outgoing-messages/typing/TypingMessage.dart';
 import 'package:np_plus/services/SocketMessengerService.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
-import 'package:np_plus/main.dart';
 import 'package:np_plus/store/LocalUserStore.dart';
 import 'package:np_plus/store/PartySessionStore.dart';
 import 'package:np_plus/store/ChatMessagesStore.dart';
@@ -148,8 +148,8 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
                 );
               }
               String avatar = chatUser?.avatar != ''
-                  ? chatUser?.avatar ?? DefaultsVault.DEFAULT_AVATAR
-                  : DefaultsVault.DEFAULT_AVATAR;
+                  ? chatUser?.avatar ?? DefaultsVault.DEFAULT_AVATAR.toString()
+                  : DefaultsVault.DEFAULT_AVATAR.toString();
               return SvgPicture.asset('assets/avatars/${avatar}', height: 35);
             },
           ),

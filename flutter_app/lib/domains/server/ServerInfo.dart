@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 class PartySession {
   String _sessionId;
   String _serverId;
@@ -26,9 +28,11 @@ class PartySession {
   }
 
   int getServerTimeAdjustedForTimeSinceLastServerTimeUpdate() {
-    return _serverTime +
+    debugPrint("server time $_serverTime");
+    debugPrint("adjusted server time ${_serverTime != null ? _serverTime : 0}");
+    return (_serverTime != null ? _serverTime : 0) +
         DateTime.now().millisecondsSinceEpoch -
-        _serverTimeLastUpdatedTime;
+        _serverTimeLastUpdatedTime != null ? _serverTimeLastUpdatedTime : 0;
   }
 
   PartySession();

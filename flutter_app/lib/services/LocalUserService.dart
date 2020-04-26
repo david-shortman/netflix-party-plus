@@ -27,14 +27,6 @@ class LocalUserService {
     );
   }
 
-  void updateSavedLocalUser(LocalUser localUser) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.setString("username", localUser.username);
-    await sharedPreferences.setString("userIcon", localUser.icon);
-    await sharedPreferences.setString("userId", localUser.id);
-    _onLocalUserUpdated();
-  }
-
   void updateUserId(String userId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.setString(

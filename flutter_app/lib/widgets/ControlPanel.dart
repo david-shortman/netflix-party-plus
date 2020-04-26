@@ -1,13 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:np_plus/GetItInstance.dart';
 import 'package:np_plus/vaults/DefaultsVault.dart';
 import 'package:np_plus/domains/media-controls/VideoState.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/update-session/UpdateSessionContent.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/update-session/UpdateSessionMessage.dart';
 import 'package:np_plus/domains/server/ServerInfo.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
-import 'package:np_plus/main.dart';
 import 'package:np_plus/pages/UserSettingsPage.dart';
 import 'package:np_plus/services/SocketMessengerService.dart';
 import 'package:np_plus/store/LocalUserStore.dart';
@@ -27,6 +28,7 @@ class _ControlPanelState extends State<ControlPanel> {
   final _localUserStore = getIt.get<LocalUserStore>();
   final _playbackInfoStore = getIt.get<PlaybackInfoStore>();
   final _messengerService = getIt.get<SocketMessengerService>();
+  final _panelController = PanelController();
   int _videoDuration = 655550;
 
   _ControlPanelState({Key key});
@@ -41,7 +43,8 @@ class _ControlPanelState extends State<ControlPanel> {
           return SlidingUpPanel(
             backdropEnabled: true,
             parallaxEnabled: true,
-            maxHeight: 400,
+            controller: _panelController,
+            maxHeight: isSessionActive ? 400 : 80,
             minHeight: isSessionActive ? 100 : 80,
             panelBuilder: (sc) => _panel(sc, isSessionActive),
             isDraggable: isSessionActive,
@@ -161,17 +164,13 @@ class _ControlPanelState extends State<ControlPanel> {
     } on Exception {
       debugPrint("Failed to disconnect");
     }
-    setState(() {
-      _disconnect();
-    });
-  }
-
-  void _disconnect() {
+    _panelController.close();
     _messengerService.closeConnection();
     _partySessionStore.setAsSessionInactive();
   }
 
   void _onPlayPressed() {
+    HapticFeedback.lightImpact();
     _playbackInfoStore.updateAsPlaying();
     int estimatedServerTime = _partySessionStore.partySession
         .getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
@@ -183,6 +182,7 @@ class _ControlPanelState extends State<ControlPanel> {
   }
 
   void _onPausePressed() {
+    HapticFeedback.lightImpact();
     _playbackInfoStore.updateAsPaused();
     _playbackInfoStore.updateLastKnownMoviePosition(
         _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate());
@@ -196,6 +196,7 @@ class _ControlPanelState extends State<ControlPanel> {
   }
 
   void _navigateToAccountSettings(buildContext) async {
+    await _panelController.close();
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => UserSettingsPage()),

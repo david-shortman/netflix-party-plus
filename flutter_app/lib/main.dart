@@ -13,8 +13,7 @@ import 'package:np_plus/store/PartySessionStore.dart';
 import 'package:np_plus/store/ChatMessagesStore.dart';
 import 'package:np_plus/store/PlaybackInfoStore.dart';
 import 'package:np_plus/services/SomeoneIsTypingService.dart';
-
-GetIt getIt = GetIt.asNewInstance();
+import 'package:np_plus/GetItInstance.dart';
 
 void main() {
   getIt.registerSingleton(PartySessionStore());

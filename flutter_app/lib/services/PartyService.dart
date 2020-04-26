@@ -102,7 +102,6 @@ class PartyService {
   }
 
   void _onErrorMessageReceived(ErrorMessage errorMessage) {
-//    _partySessionStore.setAsSessionInactive();
     _toastService.showToastMessage(errorMessage.errorMessage);
   }
 
