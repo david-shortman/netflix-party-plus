@@ -16,8 +16,8 @@ class LocalUserService {
   Future<LocalUser> getLocalUser() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     return LocalUser(
-      username: await sharedPreferences.getString("username"),
-      icon: await sharedPreferences.getString("userIcon"),
+      username: await sharedPreferences.getString("username") ?? "Mobile User",
+      icon: await sharedPreferences.getString("userIcon") ?? "Batman.svg",
       id: await sharedPreferences.getString("userId"),
     );
   }
@@ -27,6 +27,13 @@ class LocalUserService {
     await sharedPreferences.setString("username", localUser.username);
     await sharedPreferences.setString("userIcon", localUser.icon);
     await sharedPreferences.setString("userId", localUser.id);
+    _onLocalUserUpdated();
+  }
+
+  void updateUserId(String userId) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setString(
+        "userId", userId ?? _localUserStore.localUser.id);
     _onLocalUserUpdated();
   }
 

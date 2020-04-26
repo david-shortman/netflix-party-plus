@@ -10,32 +10,30 @@ import 'package:np_plus/domains/messages/outgoing-messages/chat-message/SendMess
 import 'package:np_plus/domains/messages/outgoing-messages/chat-message/SendMessageMessage.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/typing/TypingContent.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/typing/TypingMessage.dart';
-import 'package:np_plus/domains/messenger/SocketMessenger.dart';
+import 'package:np_plus/services/SocketMessengerService.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
 import 'package:np_plus/main.dart';
 import 'package:np_plus/store/LocalUserStore.dart';
-import 'package:np_plus/store/NPServerInfoStore.dart';
+import 'package:np_plus/store/PartySessionStore.dart';
 import 'package:np_plus/store/ChatMessagesStore.dart';
 import 'package:np_plus/store/PlaybackInfoStore.dart';
-import 'package:np_plus/services/SomeoneIsTypingService.dart';
 import 'package:np_plus/theming/AvatarColors.dart';
 import 'package:np_plus/utilities/TimeUtility.dart';
 import 'package:rxdart/rxdart.dart';
 
-class Chat extends StatefulWidget {
-  Chat({Key key}) : super(key: key);
+class ChatFeed extends StatefulWidget {
+  ChatFeed({Key key}) : super(key: key);
 
   @override
-  _ChatState createState() => _ChatState(key: key);
+  _ChatFeedState createState() => _ChatFeedState(key: key);
 }
 
-class _ChatState extends State<Chat> {
-  final _messenger = getIt.get<SocketMessenger>();
+class _ChatFeedState extends State<ChatFeed> {
+  final _messenger = getIt.get<SocketMessengerService>();
 
-  final npServerInfoStore = getIt.get<NPServerInfoStore>();
+  final npServerInfoStore = getIt.get<PartySessionStore>();
   final _playbackInfoStore = getIt.get<PlaybackInfoStore>();
-  final _chatMessagesStore =
-      getIt.get<ChatMessagesStore>();
+  final _chatMessagesStore = getIt.get<ChatMessagesStore>();
   final _localUserStore = getIt.get<LocalUserStore>();
 
   final ScrollController _chatScrollController = ScrollController();
@@ -47,7 +45,7 @@ class _ChatState extends State<Chat> {
 
   int _lastMessagesCount = 0;
 
-  _ChatState({Key key}) {
+  _ChatFeedState({Key key}) {
     _setupNewChatMessagesListener();
   }
 
@@ -79,11 +77,14 @@ class _ChatState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: _chatMessagesStore.stream$.withLatestFrom(_localUserStore.stream$, (chatMessages, localUser) => {
-        'chatMessages': chatMessages,
-        'localUser': localUser
-      }),
+      stream: _chatMessagesStore.stream$.withLatestFrom(
+          _localUserStore.stream$,
+          (chatMessages, localUser) =>
+              {'chatMessages': chatMessages, 'localUser': localUser}),
       builder: (context, streamSnapshot) {
+        if (streamSnapshot.data == null) {
+          return Container();
+        }
         LocalUser localUser = streamSnapshot.data['localUser'];
         return DashChat(
           messages: streamSnapshot.data['chatMessages'],
@@ -125,7 +126,6 @@ class _ChatState extends State<Chat> {
             stream: _showUserBubbleAsAvatar.stream,
             builder: (context, showUserBubbleAsAvatarSnapshot) {
               if (showUserBubbleAsAvatarSnapshot.data == false) {
-                debugPrint('username ${chatUser.name}');
                 String firstTwoLettersOfUsername = chatUser.name != null &&
                         chatUser.name.isNotEmpty
                     ? '${chatUser.name[0].toUpperCase()}${chatUser.name.length > 1 ? '${chatUser.name[1]}' : ''}'
@@ -179,7 +179,7 @@ class _ChatState extends State<Chat> {
             chatMessage.text,
             false,
             _serverTimeUtility.getCurrentServerTimeAdjustedForCurrentTime(
-                npServerInfoStore.npServerInfo.getServerTime(),
+                npServerInfoStore.partySession.getServerTime(),
                 _playbackInfoStore
                     .playbackInfo.serverTimeAtLastVideoStateUpdate),
             _localUserStore.localUser.id,

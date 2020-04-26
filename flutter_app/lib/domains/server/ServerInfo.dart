@@ -1,10 +1,11 @@
-class NPServerInfo {
+class PartySession {
   String _sessionId;
   String _serverId;
   int _serverTime;
   int _serverTimeLastUpdatedTime;
+  bool _isSessionActive = false;
 
-  bool isIncomplete() {
+  bool isMetadataIncomplete() {
     return _sessionId == null || _serverId == null;
   }
 
@@ -30,29 +31,50 @@ class NPServerInfo {
         _serverTimeLastUpdatedTime;
   }
 
-  NPServerInfo();
+  PartySession();
 
-  NPServerInfo.fromUrl({String url}) {
+  PartySession.fromUrl({String url}) {
     Uri uri = Uri.parse(url);
     _sessionId = uri.queryParameters['npSessionId'];
     _serverId = uri.queryParameters['npServerId'];
   }
 
-  NPServerInfo.fromNPServerInfo(NPServerInfo npServerInfo,
-      {int newServerTime, int newServerTimeLastUpdatedTime}) {
-    _serverId = npServerInfo.getServerId();
-    _sessionId = npServerInfo.getSessionId();
+  PartySession.fromPartySessionAndSessionActive(
+      PartySession partySession, bool isSessionActive) {
+    _serverId = partySession.getServerId();
+    _sessionId = partySession.getSessionId();
+    _serverTime = partySession.getServerTime();
+    _serverId = partySession.getServerId();
+    _isSessionActive = isSessionActive;
+  }
 
-    if (newServerTime >= 0) {
+  PartySession.fromPartySession(PartySession partySession,
+      {int newServerTime,
+      int newServerTimeLastUpdatedTime,
+      bool isSessionActive}) {
+    _serverId = partySession.getServerId();
+    _sessionId = partySession.getSessionId();
+
+    if (newServerTime != 0) {
       _serverTime = newServerTime;
     } else {
-      _serverTime = npServerInfo.getServerTime();
+      _serverTime = partySession.getServerTime();
     }
 
-    if (newServerTime >= 0) {
+    if (newServerTime != 0) {
       _serverTimeLastUpdatedTime = newServerTimeLastUpdatedTime;
     } else {
-      _serverTimeLastUpdatedTime = npServerInfo.getServerTimeLastUpdatedTime();
+      _serverTimeLastUpdatedTime = partySession.getServerTimeLastUpdatedTime();
     }
+
+    if (isSessionActive != null) {
+      _isSessionActive = isSessionActive;
+    } else {
+      _isSessionActive = partySession.isSessionActive();
+    }
+  }
+
+  bool isSessionActive() {
+    return _isSessionActive;
   }
 }
