@@ -135,42 +135,25 @@ class _LandingPageState extends State<LandingPage> {
                 "3. Paste the link there to create a scannable QR code"))));
     widgets.add(Padding(
       padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
-      child: StreamBuilder(
-          stream: _isAttemptingToJoinSessionFromQR$.stream,
-          builder: (context,
-              AsyncSnapshot<bool> isAttemptingToJoinSessionFromQRSnapshot) {
-            bool isAttemptingToJoinSessionFromQR =
-                isAttemptingToJoinSessionFromQRSnapshot.data != null
-                    ? isAttemptingToJoinSessionFromQRSnapshot.data
-                    : false;
-            return ProgressButton(
-              child: Text(
-                isAttemptingToJoinSessionFromQR != null
-                    ? isAttemptingToJoinSessionFromQR
-                        ? ""
-                        : LabelVault.SCAN_QR_BUTTON
-                    : LabelVault.SCAN_QR_BUTTON,
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              onPressed: _onScanQRPressed,
-              buttonState: isAttemptingToJoinSessionFromQR
-                  ? ButtonState.inProgress
-                  : ButtonState.normal,
-              backgroundColor: Theme.of(context).primaryColor,
-              progressColor: Colors.white,
-            );
-          }),
+      child: ProgressButton(
+        child: Text(
+          LabelVault.SCAN_QR_BUTTON,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        onPressed: _onScanQRPressed,
+        buttonState: ButtonState.normal,
+        backgroundColor: Theme.of(context).primaryColor,
+        progressColor: Colors.white,
+      ),
     ));
     return widgets;
   }
 
   void _onScanQRPressed() async {
     await HapticFeedback.lightImpact();
-    var result = await BarcodeScanner.scan();
+    String result = await BarcodeScanner.scan();
     _urlTextController.text = result;
     _connectToServer();
-    _isAttemptingToJoinSessionFromQR$.add(true);
   }
 
   void _onConnectIntent() {
@@ -199,6 +182,5 @@ class _LandingPageState extends State<LandingPage> {
   void _onConnectFailed() {
     _toastService.showToastMessage("Invalid Link");
     _isAttemptingToJoinSessionFromText$.add(false);
-    _isAttemptingToJoinSessionFromQR$.add(false);
   }
 }
