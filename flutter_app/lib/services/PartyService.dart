@@ -208,7 +208,7 @@ class PartyService {
       'uid': userMessage.userId,
       'name': userMessage.userNickname,
       'avatar': UserAvatar.formatIconName(userMessage.userIcon),
-      'containerColor': AvatarColors.getColor(userMessage.userIcon)
+      'containerColor': AvatarColors.getColor(userMessage.userIcon).value
     });
   }
 

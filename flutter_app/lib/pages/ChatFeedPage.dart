@@ -47,7 +47,6 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
   int _lastMessagesCount = 0;
 
   _ChatFeedPageState({Key key}) {
-    _setupNewChatMessagesListener();
   }
 
   void _setupNewChatMessagesListener() {
@@ -58,7 +57,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   void _onChatMessagesChanged(List<ChatMessage> chatMessages) {
     if (chatMessages.length > _lastMessagesCount) {
-      if (_chatScrollController?.position != null) {
+      if (_chatScrollController.hasClients) {
         WidgetsBinding.instance
             .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
       }
@@ -69,7 +68,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   void _scrollToBottomOfChatStream() {
     _chatScrollController.animateTo(
-        _chatScrollController.position.maxScrollExtent + 80,
+        _chatScrollController.position.maxScrollExtent,
         duration: Duration(milliseconds: 300),
         curve: Curves.linear);
   }
@@ -80,6 +79,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   @override
   Widget build(BuildContext context) {
+    _setupNewChatMessagesListener();
     return StreamBuilder(
       stream: _chatMessagesStore.stream$.withLatestFrom(
           _localUserStore.stream$,
@@ -169,13 +169,13 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
             HapticFeedback.lightImpact();
             _showUserBubbleAsAvatar.add(!_showUserBubbleAsAvatar.value);
           },
-          messageTextBuilder: (text) {
+          messageTextBuilder: (text, [chatMessage]) {
             return Text(
               text,
               style: TextStyle(color: Colors.white),
             );
           },
-          messageTimeBuilder: (time) {
+          messageTimeBuilder: (time, [chatMessage]) {
             return Text(
               time,
               style: TextStyle(color: Colors.white, fontSize: 10),
