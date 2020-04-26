@@ -46,8 +46,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   int _lastMessagesCount = 0;
 
-  _ChatFeedPageState({Key key}) {
-  }
+  _ChatFeedPageState({Key key});
 
   void _setupNewChatMessagesListener() {
     _chatMessagesStore.stream$

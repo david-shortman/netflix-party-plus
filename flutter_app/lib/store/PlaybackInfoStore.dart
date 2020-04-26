@@ -8,6 +8,10 @@ class PlaybackInfoStore {
   ValueStream<PlaybackInfo> get stream$ => _playbackInfo.stream;
   PlaybackInfo get playbackInfo => _playbackInfo.value;
 
+  bool isPlaying() {
+    return playbackInfo.isPlaying;
+  }
+
   void updateAsPaused() {
     _playbackInfo
         .add(PlaybackInfo.fromPlaybackInfo(playbackInfo, newIsPlaying: false));

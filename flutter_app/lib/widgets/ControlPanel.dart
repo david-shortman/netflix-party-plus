@@ -120,18 +120,46 @@ class _ControlPanelState extends State<ControlPanel> {
               SizedBox(
                 height: 5.0,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Visibility(
-                    visible: isSessionActive,
-                    child: _getPlaybackControlButton(),
-                  ),
-                ],
-              )
+              Visibility(
+                  visible: isSessionActive,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        CupertinoButton(child: Icon(Icons.replay_10, color: Theme.of(context).primaryColor, size: 45,), onPressed: _onReplay10Pressed,),
+                        _getPlaybackControlButton(),
+                        CupertinoButton(child: Icon(Icons.forward_10, color: Theme.of(context).primaryColor, size: 45,), onPressed: _onForward10Pressed),
+                      ]))
             ],
           ),
         ));
+  }
+
+  void _onReplay10Pressed() {
+    HapticFeedback.lightImpact();
+    _adjustVideoPositionBy(-10000);
+  }
+
+  void _onForward10Pressed() {
+    HapticFeedback.lightImpact();
+    _adjustVideoPositionBy(10000);
+  }
+
+  void _adjustVideoPositionBy(int diff) {
+    debugPrint('media playing is ${_playbackInfoStore.isPlaying()}');
+    if (_playbackInfoStore.isPlaying()) {
+      _playbackInfoStore.updateLastKnownMoviePosition(
+          _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate() + diff);
+    } else {
+      _playbackInfoStore.updateLastKnownMoviePosition(_playbackInfoStore.playbackInfo.lastKnownMoviePosition + diff);
+    }
+    int estimatedServerTime = _partySessionStore.partySession
+        .getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
+    debugPrint('changing time by $diff');
+    _updateSessionContent(
+        _playbackInfoStore.isPlaying() ? VideoState.PLAYING : VideoState.PAUSED,
+        _playbackInfoStore.playbackInfo.lastKnownMoviePosition,
+        estimatedServerTime);
+    _playbackInfoStore.updateServerTimeAtLastUpdate(estimatedServerTime);
   }
 
   Widget _getPlaybackControlButton() {

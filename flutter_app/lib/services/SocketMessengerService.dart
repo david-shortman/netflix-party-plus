@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:np_plus/domains/messages/SocketMessage.dart';
 import 'package:np_plus/domains/messages/incoming-messages/ReceivedMessage.dart';
 import 'package:web_socket_channel/io.dart';
@@ -28,6 +29,7 @@ class SocketMessengerService {
   }
 
   void sendMessage(SocketMessage message) {
+    debugPrint('sending ${message.buildString(_sequenceNum)}');
     _channel.sink.add(message.buildString(_sequenceNum));
     _sequenceNum++;
   }
