@@ -32,7 +32,7 @@ class AvatarColors {
       case "IronMan.svg":
         return Colors.red;
       case "Mulan.svg":
-        return Colors.greenAccent;
+        return Colors.green[400];
       case "Pizza.svg":
         return Colors.deepOrangeAccent;
       case "Poohbear.svg":

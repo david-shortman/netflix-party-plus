@@ -7,7 +7,9 @@ class PartyHarderTheme {
         unselectedWidgetColor: Colors.black,
         cardColor: Colors.black12,
         bottomAppBarColor: Colors.white70,
-        primaryTextTheme: TextTheme(body1: TextStyle(color: Colors.black)));
+        primaryTextTheme: TextTheme(
+            body1: TextStyle(color: Colors.black),
+            display1: TextStyle(color: Colors.black12)));
   }
 
   static getDarkTheme() {
@@ -16,6 +18,8 @@ class PartyHarderTheme {
         primaryColor: Colors.red,
         accentColor: Colors.red,
         bottomAppBarColor: Colors.black87,
-        primaryTextTheme: TextTheme(body1: TextStyle(color: Colors.white)));
+        primaryTextTheme: TextTheme(
+            body1: TextStyle(color: Colors.white),
+            display1: TextStyle(color: Colors.white70)));
   }
 }
