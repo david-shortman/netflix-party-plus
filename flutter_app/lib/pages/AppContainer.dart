@@ -84,7 +84,8 @@ class _AppContainerState extends State<AppContainer>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (!_partySessionStore.isSessionActive() && itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession()) {
+      if (!_partySessionStore.isSessionActive() &&
+          itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession()) {
         _partyService.rejoinLastParty();
       }
     }
@@ -183,7 +184,8 @@ class _AppContainerState extends State<AppContainer>
   }
 
   bool itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession() {
-    return DateTime.now().millisecondsSinceEpoch - _sessionLastActiveAtTime < 1800;
+    return DateTime.now().millisecondsSinceEpoch - _sessionLastActiveAtTime <
+        1800;
   }
 
   @override
