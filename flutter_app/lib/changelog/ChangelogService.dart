@@ -1,11 +1,11 @@
 class ChangelogService {
   static String getLatestVersion() {
-    return '1.0.0';
+    return '1.1.0';
   }
 
   static String getCurrentChangelog() {
-    return '''- Welcome to NP+!
-- Auto-reconnects to chat when app is opened
-- Squashes some bugs''';
+    return '''- Long pressing on chat avatar icons changes them to use initials instead
+- Play/pause stability fixed
+- Added haptic feedback''';
   }
 }

@@ -7,6 +7,8 @@ class PartyHarderTheme {
         unselectedWidgetColor: Colors.black,
         cardColor: Colors.black12,
         bottomAppBarColor: Colors.white70,
+        dialogBackgroundColor: Colors.white,
+        selectedRowColor: Colors.grey[200],
         primaryTextTheme: TextTheme(
             body1: TextStyle(color: Colors.black),
             display1: TextStyle(color: Colors.black12)));
@@ -18,6 +20,7 @@ class PartyHarderTheme {
         primaryColor: Colors.red,
         accentColor: Colors.red,
         bottomAppBarColor: Colors.black87,
+//        dialogBackgroundColor: Colors.black38,
         primaryTextTheme: TextTheme(
             body1: TextStyle(color: Colors.white),
             display1: TextStyle(color: Colors.white70)));

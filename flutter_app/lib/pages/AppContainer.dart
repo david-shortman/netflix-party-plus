@@ -19,6 +19,7 @@ import 'package:np_plus/widgets/ChangelogDialog.dart';
 import 'package:np_plus/pages/ChatFeedPage.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:np_plus/widgets/ControlPanel.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domains/avatar/Avatar.dart';
@@ -53,15 +54,18 @@ class _AppContainerState extends State<AppContainer>
   final _chatMessagesStore = getIt.get<ChatMessagesStore>();
   final _localUserStore = getIt.get<LocalUserStore>();
   final _partyService = getIt.get<PartyService>();
+  final BehaviorSubject<bool> _isKeyboardVisible =
+      BehaviorSubject.seeded(false);
+
+  int _sessionLastActiveAtTime = 0;
 
   bool _isShowingChangelogDialog = false;
 
-  bool _isKeyboardVisible = false;
   UniqueKey chatUniqueKey = UniqueKey();
 
   _AppContainerState() {
     _setupLocalUserListener();
-    _setupSessionEndedListener();
+    _setupSessionUpdatedListener();
     _dispatchShowChangelogIntent();
   }
 
@@ -69,8 +73,8 @@ class _AppContainerState extends State<AppContainer>
     _localUserStore.stream$.listen(_onLocalUserChanged);
   }
 
-  void _setupSessionEndedListener() {
-    _partySessionStore.stream$.listen(_onSessionEnded);
+  void _setupSessionUpdatedListener() {
+    _partySessionStore.stream$.listen(_onSessionUpdated);
   }
 
   void _onLocalUserChanged(LocalUser localUser) {
@@ -82,7 +86,8 @@ class _AppContainerState extends State<AppContainer>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (_partySessionStore.isSessionActive()) {
+      if (!_partySessionStore.isSessionActive() &&
+          itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession()) {
         _partyService.rejoinLastParty();
       }
     }
@@ -91,11 +96,8 @@ class _AppContainerState extends State<AppContainer>
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addObserver(this);
-    KeyboardVisibilityNotification().addNewListener(onChange: (isVisible) {
-      setState(() {
-        _isKeyboardVisible = isVisible;
-      });
-    });
+    KeyboardVisibilityNotification()
+        .addNewListener(onChange: _isKeyboardVisible.add);
     return Scaffold(
         appBar: AppBar(
           title: RichText(
@@ -121,7 +123,15 @@ class _AppContainerState extends State<AppContainer>
             return Stack(
               children: <Widget>[
                 isSessionActive ? _getPartyPage() : LandingPage(),
-                Visibility(visible: !_isKeyboardVisible, child: ControlPanel())
+                StreamBuilder(
+                  stream: _isKeyboardVisible.stream,
+                  builder:
+                      (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
+                    return Visibility(
+                        visible: !isKeyboardVisibleSnapshot.data,
+                        child: ControlPanel());
+                  },
+                )
               ],
             );
           },
@@ -129,16 +139,22 @@ class _AppContainerState extends State<AppContainer>
   }
 
   Widget _getPartyPage() {
-    Size currentScreenSize = MediaQuery.of(context).size;
-    double screenRatio = currentScreenSize.height / currentScreenSize.width;
-    return SizedBox(
-        height: MediaQuery.of(context).size.height - (105 * screenRatio),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(6, 0, 6, 0),
-          child: ChatFeedPage(
-            key: chatUniqueKey,
-          ),
-        ));
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: StreamBuilder(
+          stream: _isKeyboardVisible.stream,
+          builder: (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
+            double bottomPadding = isKeyboardVisibleSnapshot.data ? 10 : 110;
+            return SizedBox(
+                height: MediaQuery.of(context).size.height - 76,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(6, 0, 6, bottomPadding),
+                  child: ChatFeedPage(
+                    key: chatUniqueKey,
+                  ),
+                ));
+          }),
+    );
   }
 
   Future<void> _showChangelogDialog() async {
@@ -170,12 +186,21 @@ class _AppContainerState extends State<AppContainer>
             true, UserAvatar.getNPName(user.icon), user.id, user.username))));
   }
 
-  void _onSessionEnded(PartySession partySession) {
+  void _onSessionUpdated(PartySession partySession) {
     if (!partySession.isSessionActive()) {
       _playbackInfoStore.updateServerTimeAtLastUpdate(0);
       _playbackInfoStore.updateLastKnownMoviePosition(0);
       _chatMessagesStore.clearMessages();
+      _sessionLastActiveAtTime = 0;
     }
+    if (partySession.isSessionActive()) {
+      _sessionLastActiveAtTime = DateTime.now().millisecondsSinceEpoch;
+    }
+  }
+
+  bool itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession() {
+    return DateTime.now().millisecondsSinceEpoch - _sessionLastActiveAtTime <
+        1800;
   }
 
   @override
