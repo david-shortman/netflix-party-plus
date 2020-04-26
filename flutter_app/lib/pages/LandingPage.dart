@@ -19,8 +19,6 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   TextEditingController _urlTextController = TextEditingController();
-  final BehaviorSubject<bool> _isAttemptingToJoinSessionFromQR$ =
-      BehaviorSubject.seeded(false);
   final BehaviorSubject<bool> _isAttemptingToJoinSessionFromText$ =
       BehaviorSubject.seeded(false);
 
