@@ -54,6 +54,8 @@ class _AppContainerState extends State<AppContainer>
   final _localUserStore = getIt.get<LocalUserStore>();
   final _partyService = getIt.get<PartyService>();
 
+  int _sessionLastActiveAtTime = 0;
+
   bool _isShowingChangelogDialog = false;
 
   bool _isKeyboardVisible = false;
@@ -61,7 +63,7 @@ class _AppContainerState extends State<AppContainer>
 
   _AppContainerState() {
     _setupLocalUserListener();
-    _setupSessionEndedListener();
+    _setupSessionUpdatedListener();
     _dispatchShowChangelogIntent();
   }
 
@@ -69,8 +71,8 @@ class _AppContainerState extends State<AppContainer>
     _localUserStore.stream$.listen(_onLocalUserChanged);
   }
 
-  void _setupSessionEndedListener() {
-    _partySessionStore.stream$.listen(_onSessionEnded);
+  void _setupSessionUpdatedListener() {
+    _partySessionStore.stream$.listen(_onSessionUpdated);
   }
 
   void _onLocalUserChanged(LocalUser localUser) {
@@ -82,7 +84,7 @@ class _AppContainerState extends State<AppContainer>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (_partySessionStore.isSessionActive()) {
+      if (!_partySessionStore.isSessionActive() && itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession()) {
         _partyService.rejoinLastParty();
       }
     }
@@ -129,10 +131,8 @@ class _AppContainerState extends State<AppContainer>
   }
 
   Widget _getPartyPage() {
-    Size currentScreenSize = MediaQuery.of(context).size;
-    double screenRatio = currentScreenSize.height / currentScreenSize.width;
     return SizedBox(
-        height: MediaQuery.of(context).size.height - (105 * screenRatio),
+        height: MediaQuery.of(context).size.height - 210,
         child: Padding(
           padding: EdgeInsets.fromLTRB(6, 0, 6, 0),
           child: ChatFeedPage(
@@ -170,12 +170,20 @@ class _AppContainerState extends State<AppContainer>
             true, UserAvatar.getNPName(user.icon), user.id, user.username))));
   }
 
-  void _onSessionEnded(PartySession partySession) {
+  void _onSessionUpdated(PartySession partySession) {
     if (!partySession.isSessionActive()) {
       _playbackInfoStore.updateServerTimeAtLastUpdate(0);
       _playbackInfoStore.updateLastKnownMoviePosition(0);
       _chatMessagesStore.clearMessages();
+      _sessionLastActiveAtTime = 0;
     }
+    if (partySession.isSessionActive()) {
+      _sessionLastActiveAtTime = DateTime.now().millisecondsSinceEpoch;
+    }
+  }
+
+  bool itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession() {
+    return DateTime.now().millisecondsSinceEpoch - _sessionLastActiveAtTime < 1800;
   }
 
   @override
