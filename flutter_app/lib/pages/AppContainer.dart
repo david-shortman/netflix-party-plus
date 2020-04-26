@@ -100,12 +100,16 @@ class _AppContainerState extends State<AppContainer>
         appBar: AppBar(
           title: RichText(
             text: TextSpan(
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
-              children: [
-                TextSpan(text: LabelVault.APP_TITLE_1, style: TextStyle(fontStyle: FontStyle.italic),),
-                TextSpan(text: LabelVault.APP_TITLE_2,)
-              ]
-            ),
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
+                children: [
+                  TextSpan(
+                    text: LabelVault.APP_TITLE_1,
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  ),
+                  TextSpan(
+                    text: LabelVault.APP_TITLE_2,
+                  )
+                ]),
           ),
           backgroundColor: Theme.of(context).primaryColor,
         ),
@@ -149,8 +153,8 @@ class _AppContainerState extends State<AppContainer>
     Future.delayed(Duration(milliseconds: 300), () async {
       if (!_isShowingChangelogDialog) {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        String lastViewedChangelog =
-            await prefs.getString(PreferencePropertyVault.LAST_VIEWED_CHANGELOG_VERSION);
+        String lastViewedChangelog = await prefs
+            .getString(PreferencePropertyVault.LAST_VIEWED_CHANGELOG_VERSION);
         if (lastViewedChangelog != ChangelogService.getLatestVersion()) {
           _isShowingChangelogDialog = true;
           await _showChangelogDialog();

@@ -6,7 +6,6 @@ import 'package:np_plus/vaults/PreferencePropertyVault.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChangelogDialog extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return CupertinoAlertDialog(
@@ -43,7 +42,8 @@ class ChangelogDialog extends StatelessWidget {
             onPressed: () async {
               SharedPreferences prefs = await SharedPreferences.getInstance();
               await prefs.setString(
-                  PreferencePropertyVault.LAST_VIEWED_CHANGELOG_VERSION, ChangelogService.getLatestVersion());
+                  PreferencePropertyVault.LAST_VIEWED_CHANGELOG_VERSION,
+                  ChangelogService.getLatestVersion());
               Navigator.pop(context);
             },
           ),

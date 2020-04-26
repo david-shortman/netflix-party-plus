@@ -88,12 +88,16 @@ class _LandingPageState extends State<LandingPage> {
         builder: (context,
             AsyncSnapshot<bool> isAttemptingToJoinSessionFromTextSnapshot) {
           bool isAttemptingToJoinSessionFromText =
-              isAttemptingToJoinSessionFromTextSnapshot.data != null ? isAttemptingToJoinSessionFromTextSnapshot.data : false;
+              isAttemptingToJoinSessionFromTextSnapshot.data != null
+                  ? isAttemptingToJoinSessionFromTextSnapshot.data
+                  : false;
           return Padding(
             padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
             child: ProgressButton(
               child: Text(
-                isAttemptingToJoinSessionFromText ? "" : LabelVault.CONNECT_TO_PARTY_BUTTON.toString(),
+                isAttemptingToJoinSessionFromText
+                    ? ""
+                    : LabelVault.CONNECT_TO_PARTY_BUTTON.toString(),
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -136,10 +140,16 @@ class _LandingPageState extends State<LandingPage> {
           builder: (context,
               AsyncSnapshot<bool> isAttemptingToJoinSessionFromQRSnapshot) {
             bool isAttemptingToJoinSessionFromQR =
-                isAttemptingToJoinSessionFromQRSnapshot.data != null ? isAttemptingToJoinSessionFromQRSnapshot.data : false;
+                isAttemptingToJoinSessionFromQRSnapshot.data != null
+                    ? isAttemptingToJoinSessionFromQRSnapshot.data
+                    : false;
             return ProgressButton(
               child: Text(
-                  isAttemptingToJoinSessionFromQR != null ? isAttemptingToJoinSessionFromQR ? "" : LabelVault.SCAN_QR_BUTTON : LabelVault.SCAN_QR_BUTTON,
+                isAttemptingToJoinSessionFromQR != null
+                    ? isAttemptingToJoinSessionFromQR
+                        ? ""
+                        : LabelVault.SCAN_QR_BUTTON
+                    : LabelVault.SCAN_QR_BUTTON,
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
