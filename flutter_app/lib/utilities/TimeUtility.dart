@@ -11,6 +11,7 @@ class ServerTimeUtility {
 
   int getCurrentServerTimeAdjustedForCurrentTime(
       int currentServerTime, int timeAtLastUpdate) {
-    return currentServerTime + getMillisecondsSinceLastUpdate(timeAtLastUpdate);
+    return currentServerTime ??
+        0 + getMillisecondsSinceLastUpdate(timeAtLastUpdate);
   }
 }

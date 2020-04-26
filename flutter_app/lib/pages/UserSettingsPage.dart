@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
 import 'package:np_plus/services/LocalUserService.dart';
+import '../vaults/DefaultsVault.dart';
 import '../main.dart';
 
 class UserSettingsPage extends StatefulWidget {
@@ -44,7 +45,9 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
 
   _UserSettingsPageState() {
     _images = avatars
-        .map((avatar) => SvgPicture.asset("assets/avatars/$avatar", height: 85))
+        .map((avatar) => SvgPicture.asset(
+            "assets/avatars/${avatar ?? DefaultsVault.DEFAULT_AVATAR}",
+            height: 85))
         .toList();
     _loadSavedLocalUserDetails();
   }
@@ -66,7 +69,7 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
     LocalUser localUser = await _localUserService.getLocalUser();
     _usernameController.text = localUser.username ?? "Mobile User";
     setState(() {
-      _iconName = localUser.icon ?? "Batman.svg";
+      _iconName = localUser.icon ?? DefaultsVault.DEFAULT_AVATAR;
     });
   }
 
@@ -90,11 +93,12 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
                 padding: EdgeInsets.all(4),
               ),
               CupertinoTextField(
-                textInputAction: TextInputAction.go,
+                textInputAction: TextInputAction.done,
                 controller: _usernameController,
                 placeholder: 'Enter Username',
                 style: Theme.of(context).primaryTextTheme.body1,
                 clearButtonMode: OverlayVisibilityMode.editing,
+                keyboardType: TextInputType.text,
               ),
               Padding(
                 padding: EdgeInsets.all(10),

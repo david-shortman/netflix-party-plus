@@ -1,4 +1,4 @@
-import 'package:np_plus/playback/PlaybackInfo.dart';
+import 'package:np_plus/domains/playback/PlaybackInfo.dart';
 import 'package:rxdart/rxdart.dart';
 
 class PlaybackInfoStore {

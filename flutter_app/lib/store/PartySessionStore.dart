@@ -19,8 +19,10 @@ class PartySessionStore {
   }
 
   void setAsSessionInactive() {
-    _partySession.add(
-        PartySession.fromPartySession(partySession, isSessionActive: false));
+    _partySession.add(PartySession.fromPartySession(partySession,
+        newServerTime: 0,
+        newServerTimeLastUpdatedTime: 0,
+        isSessionActive: false));
   }
 
   void setAsSessionActive() {

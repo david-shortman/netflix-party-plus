@@ -2,6 +2,8 @@ import 'package:np_plus/domains/user/LocalUser.dart';
 import 'package:np_plus/store/LocalUserStore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../vaults/DefaultsVault.dart';
+
 class LocalUserService {
   LocalUserStore _localUserStore;
 
@@ -15,9 +17,12 @@ class LocalUserService {
 
   Future<LocalUser> getLocalUser() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String username =
+        await sharedPreferences.getString("username") ?? "Mobile User";
     return LocalUser(
-      username: await sharedPreferences.getString("username") ?? "Mobile User",
-      icon: await sharedPreferences.getString("userIcon") ?? "Batman.svg",
+      username: username != "" ? username : DefaultsVault.DEFAULT_AVATAR,
+      icon: await sharedPreferences.getString("userIcon") ??
+          DefaultsVault.DEFAULT_AVATAR,
       id: await sharedPreferences.getString("userId"),
     );
   }

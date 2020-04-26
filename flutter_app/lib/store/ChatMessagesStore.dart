@@ -15,6 +15,10 @@ class ChatMessagesStore {
     _chatMessages.add(combinedChatMessages);
   }
 
+  void clearMessages() {
+    _chatMessages.add([]);
+  }
+
   void removeChatMessage(ChatMessage chatMessage) {
     _chatMessages.add(_chatMessages.value
         .where((message) => message != chatMessage)

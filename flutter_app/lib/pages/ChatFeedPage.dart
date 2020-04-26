@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:np_plus/vaults/DefaultsVault.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/chat-message/SendMessageBody.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/chat-message/SendMessageContent.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/chat-message/SendMessageMessage.dart';
@@ -21,14 +22,14 @@ import 'package:np_plus/theming/AvatarColors.dart';
 import 'package:np_plus/utilities/TimeUtility.dart';
 import 'package:rxdart/rxdart.dart';
 
-class ChatFeed extends StatefulWidget {
-  ChatFeed({Key key}) : super(key: key);
+class ChatFeedPage extends StatefulWidget {
+  ChatFeedPage({Key key}) : super(key: key);
 
   @override
-  _ChatFeedState createState() => _ChatFeedState(key: key);
+  _ChatFeedPageState createState() => _ChatFeedPageState(key: key);
 }
 
-class _ChatFeedState extends State<ChatFeed> {
+class _ChatFeedPageState extends State<ChatFeedPage> {
   final _messenger = getIt.get<SocketMessengerService>();
 
   final npServerInfoStore = getIt.get<PartySessionStore>();
@@ -45,7 +46,7 @@ class _ChatFeedState extends State<ChatFeed> {
 
   int _lastMessagesCount = 0;
 
-  _ChatFeedState({Key key}) {
+  _ChatFeedPageState({Key key}) {
     _setupNewChatMessagesListener();
   }
 
@@ -55,8 +56,9 @@ class _ChatFeedState extends State<ChatFeed> {
 
   void _onChatMessagesChanged(List<ChatMessage> chatMessages) {
     if (chatMessages.length > _lastMessagesCount) {
-      if (_chatScrollController != null) {
-        _scrollToBottomOfChatStream();
+      if (_chatScrollController?.position != null) {
+        WidgetsBinding.instance
+            .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
       }
       HapticFeedback.mediumImpact();
     }
@@ -93,7 +95,7 @@ class _ChatFeedState extends State<ChatFeed> {
           user: ChatUser(
               name: localUser?.username,
               uid: localUser?.id,
-              avatar: localUser?.icon ?? 'Batman.svg',
+              avatar: localUser?.icon ?? DefaultsVault.DEFAULT_AVATAR,
               containerColor: AvatarColors.getColor(localUser?.icon ?? '')),
           text: _messageInputText,
           textController: _messageInputTextEditingController,
@@ -145,8 +147,10 @@ class _ChatFeedState extends State<ChatFeed> {
                       shape: BoxShape.circle),
                 );
               }
-              return SvgPicture.asset('assets/avatars/${chatUser?.avatar}',
-                  height: 35);
+              String avatar = chatUser?.avatar != ''
+                  ? chatUser?.avatar ?? DefaultsVault.DEFAULT_AVATAR
+                  : DefaultsVault.DEFAULT_AVATAR;
+              return SvgPicture.asset('assets/avatars/${avatar}', height: 35);
             },
           ),
           onLongPressAvatar: (user) {

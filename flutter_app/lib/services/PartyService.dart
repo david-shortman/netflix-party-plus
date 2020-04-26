@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dash_chat/dash_chat.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:np_plus/domains/avatar/Avatar.dart';
 import 'package:np_plus/domains/media-controls/VideoState.dart';
 import 'package:np_plus/domains/messages/incoming-messages/ErrorMessage.dart';
@@ -22,10 +21,10 @@ import 'package:np_plus/domains/messages/outgoing-messages/join-session/JoinSess
 import 'package:np_plus/domains/messages/outgoing-messages/join-session/UserSettings.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/server-time/GetServerTimeContent.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/server-time/GetServerTimeMessage.dart';
+import 'package:np_plus/domains/playback/PlaybackInfo.dart';
 import 'package:np_plus/services/SocketMessengerService.dart';
 import 'package:np_plus/domains/server/ServerInfo.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
-import 'package:np_plus/playback/PlaybackInfo.dart';
 import 'package:np_plus/services/LocalUserService.dart';
 import 'package:np_plus/services/SomeoneIsTypingService.dart';
 import 'package:np_plus/services/ToastService.dart';
@@ -175,6 +174,12 @@ class PartyService {
 
   void _onConnectionClosed() {
     _partySessionStore.setAsSessionInactive();
+    if (_pingServerTimer.isActive) {
+      _pingServerTimer.cancel();
+    }
+    if (_getServerTimeTimer.isActive) {
+      _getServerTimeTimer.cancel();
+    }
   }
 
   void _sendGetServerTimeMessage() {

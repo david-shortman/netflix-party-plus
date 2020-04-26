@@ -6,7 +6,9 @@ import 'package:np_plus/main.dart';
 import 'package:np_plus/services/PartyService.dart';
 import 'package:np_plus/services/ToastService.dart';
 import 'package:np_plus/store/PartySessionStore.dart';
+import 'package:np_plus/vaults/LabelVault.dart';
 import 'package:progress_button/progress_button.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LandingPage extends StatefulWidget {
@@ -15,15 +17,29 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-  bool _isAttemptingToJoinSessionFromText = false;
-  bool _isAttemptingToJoinSessionFromQR = false;
   TextEditingController _urlTextController = TextEditingController();
+  final BehaviorSubject<bool> _isAttemptingToJoinSessionFromQR$ =
+      BehaviorSubject.seeded(false);
+  final BehaviorSubject<bool> _isAttemptingToJoinSessionFromText$ =
+      BehaviorSubject.seeded(false);
 
   final _npServerInfoStore = getIt.get<PartySessionStore>();
   final _toastService = getIt.get<ToastService>();
   final _partyService = getIt.get<PartyService>();
 
   _LandingPageState();
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadLastPartyUrl();
+  }
+
+  void _loadLastPartyUrl() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _urlTextController.text = prefs.getString("lastPartyUrl") ?? "";
+  }
 
   @override
   Widget build(BuildContext ctxt) {
@@ -45,13 +61,13 @@ class _LandingPageState extends State<LandingPage> {
       Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            "Party URL",
+            LabelVault.LANDING_PAGE_TITLE,
             textAlign: TextAlign.left,
-            style: TextStyle(fontSize: 20),
+            style: TextStyle(fontSize: 24),
           )),
     );
     widgets.add(Padding(
-      padding: EdgeInsets.all(4),
+      padding: EdgeInsets.all(10),
     ));
     widgets.add(CupertinoTextField(
       textInputAction: TextInputAction.go,
@@ -59,25 +75,36 @@ class _LandingPageState extends State<LandingPage> {
         _onConnectIntent();
       },
       controller: _urlTextController,
-      placeholder: 'Enter URL',
+      placeholder: LabelVault.URL_FIELD_PLACEHOLDER,
+      placeholderStyle:
+          TextStyle(color: Theme.of(context).primaryTextTheme.display1.color),
       style: Theme.of(context).primaryTextTheme.body1,
       clearButtonMode: OverlayVisibilityMode.editing,
+      keyboardType: TextInputType.url,
     ));
-    widgets.add(Padding(
-      padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
-      child: ProgressButton(
-        child: Text(
-          _isAttemptingToJoinSessionFromText ? "" : "Connect to Party",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        onPressed: _onConnectIntent,
-        buttonState: _isAttemptingToJoinSessionFromText
-            ? ButtonState.inProgress
-            : ButtonState.normal,
-        backgroundColor: Theme.of(context).primaryColor,
-        progressColor: Colors.white,
-      ),
-    ));
+    widgets.add(StreamBuilder(
+        stream: _isAttemptingToJoinSessionFromText$.stream,
+        builder: (context,
+            AsyncSnapshot<bool> isAttemptingToJoinSessionFromTextSnapshot) {
+          bool isAttemptingToJoinSessionFromText =
+              isAttemptingToJoinSessionFromTextSnapshot.data;
+          return Padding(
+            padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
+            child: ProgressButton(
+              child: Text(
+                isAttemptingToJoinSessionFromText ?? LabelVault.CONNECT_TO_PARTY_BUTTON ? "" : LabelVault.CONNECT_TO_PARTY_BUTTON,
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              onPressed: _onConnectIntent,
+              buttonState: isAttemptingToJoinSessionFromText
+                  ? ButtonState.inProgress
+                  : ButtonState.normal,
+              backgroundColor: Theme.of(context).primaryColor,
+              progressColor: Colors.white,
+            ),
+          );
+        }));
     widgets.add(Padding(
         padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
         child: Text(
@@ -103,18 +130,28 @@ class _LandingPageState extends State<LandingPage> {
                 "3. Paste the link there to create a scannable QR code"))));
     widgets.add(Padding(
       padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
-      child: ProgressButton(
-        child: Text(
-          _isAttemptingToJoinSessionFromQR ? "" : "Scan QR Code",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        onPressed: _onScanQRPressed,
-        buttonState: _isAttemptingToJoinSessionFromQR
-            ? ButtonState.inProgress
-            : ButtonState.normal,
-        backgroundColor: Theme.of(context).primaryColor,
-        progressColor: Colors.white,
-      ),
+      child: StreamBuilder(
+          stream: _isAttemptingToJoinSessionFromQR$.stream,
+          builder: (context,
+              AsyncSnapshot<bool> isAttemptingToJoinSessionFromQRSnapshot) {
+            bool isAttemptingToJoinSessionFromQR =
+                isAttemptingToJoinSessionFromQRSnapshot.data;
+            return ProgressButton(
+              child: Text(
+                isAttemptingToJoinSessionFromQR ?? LabelVault.CONNECT_TO_PARTY_BUTTON
+                    ? ""
+                    : LabelVault.SCAN_QR_BUTTON,
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              onPressed: _onScanQRPressed,
+              buttonState: isAttemptingToJoinSessionFromQR
+                  ? ButtonState.inProgress
+                  : ButtonState.normal,
+              backgroundColor: Theme.of(context).primaryColor,
+              progressColor: Colors.white,
+            );
+          }),
     ));
     return widgets;
   }
@@ -123,14 +160,12 @@ class _LandingPageState extends State<LandingPage> {
     var result = await BarcodeScanner.scan();
     _urlTextController.text = result;
     _connectToServer();
-    setState(() {
-      _isAttemptingToJoinSessionFromQR = true;
-    });
+    _isAttemptingToJoinSessionFromQR$.add(true);
   }
 
   void _onConnectIntent() {
     setState(() {
-      _isAttemptingToJoinSessionFromText = true;
+      _isAttemptingToJoinSessionFromText$.add(true);
     });
     _connectToServer();
   }
@@ -152,9 +187,7 @@ class _LandingPageState extends State<LandingPage> {
 
   void _onConnectFailed() {
     _toastService.showToastMessage("Invalid Link");
-    setState(() {
-      _isAttemptingToJoinSessionFromText = false;
-      _isAttemptingToJoinSessionFromQR = false;
-    });
+    _isAttemptingToJoinSessionFromText$.add(false);
+    _isAttemptingToJoinSessionFromQR$.add(false);
   }
 }
