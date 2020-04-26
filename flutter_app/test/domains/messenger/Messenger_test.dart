@@ -13,6 +13,7 @@ class MockSocketMessage extends Mock implements SocketMessage {}
 void main() {
   group('messenger unit tests', () {
     test('that when sendMessage is called the message is built and sent', () {
+      expect(true, isTrue);
 //      SocketMessenger messenger = SocketMessenger();
 //
 //      String message = "what's up";
