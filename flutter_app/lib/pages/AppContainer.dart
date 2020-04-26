@@ -132,14 +132,17 @@ class _AppContainerState extends State<AppContainer>
   }
 
   Widget _getPartyPage() {
-    return SizedBox(
-        height: MediaQuery.of(context).size.height - 210,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(6, 0, 6, 0),
-          child: ChatFeedPage(
-            key: chatUniqueKey,
-          ),
-        ));
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SizedBox(
+          height: MediaQuery.of(context).size.height - 76,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(6, 0, 6, 110),
+            child: ChatFeedPage(
+              key: chatUniqueKey,
+            ),
+          )),
+    );
   }
 
   Future<void> _showChangelogDialog() async {
