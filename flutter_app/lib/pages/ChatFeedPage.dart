@@ -37,6 +37,8 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
   final _chatMessagesStore = getIt.get<ChatMessagesStore>();
   final _localUserStore = getIt.get<LocalUserStore>();
 
+  StreamSubscription<List<ChatMessage>> _chatMessageListener;
+
   final ScrollController _chatScrollController = ScrollController();
 
   final ServerTimeUtility _serverTimeUtility = ServerTimeUtility();
@@ -46,19 +48,17 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   int _lastMessagesCount = 0;
 
-  _ChatFeedPageState({Key key}) {
-    _setupNewChatMessagesListener();
-  }
+  _ChatFeedPageState({Key key});
 
   void _setupNewChatMessagesListener() {
-    _chatMessagesStore.stream$
+    _chatMessageListener = _chatMessagesStore.stream$
         .debounceTime(Duration(milliseconds: 100))
         .listen(_onChatMessagesChanged);
   }
 
   void _onChatMessagesChanged(List<ChatMessage> chatMessages) {
     if (chatMessages.length > _lastMessagesCount) {
-      if (_chatScrollController?.position != null) {
+      if (_chatScrollController.hasClients) {
         WidgetsBinding.instance
             .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
       }
@@ -69,7 +69,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   void _scrollToBottomOfChatStream() {
     _chatScrollController.animateTo(
-        _chatScrollController.position.maxScrollExtent + 80,
+        _chatScrollController.position.maxScrollExtent,
         duration: Duration(milliseconds: 300),
         curve: Curves.linear);
   }
@@ -80,6 +80,9 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_chatMessageListener == null) {
+      _setupNewChatMessagesListener();
+    }
     return StreamBuilder(
       stream: _chatMessagesStore.stream$.withLatestFrom(
           _localUserStore.stream$,
@@ -169,13 +172,13 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
             HapticFeedback.lightImpact();
             _showUserBubbleAsAvatar.add(!_showUserBubbleAsAvatar.value);
           },
-          messageTextBuilder: (text) {
+          messageTextBuilder: (text, [chatMessage]) {
             return Text(
               text,
               style: TextStyle(color: Colors.white),
             );
           },
-          messageTimeBuilder: (time) {
+          messageTimeBuilder: (time, [chatMessage]) {
             return Text(
               time,
               style: TextStyle(color: Colors.white, fontSize: 10),
@@ -208,5 +211,11 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
     setState(() {
       _messageInputText = text;
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _chatMessageListener.cancel();
   }
 }

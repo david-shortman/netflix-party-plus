@@ -1,3 +1,4 @@
+import 'package:np_plus/domains/media-controls/VideoState.dart';
 import 'package:np_plus/domains/playback/PlaybackInfo.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -8,14 +9,17 @@ class PlaybackInfoStore {
   ValueStream<PlaybackInfo> get stream$ => _playbackInfo.stream;
   PlaybackInfo get playbackInfo => _playbackInfo.value;
 
-  void updateAsPaused() {
-    _playbackInfo
-        .add(PlaybackInfo.fromPlaybackInfo(playbackInfo, newIsPlaying: false));
+  bool isPlaying() {
+    return playbackInfo.isPlaying;
   }
 
-  void updateAsPlaying() {
-    _playbackInfo
-        .add(PlaybackInfo.fromPlaybackInfo(playbackInfo, newIsPlaying: true));
+  String getVideoState() {
+    return playbackInfo.isPlaying ? VideoState.PLAYING : VideoState.PAUSED;
+  }
+
+  void updateVideoState(String videoState) {
+    _playbackInfo.add(PlaybackInfo.fromPlaybackInfo(playbackInfo,
+        newIsPlaying: videoState == VideoState.PLAYING));
   }
 
   void updateLastKnownMoviePosition(int newLastKnownMoviePosition) {

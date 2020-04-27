@@ -128,7 +128,7 @@ class _AppContainerState extends State<AppContainer>
                   builder:
                       (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
                     return Visibility(
-                        visible: !isKeyboardVisibleSnapshot.data,
+                        visible: !(isKeyboardVisibleSnapshot.data ?? false),
                         child: ControlPanel());
                   },
                 )
@@ -144,7 +144,10 @@ class _AppContainerState extends State<AppContainer>
       child: StreamBuilder(
           stream: _isKeyboardVisible.stream,
           builder: (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
-            double bottomPadding = isKeyboardVisibleSnapshot.data ? 10 : 110;
+            double bottomPadding = isKeyboardVisibleSnapshot.data != null &&
+                    isKeyboardVisibleSnapshot.data
+                ? 10
+                : 110;
             return SizedBox(
                 height: MediaQuery.of(context).size.height - 76,
                 child: Padding(
