@@ -37,6 +37,8 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
   final _chatMessagesStore = getIt.get<ChatMessagesStore>();
   final _localUserStore = getIt.get<LocalUserStore>();
 
+  StreamSubscription<List<ChatMessage>> _chatMessageListener;
+
   final ScrollController _chatScrollController = ScrollController();
 
   final ServerTimeUtility _serverTimeUtility = ServerTimeUtility();
@@ -49,7 +51,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
   _ChatFeedPageState({Key key});
 
   void _setupNewChatMessagesListener() {
-    _chatMessagesStore.stream$
+    _chatMessageListener = _chatMessagesStore.stream$
         .debounceTime(Duration(milliseconds: 100))
         .listen(_onChatMessagesChanged);
   }
@@ -207,5 +209,11 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
     setState(() {
       _messageInputText = text;
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _chatMessageListener.cancel();
   }
 }
