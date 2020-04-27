@@ -128,7 +128,7 @@ class _AppContainerState extends State<AppContainer>
                   builder:
                       (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
                     return Visibility(
-                        visible: !isKeyboardVisibleSnapshot.data,
+                        visible: !(isKeyboardVisibleSnapshot.data ?? false),
                         child: ControlPanel());
                   },
                 )

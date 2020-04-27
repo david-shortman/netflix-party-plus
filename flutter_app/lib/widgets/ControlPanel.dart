@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:np_plus/GetItInstance.dart';
+import 'package:np_plus/services/PartyService.dart';
 import 'package:np_plus/vaults/DefaultsVault.dart';
 import 'package:np_plus/domains/media-controls/VideoState.dart';
-import 'package:np_plus/domains/messages/outgoing-messages/update-session/UpdateSessionContent.dart';
-import 'package:np_plus/domains/messages/outgoing-messages/update-session/UpdateSessionMessage.dart';
 import 'package:np_plus/domains/server/ServerInfo.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
 import 'package:np_plus/pages/UserSettingsPage.dart';
@@ -28,8 +27,8 @@ class _ControlPanelState extends State<ControlPanel> {
   final _localUserStore = getIt.get<LocalUserStore>();
   final _playbackInfoStore = getIt.get<PlaybackInfoStore>();
   final _messengerService = getIt.get<SocketMessengerService>();
+  final _partyService = getIt.get<PartyService>();
   final _panelController = PanelController();
-  int _videoDuration = 655550;
 
   _ControlPanelState({Key key});
 
@@ -149,31 +148,14 @@ class _ControlPanelState extends State<ControlPanel> {
 
   void _onReplay10Pressed() {
     HapticFeedback.lightImpact();
-    _adjustVideoPositionBy(-10000);
+    _partyService.updateVideoState(_playbackInfoStore.getVideoState(),
+        diff: -10000);
   }
 
   void _onForward10Pressed() {
     HapticFeedback.lightImpact();
-    _adjustVideoPositionBy(10000);
-  }
-
-  void _adjustVideoPositionBy(int diff) {
-    debugPrint('media playing is ${_playbackInfoStore.isPlaying()}');
-    if (_playbackInfoStore.isPlaying()) {
-      _playbackInfoStore.updateLastKnownMoviePosition(
-          _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate() + diff);
-    } else {
-      _playbackInfoStore.updateLastKnownMoviePosition(
-          _playbackInfoStore.playbackInfo.lastKnownMoviePosition + diff);
-    }
-    int estimatedServerTime = _partySessionStore.partySession
-        .getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
-    debugPrint('changing time by $diff');
-    _updateSessionContent(
-        _playbackInfoStore.isPlaying() ? VideoState.PLAYING : VideoState.PAUSED,
-        _playbackInfoStore.playbackInfo.lastKnownMoviePosition,
-        estimatedServerTime);
-    _playbackInfoStore.updateServerTimeAtLastUpdate(estimatedServerTime);
+    _partyService.updateVideoState(_playbackInfoStore.getVideoState(),
+        diff: 10000);
   }
 
   Widget _getPlaybackControlButton() {
@@ -213,28 +195,12 @@ class _ControlPanelState extends State<ControlPanel> {
 
   void _onPlayPressed() {
     HapticFeedback.lightImpact();
-    _playbackInfoStore.updateAsPlaying();
-    int estimatedServerTime = _partySessionStore.partySession
-        .getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
-    _updateSessionContent(
-        VideoState.PLAYING,
-        _playbackInfoStore.playbackInfo.lastKnownMoviePosition,
-        estimatedServerTime);
-    _playbackInfoStore.updateServerTimeAtLastUpdate(estimatedServerTime);
+    _partyService.updateVideoState(VideoState.PLAYING);
   }
 
   void _onPausePressed() {
     HapticFeedback.lightImpact();
-    _playbackInfoStore.updateAsPaused();
-    _playbackInfoStore.updateLastKnownMoviePosition(
-        _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate());
-    int estimatedServerTime = _partySessionStore.partySession
-        .getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
-    _updateSessionContent(
-        VideoState.PAUSED,
-        _playbackInfoStore.playbackInfo.lastKnownMoviePosition,
-        estimatedServerTime);
-    _playbackInfoStore.updateServerTimeAtLastUpdate(estimatedServerTime);
+    _partyService.updateVideoState(VideoState.PAUSED);
   }
 
   void _navigateToAccountSettings(buildContext) async {
@@ -243,31 +209,5 @@ class _ControlPanelState extends State<ControlPanel> {
       context,
       MaterialPageRoute(builder: (context) => UserSettingsPage()),
     );
-  }
-
-  int _getMillisecondsPassedSinceLastVideoStateUpdate() {
-    return _getCurrentTimeMillisecondsSinceEpoch() -
-        _playbackInfoStore.playbackInfo.serverTimeAtLastVideoStateUpdate;
-  }
-
-  int _getCurrentTimeMillisecondsSinceEpoch() {
-    return DateTime.now().millisecondsSinceEpoch;
-  }
-
-  int _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate() {
-    return _playbackInfoStore.playbackInfo.lastKnownMoviePosition +
-        _getMillisecondsPassedSinceLastVideoStateUpdate();
-  }
-
-  void _updateSessionContent(
-      String mediaState, int videoPosition, int lastKnownTimeUpdatedAt) {
-    _messengerService.sendMessage(UpdateSessionMessage(UpdateSessionContent(
-        videoPosition,
-        lastKnownTimeUpdatedAt,
-        mediaState,
-        null,
-        null,
-        _videoDuration,
-        false)));
   }
 }

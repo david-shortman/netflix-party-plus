@@ -21,6 +21,8 @@ import 'package:np_plus/domains/messages/outgoing-messages/join-session/JoinSess
 import 'package:np_plus/domains/messages/outgoing-messages/join-session/UserSettings.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/server-time/GetServerTimeContent.dart';
 import 'package:np_plus/domains/messages/outgoing-messages/server-time/GetServerTimeMessage.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/update-session/UpdateSessionContent.dart';
+import 'package:np_plus/domains/messages/outgoing-messages/update-session/UpdateSessionMessage.dart';
 import 'package:np_plus/domains/playback/PlaybackInfo.dart';
 import 'package:np_plus/services/SocketMessengerService.dart';
 import 'package:np_plus/domains/server/ServerInfo.dart';
@@ -34,7 +36,7 @@ import 'package:np_plus/store/PlaybackInfoStore.dart';
 import 'package:np_plus/theming/AvatarColors.dart';
 
 class PartyService {
-  SocketMessengerService _messenger;
+  SocketMessengerService _messengerService;
   ToastService _toastService;
   PlaybackInfoStore _playbackInfoStore;
   ChatMessagesStore _chatMessagesStore;
@@ -44,6 +46,8 @@ class PartyService {
   Timer _getServerTimeTimer;
   Timer _pingServerTimer;
   PartySession _lastPartySession;
+  // TODO: should probably update this value
+  int _videoDuration = 655550;
 
   PartyService(
       SocketMessengerService socketMessenger,
@@ -53,7 +57,7 @@ class PartyService {
       ChatMessagesStore chatMessagesStore,
       SomeoneIsTypingService someoneIsTypingService,
       PartySessionStore partySessionStore) {
-    _messenger = socketMessenger;
+    _messengerService = socketMessenger;
     _toastService = toastService;
     _playbackInfoStore = playbackInfoStore;
     _localUserService = localUserService;
@@ -71,7 +75,7 @@ class PartyService {
     if (partySession == null) {
       partySession = _lastPartySession;
     }
-    _messenger.establishConnection(
+    _messengerService.establishConnection(
         "wss://${partySession.getServerId()}.netflixparty.com/socket.io/?EIO=3&transport=websocket",
         _onReceivedStreamMessage,
         _onConnectionClosed,
@@ -146,7 +150,7 @@ class PartyService {
     }
     _pingServerTimer = Timer.periodic(
         Duration(milliseconds: sidMessage.pingInterval),
-        (Timer t) => _messenger.sendRawMessage("2"));
+        (Timer t) => _messengerService.sendRawMessage("2"));
   }
 
   void _onUpdateMessageReceived(UpdateMessage updateMessage) {
@@ -183,7 +187,7 @@ class PartyService {
 
   void _sendGetServerTimeMessage() {
     GetServerTimeContent getServerTimeContent = GetServerTimeContent("1.7.8");
-    _messenger.sendMessage(GetServerTimeMessage(getServerTimeContent));
+    _messengerService.sendMessage(GetServerTimeMessage(getServerTimeContent));
   }
 
   void _joinSession(String sessionIdForJoin) async {
@@ -192,7 +196,7 @@ class PartyService {
         UserSettings(true, localUser.icon, localUser.id, localUser.username);
     JoinSessionContent joinSessionContent =
         JoinSessionContent(sessionIdForJoin, localUser.id, userSettings);
-    _messenger.sendMessage(JoinSessionMessage(joinSessionContent));
+    _messengerService.sendMessage(JoinSessionMessage(joinSessionContent));
     _partySessionStore.setAsSessionActive();
   }
 
@@ -214,6 +218,50 @@ class PartyService {
 
   void _sendNotBufferingMessage() {
     BufferingContent bufferingContent = BufferingContent(false);
-    _messenger.sendMessage(BufferingMessage(bufferingContent));
+    _messengerService.sendMessage(BufferingMessage(bufferingContent));
+  }
+
+  void updateVideoState(String videoState, {int diff = 0}) {
+    if (_playbackInfoStore.isPlaying()) {
+      _playbackInfoStore.updateLastKnownMoviePosition(
+          _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate() + diff);
+    } else {
+      _playbackInfoStore.updateLastKnownMoviePosition(
+          _playbackInfoStore.playbackInfo.lastKnownMoviePosition + diff);
+    }
+    _playbackInfoStore.updateVideoState(videoState);
+    int estimatedServerTime = _partySessionStore.partySession
+        .getServerTimeAdjustedForTimeSinceLastServerTimeUpdate();
+    _updateSessionContent(
+        videoState,
+        _playbackInfoStore.playbackInfo.lastKnownMoviePosition,
+        estimatedServerTime);
+    _playbackInfoStore.updateServerTimeAtLastUpdate(estimatedServerTime);
+  }
+
+  void _updateSessionContent(
+      String mediaState, int videoPosition, int lastKnownTimeUpdatedAt) {
+    _messengerService.sendMessage(UpdateSessionMessage(UpdateSessionContent(
+        videoPosition,
+        lastKnownTimeUpdatedAt,
+        mediaState,
+        null,
+        null,
+        _videoDuration,
+        false)));
+  }
+
+  int _getMillisecondsPassedSinceLastVideoStateUpdate() {
+    return _getCurrentTimeMillisecondsSinceEpoch() -
+        _playbackInfoStore.playbackInfo.serverTimeAtLastVideoStateUpdate;
+  }
+
+  int _getCurrentTimeMillisecondsSinceEpoch() {
+    return DateTime.now().millisecondsSinceEpoch;
+  }
+
+  int _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate() {
+    return _playbackInfoStore.playbackInfo.lastKnownMoviePosition +
+        _getMillisecondsPassedSinceLastVideoStateUpdate();
   }
 }
