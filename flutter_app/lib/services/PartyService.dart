@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dash_chat/dash_chat.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:np_plus/domains/avatar/Avatar.dart';
 import 'package:np_plus/domains/media-controls/VideoState.dart';
 import 'package:np_plus/domains/messages/incoming-messages/ErrorMessage.dart';
@@ -46,8 +47,6 @@ class PartyService {
   Timer _getServerTimeTimer;
   Timer _pingServerTimer;
   PartySession _lastPartySession;
-  // TODO: should probably update this value
-  int _videoDuration = 655550;
 
   PartyService(
       SocketMessengerService socketMessenger,
@@ -157,7 +156,8 @@ class PartyService {
     _playbackInfoStore.updatePlaybackInfo(PlaybackInfo(
         serverTimeAtLastVideoStateUpdate: updateMessage.lastKnownTimeUpdatedAt,
         lastKnownMoviePosition: updateMessage.lastKnownTime,
-        isPlaying: updateMessage.state == VideoState.PLAYING));
+        isPlaying: updateMessage.state == VideoState.PLAYING,
+        videoDuration: updateMessage.videoDuration));
     _sendNotBufferingMessage();
   }
 
@@ -221,13 +221,18 @@ class PartyService {
     _messengerService.sendMessage(BufferingMessage(bufferingContent));
   }
 
-  void updateVideoState(String videoState, {int diff = 0}) {
-    if (_playbackInfoStore.isPlaying()) {
-      _playbackInfoStore.updateLastKnownMoviePosition(
-          _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate() + diff);
+  void updateVideoState(String videoState, {int diff = 0, double percentage}) {
+    if (percentage != null) {
+      int newVideoPosition = (percentage * (_playbackInfoStore.playbackInfo.videoDuration ?? 0.0)).floor();
+      _playbackInfoStore.updateLastKnownMoviePosition(newVideoPosition);
     } else {
-      _playbackInfoStore.updateLastKnownMoviePosition(
-          _playbackInfoStore.playbackInfo.lastKnownMoviePosition + diff);
+      if (_playbackInfoStore.isPlaying()) {
+        _playbackInfoStore.updateLastKnownMoviePosition(
+            _getVideoPositionAdjustedForTimeSinceLastVideoStateUpdate() + diff);
+      } else {
+        _playbackInfoStore.updateLastKnownMoviePosition(
+            _playbackInfoStore.playbackInfo.lastKnownMoviePosition + diff);
+      }
     }
     _playbackInfoStore.updateVideoState(videoState);
     int estimatedServerTime = _partySessionStore.partySession
@@ -247,7 +252,7 @@ class PartyService {
         mediaState,
         null,
         null,
-        _videoDuration,
+        _playbackInfoStore.playbackInfo.videoDuration,
         false)));
   }
 

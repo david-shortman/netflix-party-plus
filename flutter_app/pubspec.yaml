@@ -23,6 +23,7 @@ dependencies:
   flutter_markdown: ^0.3.5
   rxdart: ^0.24.0
   get_it: ^4.0.1
+  seekbar: ^0.0.2
 
 dev_dependencies:
   flutter_test:
