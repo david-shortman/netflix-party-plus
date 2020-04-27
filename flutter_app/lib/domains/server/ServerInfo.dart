@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 class PartySession {
   String _sessionId;
   String _serverId;
@@ -37,7 +35,6 @@ class PartySession {
     return _serverTime +
         DateTime.now().millisecondsSinceEpoch -
         _serverTimeLastUpdatedTime;
-    ;
   }
 
   PartySession();
