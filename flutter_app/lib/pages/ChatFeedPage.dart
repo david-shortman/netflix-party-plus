@@ -80,7 +80,9 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   @override
   Widget build(BuildContext context) {
-    _setupNewChatMessagesListener();
+    if (_chatMessageListener == null) {
+      _setupNewChatMessagesListener();
+    }
     return StreamBuilder(
       stream: _chatMessagesStore.stream$.withLatestFrom(
           _localUserStore.stream$,
