@@ -163,10 +163,13 @@ class PartyService {
 
   void _onCatchupMessageReceived(
       VideoIdAndMessageCatchupMessage catchupMessage) {
+    debugPrint('catchup ${catchupMessage.lastKnownTime} ${catchupMessage.lastKnownTimeRemaining}');
     _playbackInfoStore.updatePlaybackInfo(PlaybackInfo(
         serverTimeAtLastVideoStateUpdate: catchupMessage.lastKnownTimeUpdatedAt,
         lastKnownMoviePosition: catchupMessage.lastKnownTime,
-        isPlaying: catchupMessage.state == VideoState.PLAYING));
+        isPlaying: catchupMessage.state == VideoState.PLAYING,
+        videoDuration: catchupMessage.lastKnownTime +
+            catchupMessage.lastKnownTimeRemaining));
     _addChatMessages(catchupMessage.userMessages);
     _sendNotBufferingMessage();
   }
@@ -223,7 +226,9 @@ class PartyService {
 
   void updateVideoState(String videoState, {int diff = 0, double percentage}) {
     if (percentage != null) {
-      int newVideoPosition = (percentage * (_playbackInfoStore.playbackInfo.videoDuration ?? 0.0)).floor();
+      int newVideoPosition =
+          (percentage * (_playbackInfoStore.playbackInfo.videoDuration ?? 0.0))
+              .floor();
       _playbackInfoStore.updateLastKnownMoviePosition(newVideoPosition);
     } else {
       if (_playbackInfoStore.isPlaying()) {

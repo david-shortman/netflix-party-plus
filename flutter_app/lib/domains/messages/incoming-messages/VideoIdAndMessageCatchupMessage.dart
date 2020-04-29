@@ -7,6 +7,7 @@ class VideoIdAndMessageCatchupMessage extends ReceivedMessage {
   int lastKnownTimeUpdatedAt;
   String state;
   List<UserMessage> userMessages;
+  int lastKnownTimeRemaining;
 
   VideoIdAndMessageCatchupMessage(Map<String, dynamic> objectFromMessage) {
     videoId = objectFromMessage['videoId'];
@@ -15,6 +16,7 @@ class VideoIdAndMessageCatchupMessage extends ReceivedMessage {
     state = objectFromMessage['state'];
     lastKnownTime = objectFromMessage['lastKnownTime'];
     lastKnownTimeUpdatedAt = objectFromMessage['lastKnownTimeUpdatedAt'];
+    lastKnownTimeRemaining = objectFromMessage['lastKnownTimeRemaining'];
     Iterator<dynamic> messageIterator = messageArray.iterator;
     while (messageIterator.moveNext()) {
       userMessages.add(UserMessage(messageIterator.current));

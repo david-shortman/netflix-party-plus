@@ -19,7 +19,9 @@ class PartyHarderTheme {
         brightness: Brightness.dark,
         primaryColor: Colors.red,
         accentColor: Colors.red,
-        bottomAppBarColor: Colors.black87,
+        bottomAppBarColor: Color.fromRGBO(30, 30, 30, 1),
+        backgroundColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black,
 //        dialogBackgroundColor: Colors.black38,
         primaryTextTheme: TextTheme(
             body1: TextStyle(color: Colors.white),

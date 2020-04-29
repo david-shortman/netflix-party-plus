@@ -147,7 +147,7 @@ class _AppContainerState extends State<AppContainer>
             double bottomPadding = isKeyboardVisibleSnapshot.data != null &&
                     isKeyboardVisibleSnapshot.data
                 ? 10
-                : 110;
+                : 130;
             return SizedBox(
                 height: MediaQuery.of(context).size.height - 76,
                 child: Padding(
