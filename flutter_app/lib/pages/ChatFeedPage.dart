@@ -32,23 +32,37 @@ class ChatFeedPage extends StatefulWidget {
 class _ChatFeedPageState extends State<ChatFeedPage> {
   final _messenger = getIt.get<SocketMessengerService>();
 
-  final npServerInfoStore = getIt.get<PartySessionStore>();
+  final _partySessionStore = getIt.get<PartySessionStore>();
   final _playbackInfoStore = getIt.get<PlaybackInfoStore>();
   final _chatMessagesStore = getIt.get<ChatMessagesStore>();
   final _localUserStore = getIt.get<LocalUserStore>();
 
   StreamSubscription<List<ChatMessage>> _chatMessageListener;
 
-  final ScrollController _chatScrollController = ScrollController();
+  ScrollController _chatScrollController = ScrollController();
 
   final ServerTimeUtility _serverTimeUtility = ServerTimeUtility();
 
   final BehaviorSubject<bool> _showUserBubbleAsAvatar =
       BehaviorSubject.seeded(true);
 
+  final GlobalKey _chatKey = GlobalKey<DashChatState>();
+
   int _lastMessagesCount = 0;
 
-  _ChatFeedPageState({Key key});
+  double _lastMaxScrollExtent = 0;
+  double _lastExtentAfterPosition = 0;
+
+  bool _shouldPreserveScrollPosition = false;
+
+  _ChatFeedPageState({Key key}) {
+    _chatScrollController.addListener(_onScrollControllerPositionChanged);
+  }
+
+  void _onScrollControllerPositionChanged() {
+    _lastExtentAfterPosition = _chatScrollController.position.extentAfter;
+    _lastMaxScrollExtent = _chatScrollController.position.maxScrollExtent;
+  }
 
   void _setupNewChatMessagesListener() {
     _chatMessageListener = _chatMessagesStore.stream$
@@ -58,6 +72,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   void _onChatMessagesChanged(List<ChatMessage> chatMessages) {
     if (chatMessages.length > _lastMessagesCount) {
+      _shouldPreserveScrollPosition = true;
       if (_chatScrollController.hasClients) {
         WidgetsBinding.instance
             .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
@@ -80,6 +95,17 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: fix scrolling jank (again)
+//    if (_chatScrollController.hasClients) {
+//          debugPrint('kk');
+//          double lastPosition = _lastMaxScrollExtent - _lastExtentAfterPosition;
+//          double changeInSize = _chatScrollController.position.maxScrollExtent - _lastMaxScrollExtent;
+//          WidgetsBinding.instance
+//          .addPostFrameCallback((_) {
+//              _chatScrollController.jumpTo(lastPosition + changeInSize);
+//      });
+//    }
+    debugPrint('rebuild');
     if (_chatMessageListener == null) {
       _setupNewChatMessagesListener();
     }
@@ -96,6 +122,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
         bool isDarkMode =
             MediaQuery.of(context).platformBrightness == Brightness.dark;
         return DashChat(
+          key: _chatKey,
           messages: streamSnapshot.data['chatMessages'],
           scrollController: _chatScrollController,
           scrollToBottom: false,
@@ -105,6 +132,14 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
               avatar: localUser?.icon ?? DefaultsVault.DEFAULT_AVATAR,
               containerColor: AvatarColors.getColor(localUser?.icon ?? '')),
           text: _messageInputText,
+          inputDecoration: InputDecoration(
+              hintText: "Send a message",
+              border: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              contentPadding: EdgeInsets.fromLTRB(2, 5, 0, 0)),
           textController: _messageInputTextEditingController,
           onTextChange: (newText) {
             _messenger.sendMessage(TypingMessage(TypingContent(true)));
@@ -198,7 +233,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
             chatMessage.text,
             false,
             _serverTimeUtility.getCurrentServerTimeAdjustedForCurrentTime(
-                npServerInfoStore.partySession.getServerTime(),
+                _partySessionStore.partySession.getServerTime(),
                 _playbackInfoStore
                     .playbackInfo.serverTimeAtLastVideoStateUpdate),
             _localUserStore.localUser.id,

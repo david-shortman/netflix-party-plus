@@ -67,6 +67,9 @@ class _AppContainerState extends State<AppContainer>
     _setupLocalUserListener();
     _setupSessionUpdatedListener();
     _dispatchShowChangelogIntent();
+    WidgetsBinding.instance.addObserver(this);
+    KeyboardVisibilityNotification()
+        .addNewListener(onChange: _isKeyboardVisible.add);
   }
 
   void _setupLocalUserListener() {
@@ -95,24 +98,35 @@ class _AppContainerState extends State<AppContainer>
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addObserver(this);
-    KeyboardVisibilityNotification()
-        .addNewListener(onChange: _isKeyboardVisible.add);
     return Scaffold(
-        appBar: AppBar(
-          title: RichText(
-            text: TextSpan(
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
-                children: [
-                  TextSpan(
-                    text: LabelVault.APP_TITLE_1,
-                    style: TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                  TextSpan(
-                    text: LabelVault.APP_TITLE_2,
-                  )
-                ]),
-          ),
+        appBar: CupertinoNavigationBar(
+          middle: StreamBuilder(
+              stream: _partySessionStore.stream$.withLatestFrom(
+                  _chatMessagesStore.chatUserStream$,
+                  (partySession, chatUsers) =>
+                      {'partySession': partySession, 'chatUsers': chatUsers}),
+              builder: (context, streamSnapshot) {
+                if (streamSnapshot.data == null) {
+                  return Container();
+                }
+                return RichText(
+                  text: TextSpan(
+                      style:
+                          TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
+                      children:
+                          streamSnapshot.data['partySession'].isSessionActive()
+                              ? [
+                                  TextSpan(
+                                      text:
+                                          "${streamSnapshot.data['chatUsers'].length} people")
+                                ]
+                              : [
+                                  TextSpan(
+                                    text: LabelVault.LANDING_PAGE_TITLE,
+                                  ),
+                                ]),
+                );
+              }),
           backgroundColor: Theme.of(context).primaryColor,
         ),
         body: StreamBuilder(
@@ -149,7 +163,7 @@ class _AppContainerState extends State<AppContainer>
                 ? 10
                 : 130;
             return SizedBox(
-                height: MediaQuery.of(context).size.height - 76,
+                height: MediaQuery.of(context).size.height - 64,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(6, 0, 6, bottomPadding),
                   child: ChatFeedPage(
