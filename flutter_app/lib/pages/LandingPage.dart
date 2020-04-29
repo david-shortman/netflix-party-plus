@@ -75,12 +75,15 @@ class _LandingPageState extends State<LandingPage> {
           return Padding(
             padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
             child: ProgressButton(
-              child: Text(
-                isAttemptingToJoinSessionFromText
-                    ? ""
-                    : '${LabelVault.CONNECT_TO_PARTY_BUTTON.toString()}',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  isAttemptingToJoinSessionFromText
+                      ? ""
+                      : '${LabelVault.CONNECT_TO_PARTY_BUTTON.toString()}',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               ),
               onPressed: _onConnectIntent,
               buttonState: isAttemptingToJoinSessionFromText

@@ -62,11 +62,14 @@ class _AppContainerState extends State<AppContainer>
 
   bool _isShowingChangelogDialog = false;
 
+  int _numChatUsers = 0;
+
   UniqueKey chatUniqueKey = UniqueKey();
 
   _AppContainerState() {
     _setupLocalUserListener();
     _setupSessionUpdatedListener();
+    _setupUsersListener();
     _dispatchShowChangelogIntent();
     WidgetsBinding.instance.addObserver(this);
     KeyboardVisibilityNotification()
@@ -75,6 +78,16 @@ class _AppContainerState extends State<AppContainer>
 
   void _setupLocalUserListener() {
     _localUserStore.stream$.listen(_onLocalUserChanged);
+  }
+
+  void _setupUsersListener() {
+    _chatMessagesStore.chatUserStream$.listen(_onChatUsersChanged);
+  }
+
+  void _onChatUsersChanged(List<ChatUser> chatUsers) {
+    setState(() {
+      _numChatUsers = chatUsers.length;
+    });
   }
 
   void _setupSessionUpdatedListener() {
@@ -100,83 +113,72 @@ class _AppContainerState extends State<AppContainer>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: StreamBuilder(
-          stream: _chatMessagesStore.isSomeoneTypingStream$,
-          builder: (context, AsyncSnapshot<bool> chatMessagesSnapshot) {
-            return Visibility(
-              visible: chatMessagesSnapshot.data ?? false,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 190),
-                child: Container(
-                  width: 200,
-                  height: 35,
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      "People are typing...",
-                      style: TextStyle(color: Colors.white),
-                    ),
+      appBar: CupertinoNavigationBar(
+        middle: StreamBuilder(
+            stream: _partySessionStore.isSessionActive$,
+            builder: (context, isSessionActiveSnapshot) {
+              bool isSessionActive = isSessionActiveSnapshot.data ?? false;
+              return RichText(
+                text: TextSpan(
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
+                    children: isSessionActive
+                        ? [TextSpan(text: "$_numChatUsers people")]
+                        : [
+                            TextSpan(
+                              text: LabelVault.LANDING_PAGE_TITLE,
+                            ),
+                          ]),
+              );
+            }),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+      body: StreamBuilder(
+        stream: _partySessionStore.isSessionActive$,
+        builder: (context, AsyncSnapshot<bool> isSessionActiveSnapshot) {
+          bool isSessionActive = isSessionActiveSnapshot.data ?? false;
+          return Stack(
+            children: <Widget>[
+              isSessionActive ? _getPartyPage() : LandingPage(),
+              StreamBuilder(
+                stream: _isKeyboardVisible.stream,
+                builder:
+                    (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
+                  return Visibility(
+                      visible: !(isKeyboardVisibleSnapshot.data ?? false),
+                      child: ControlPanel());
+                },
+              )
+            ],
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: StreamBuilder(
+        stream: _chatMessagesStore.isSomeoneTypingStream$,
+        builder: (context, AsyncSnapshot<bool> chatMessagesSnapshot) {
+          return Visibility(
+            visible: chatMessagesSnapshot.data ?? false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 190),
+              child: Container(
+                width: 200,
+                height: 35,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "People are typing...",
+                    style: TextStyle(color: Colors.white),
                   ),
-                  decoration: BoxDecoration(
-                      color: Color.fromRGBO(0, 0, 0, .5),
-                      borderRadius: BorderRadius.all(Radius.circular(12.0))),
                 ),
+                decoration: BoxDecoration(
+                    color: Color.fromRGBO(0, 0, 0, .5),
+                    borderRadius: BorderRadius.all(Radius.circular(12.0))),
               ),
-            );
-          },
-        ),
-        appBar: CupertinoNavigationBar(
-          middle: StreamBuilder(
-              stream: _partySessionStore.isSessionActive$.withLatestFrom(
-                  _chatMessagesStore.chatUserStream$,
-                  (isSessionActive, chatUsers) => {
-                        'isSessionActive': isSessionActive,
-                        'chatUsers': chatUsers
-                      }),
-              builder: (context, streamSnapshot) {
-                if (streamSnapshot.data == null) {
-                  return Container();
-                }
-                return RichText(
-                  text: TextSpan(
-                      style:
-                          TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
-                      children: streamSnapshot.data['isSessionActive']
-                          ? [
-                              TextSpan(
-                                  text:
-                                      "${streamSnapshot.data['chatUsers'].length} people")
-                            ]
-                          : [
-                              TextSpan(
-                                text: LabelVault.LANDING_PAGE_TITLE,
-                              ),
-                            ]),
-                );
-              }),
-          backgroundColor: Theme.of(context).primaryColor,
-        ),
-        body: StreamBuilder(
-          stream: _partySessionStore.isSessionActive$,
-          builder: (context, AsyncSnapshot<bool> isSessionActiveSnapshot) {
-            bool isSessionActive = isSessionActiveSnapshot.data ?? false;
-            return Stack(
-              children: <Widget>[
-                isSessionActive ? _getPartyPage() : LandingPage(),
-                StreamBuilder(
-                  stream: _isKeyboardVisible.stream,
-                  builder:
-                      (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
-                    return Visibility(
-                        visible: !(isKeyboardVisibleSnapshot.data ?? false),
-                        child: ControlPanel());
-                  },
-                )
-              ],
-            );
-          },
-        ));
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _getPartyPage() {

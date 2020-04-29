@@ -42,11 +42,13 @@ class ChatMessagesStore {
         .toSet();
     combinedChatUsers
         .removeWhere((user) => userUidsWhoLeftInMessages.contains(user.uid));
+    debugPrint('users ${combinedChatUsers.length}');
     _chatUsers.add(combinedChatUsers);
   }
 
   void clearMessages() {
     _chatMessages.add([]);
+    _chatUsers.add([]);
   }
 
   void removeChatMessage(ChatMessage chatMessage) {
