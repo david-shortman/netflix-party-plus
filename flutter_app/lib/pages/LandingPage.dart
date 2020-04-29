@@ -56,30 +56,13 @@ class _LandingPageState extends State<LandingPage> {
     widgets.add(Padding(
       padding: EdgeInsets.all(6),
     ));
-    widgets.add(
-      Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            LabelVault.LANDING_PAGE_TITLE,
-            textAlign: TextAlign.left,
-            style: TextStyle(fontSize: 24),
-          )),
-    );
     widgets.add(Padding(
-      padding: EdgeInsets.all(10),
-    ));
-    widgets.add(CupertinoTextField(
-      textInputAction: TextInputAction.go,
-      onSubmitted: (text) {
-        _onConnectIntent();
-      },
-      controller: _urlTextController,
-      placeholder: LabelVault.URL_FIELD_PLACEHOLDER,
-      placeholderStyle:
-          TextStyle(color: Theme.of(context).primaryTextTheme.display1.color),
-      style: Theme.of(context).primaryTextTheme.body1,
-      clearButtonMode: OverlayVisibilityMode.editing,
-      keyboardType: TextInputType.url,
+        padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
+        child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text("1. Copy the Netflix Party link onto your phone"))));
+    widgets.add(Padding(
+      padding: EdgeInsets.all(5),
     ));
     widgets.add(StreamBuilder(
         stream: _isAttemptingToJoinSessionFromText$.stream,
@@ -92,12 +75,15 @@ class _LandingPageState extends State<LandingPage> {
           return Padding(
             padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
             child: ProgressButton(
-              child: Text(
-                isAttemptingToJoinSessionFromText
-                    ? ""
-                    : LabelVault.CONNECT_TO_PARTY_BUTTON.toString(),
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  isAttemptingToJoinSessionFromText
+                      ? ""
+                      : '${LabelVault.CONNECT_TO_PARTY_BUTTON.toString()}',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               ),
               onPressed: _onConnectIntent,
               buttonState: isAttemptingToJoinSessionFromText
@@ -118,19 +104,13 @@ class _LandingPageState extends State<LandingPage> {
         padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Align(
             alignment: Alignment.centerLeft,
-            child:
-                Text("1. Copy the link from Netflix Party on your computer"))));
-    widgets.add(Padding(
-        padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
-        child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text("2. Visit the-qrcode-generator.com"))));
+            child: Text("1. Visit the-qrcode-generator.com"))));
     widgets.add(Padding(
         padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-                "3. Paste the link there to create a scannable QR code"))));
+                "2. Paste the link there to create a scannable QR code"))));
     widgets.add(Padding(
       padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
       child: ProgressButton(
@@ -154,8 +134,9 @@ class _LandingPageState extends State<LandingPage> {
     _connectToServer();
   }
 
-  void _onConnectIntent() {
-    HapticFeedback.lightImpact();
+  void _onConnectIntent() async {
+    await HapticFeedback.lightImpact();
+    _urlTextController.text = (await Clipboard.getData('text/plain')).text;
     setState(() {
       _isAttemptingToJoinSessionFromText$.add(true);
     });

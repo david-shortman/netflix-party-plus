@@ -6,7 +6,7 @@ class PartyHarderTheme {
         primaryColor: Colors.red,
         unselectedWidgetColor: Colors.black,
         cardColor: Colors.black12,
-        bottomAppBarColor: Colors.white70,
+        bottomAppBarColor: Colors.white,
         dialogBackgroundColor: Colors.white,
         selectedRowColor: Colors.grey[200],
         primaryTextTheme: TextTheme(
@@ -19,7 +19,9 @@ class PartyHarderTheme {
         brightness: Brightness.dark,
         primaryColor: Colors.red,
         accentColor: Colors.red,
-        bottomAppBarColor: Colors.black87,
+        bottomAppBarColor: Color.fromRGBO(30, 30, 30, 1),
+        backgroundColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black,
 //        dialogBackgroundColor: Colors.black38,
         primaryTextTheme: TextTheme(
             body1: TextStyle(color: Colors.white),

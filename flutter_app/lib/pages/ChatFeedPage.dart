@@ -32,19 +32,21 @@ class ChatFeedPage extends StatefulWidget {
 class _ChatFeedPageState extends State<ChatFeedPage> {
   final _messenger = getIt.get<SocketMessengerService>();
 
-  final npServerInfoStore = getIt.get<PartySessionStore>();
+  final _partySessionStore = getIt.get<PartySessionStore>();
   final _playbackInfoStore = getIt.get<PlaybackInfoStore>();
   final _chatMessagesStore = getIt.get<ChatMessagesStore>();
   final _localUserStore = getIt.get<LocalUserStore>();
 
   StreamSubscription<List<ChatMessage>> _chatMessageListener;
 
-  final ScrollController _chatScrollController = ScrollController();
+  ScrollController _chatScrollController = ScrollController();
 
   final ServerTimeUtility _serverTimeUtility = ServerTimeUtility();
 
   final BehaviorSubject<bool> _showUserBubbleAsAvatar =
       BehaviorSubject.seeded(true);
+
+  final GlobalKey _chatKey = GlobalKey<DashChatState>();
 
   int _lastMessagesCount = 0;
 
@@ -59,8 +61,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
   void _onChatMessagesChanged(List<ChatMessage> chatMessages) {
     if (chatMessages.length > _lastMessagesCount) {
       if (_chatScrollController.hasClients) {
-        WidgetsBinding.instance
-            .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
+        _scrollToBottomOfChatStream();
       }
       HapticFeedback.mediumImpact();
     }
@@ -96,6 +97,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
         bool isDarkMode =
             MediaQuery.of(context).platformBrightness == Brightness.dark;
         return DashChat(
+          key: _chatKey,
           messages: streamSnapshot.data['chatMessages'],
           scrollController: _chatScrollController,
           scrollToBottom: false,
@@ -105,6 +107,14 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
               avatar: localUser?.icon ?? DefaultsVault.DEFAULT_AVATAR,
               containerColor: AvatarColors.getColor(localUser?.icon ?? '')),
           text: _messageInputText,
+          inputDecoration: InputDecoration(
+              hintText: "Send a message",
+              border: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              errorBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
+              contentPadding: EdgeInsets.fromLTRB(2, 5, 0, 0)),
           textController: _messageInputTextEditingController,
           onTextChange: (newText) {
             _messenger.sendMessage(TypingMessage(TypingContent(true)));
@@ -198,7 +208,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
             chatMessage.text,
             false,
             _serverTimeUtility.getCurrentServerTimeAdjustedForCurrentTime(
-                npServerInfoStore.partySession.getServerTime(),
+                _partySessionStore.partySession.getServerTime(),
                 _playbackInfoStore
                     .playbackInfo.serverTimeAtLastVideoStateUpdate),
             _localUserStore.localUser.id,

@@ -3,7 +3,6 @@ class PartySession {
   String _serverId;
   int _serverTime;
   int _serverTimeLastUpdatedTime;
-  bool _isSessionActive = false;
 
   bool isMetadataIncomplete() {
     return _sessionId == null || _serverId == null;
@@ -45,19 +44,15 @@ class PartySession {
     _serverId = uri.queryParameters['npServerId'];
   }
 
-  PartySession.fromPartySessionAndSessionActive(
-      PartySession partySession, bool isSessionActive) {
+  PartySession.fromPartySessionAndSessionActive(PartySession partySession) {
     _serverId = partySession.getServerId();
     _sessionId = partySession.getSessionId();
     _serverTime = partySession.getServerTime();
     _serverId = partySession.getServerId();
-    _isSessionActive = isSessionActive;
   }
 
   PartySession.fromPartySession(PartySession partySession,
-      {int newServerTime,
-      int newServerTimeLastUpdatedTime,
-      bool isSessionActive}) {
+      {int newServerTime, int newServerTimeLastUpdatedTime}) {
     _serverId = partySession.getServerId();
     _sessionId = partySession.getSessionId();
 
@@ -72,15 +67,5 @@ class PartySession {
     } else {
       _serverTimeLastUpdatedTime = partySession.getServerTimeLastUpdatedTime();
     }
-
-    if (isSessionActive != null) {
-      _isSessionActive = isSessionActive;
-    } else {
-      _isSessionActive = partySession.isSessionActive();
-    }
-  }
-
-  bool isSessionActive() {
-    return _isSessionActive;
   }
 }

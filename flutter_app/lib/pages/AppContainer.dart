@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -61,16 +62,32 @@ class _AppContainerState extends State<AppContainer>
 
   bool _isShowingChangelogDialog = false;
 
+  int _numChatUsers = 0;
+
   UniqueKey chatUniqueKey = UniqueKey();
 
   _AppContainerState() {
     _setupLocalUserListener();
     _setupSessionUpdatedListener();
+    _setupUsersListener();
     _dispatchShowChangelogIntent();
+    WidgetsBinding.instance.addObserver(this);
+    KeyboardVisibilityNotification()
+        .addNewListener(onChange: _isKeyboardVisible.add);
   }
 
   void _setupLocalUserListener() {
     _localUserStore.stream$.listen(_onLocalUserChanged);
+  }
+
+  void _setupUsersListener() {
+    _chatMessagesStore.chatUserStream$.listen(_onChatUsersChanged);
+  }
+
+  void _onChatUsersChanged(List<ChatUser> chatUsers) {
+    setState(() {
+      _numChatUsers = chatUsers.length;
+    });
   }
 
   void _setupSessionUpdatedListener() {
@@ -78,7 +95,7 @@ class _AppContainerState extends State<AppContainer>
   }
 
   void _onLocalUserChanged(LocalUser localUser) {
-    if (_partySessionStore.isSessionActive()) {
+    if (_partySessionStore.isSessionActive) {
       _sendBroadcastUserSettingsMessage(localUser);
     }
   }
@@ -86,7 +103,7 @@ class _AppContainerState extends State<AppContainer>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (!_partySessionStore.isSessionActive() &&
+      if (!_partySessionStore.isSessionActive &&
           itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession()) {
         _partyService.rejoinLastParty();
       }
@@ -95,47 +112,73 @@ class _AppContainerState extends State<AppContainer>
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addObserver(this);
-    KeyboardVisibilityNotification()
-        .addNewListener(onChange: _isKeyboardVisible.add);
     return Scaffold(
-        appBar: AppBar(
-          title: RichText(
-            text: TextSpan(
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
-                children: [
-                  TextSpan(
-                    text: LabelVault.APP_TITLE_1,
-                    style: TextStyle(fontStyle: FontStyle.italic),
+      appBar: CupertinoNavigationBar(
+        middle: StreamBuilder(
+            stream: _partySessionStore.isSessionActive$,
+            builder: (context, isSessionActiveSnapshot) {
+              bool isSessionActive = isSessionActiveSnapshot.data ?? false;
+              return RichText(
+                text: TextSpan(
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
+                    children: isSessionActive
+                        ? [TextSpan(text: "$_numChatUsers people")]
+                        : [
+                            TextSpan(
+                              text: LabelVault.LANDING_PAGE_TITLE,
+                            ),
+                          ]),
+              );
+            }),
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+      body: StreamBuilder(
+        stream: _partySessionStore.isSessionActive$,
+        builder: (context, AsyncSnapshot<bool> isSessionActiveSnapshot) {
+          bool isSessionActive = isSessionActiveSnapshot.data ?? false;
+          return Stack(
+            children: <Widget>[
+              isSessionActive ? _getPartyPage() : LandingPage(),
+              StreamBuilder(
+                stream: _isKeyboardVisible.stream,
+                builder:
+                    (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
+                  return Visibility(
+                      visible: !(isKeyboardVisibleSnapshot.data ?? false),
+                      child: ControlPanel());
+                },
+              )
+            ],
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: StreamBuilder(
+        stream: _chatMessagesStore.isSomeoneTypingStream$,
+        builder: (context, AsyncSnapshot<bool> chatMessagesSnapshot) {
+          return Visibility(
+            visible: chatMessagesSnapshot.data ?? false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 190),
+              child: Container(
+                width: 200,
+                height: 35,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "People are typing...",
+                    style: TextStyle(color: Colors.white),
                   ),
-                  TextSpan(
-                    text: LabelVault.APP_TITLE_2,
-                  )
-                ]),
-          ),
-          backgroundColor: Theme.of(context).primaryColor,
-        ),
-        body: StreamBuilder(
-          stream: _partySessionStore.stream$,
-          builder: (context, AsyncSnapshot<PartySession> partySessionSnapshot) {
-            bool isSessionActive = partySessionSnapshot.data != null &&
-                partySessionSnapshot.data.isSessionActive();
-            return Stack(
-              children: <Widget>[
-                isSessionActive ? _getPartyPage() : LandingPage(),
-                StreamBuilder(
-                  stream: _isKeyboardVisible.stream,
-                  builder:
-                      (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
-                    return Visibility(
-                        visible: !(isKeyboardVisibleSnapshot.data ?? false),
-                        child: ControlPanel());
-                  },
-                )
-              ],
-            );
-          },
-        ));
+                ),
+                decoration: BoxDecoration(
+                    color: Color.fromRGBO(0, 0, 0, .5),
+                    borderRadius: BorderRadius.all(Radius.circular(12.0))),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _getPartyPage() {
@@ -147,9 +190,9 @@ class _AppContainerState extends State<AppContainer>
             double bottomPadding = isKeyboardVisibleSnapshot.data != null &&
                     isKeyboardVisibleSnapshot.data
                 ? 10
-                : 110;
+                : 130;
             return SizedBox(
-                height: MediaQuery.of(context).size.height - 76,
+                height: MediaQuery.of(context).size.height - 64,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(6, 0, 6, bottomPadding),
                   child: ChatFeedPage(
@@ -190,13 +233,12 @@ class _AppContainerState extends State<AppContainer>
   }
 
   void _onSessionUpdated(PartySession partySession) {
-    if (!partySession.isSessionActive()) {
+    if (!_partySessionStore.isSessionActive) {
       _playbackInfoStore.updateServerTimeAtLastUpdate(0);
       _playbackInfoStore.updateLastKnownMoviePosition(0);
       _chatMessagesStore.clearMessages();
       _sessionLastActiveAtTime = 0;
-    }
-    if (partySession.isSessionActive()) {
+    } else {
       _sessionLastActiveAtTime = DateTime.now().millisecondsSinceEpoch;
     }
   }

@@ -20,7 +20,7 @@ class LocalUserService {
     String username =
         await sharedPreferences.getString("username") ?? "Mobile User";
     return LocalUser(
-      username: username != "" ? username : DefaultsVault.DEFAULT_AVATAR,
+      username: username != "" ? username : "Mobile User",
       icon: await sharedPreferences.getString("userIcon") ??
           DefaultsVault.DEFAULT_AVATAR,
       id: await sharedPreferences.getString("userId"),

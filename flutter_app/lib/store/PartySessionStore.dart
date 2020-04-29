@@ -8,6 +8,11 @@ class PartySessionStore {
   ValueStream<PartySession> get stream$ => _partySession.stream;
   PartySession get partySession => _partySession.value;
 
+  BehaviorSubject<bool> _isSessionActive = BehaviorSubject.seeded(false);
+
+  ValueStream<bool> get isSessionActive$ => _isSessionActive.stream;
+  bool get isSessionActive => _isSessionActive.value;
+
   void updateServerTime(int newServerTime) {
     _partySession.add(PartySession.fromPartySession(partySession,
         newServerTime: newServerTime,
@@ -20,17 +25,12 @@ class PartySessionStore {
 
   void setAsSessionInactive() {
     _partySession.add(PartySession.fromPartySession(partySession,
-        newServerTime: 0,
-        newServerTimeLastUpdatedTime: 0,
-        isSessionActive: false));
+        newServerTime: 0, newServerTimeLastUpdatedTime: 0));
+    _isSessionActive.add(false);
   }
 
   void setAsSessionActive() {
-    _partySession.add(
-        PartySession.fromPartySession(partySession, isSessionActive: true));
-  }
-
-  bool isSessionActive() {
-    return partySession.isSessionActive();
+    _partySession.add(PartySession.fromPartySession(partySession));
+    _isSessionActive.add(true);
   }
 }
