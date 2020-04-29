@@ -1,4 +1,3 @@
-import 'package:dash_chat/dash_chat.dart';
 import 'package:np_plus/store/ChatMessagesStore.dart';
 
 class SomeoneIsTypingService {

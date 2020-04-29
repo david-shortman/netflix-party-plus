@@ -9,7 +9,6 @@ import 'package:np_plus/domains/playback/PlaybackInfo.dart';
 import 'package:np_plus/services/PartyService.dart';
 import 'package:np_plus/vaults/DefaultsVault.dart';
 import 'package:np_plus/domains/media-controls/VideoState.dart';
-import 'package:np_plus/domains/server/ServerInfo.dart';
 import 'package:np_plus/domains/user/LocalUser.dart';
 import 'package:np_plus/pages/UserSettingsPage.dart';
 import 'package:np_plus/services/SocketMessengerService.dart';
