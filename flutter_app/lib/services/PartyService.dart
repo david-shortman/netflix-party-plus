@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dash_chat/dash_chat.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:np_plus/domains/avatar/Avatar.dart';
 import 'package:np_plus/domains/media-controls/VideoState.dart';
 import 'package:np_plus/domains/messages/incoming-messages/ErrorMessage.dart';
