@@ -113,7 +113,7 @@ class PartyService {
   }
 
   void _onServerTimeMessageReceived(ServerTimeMessage serverTimeMessage) {
-    if (!_partySessionStore.isSessionActive()) {
+    if (!_partySessionStore.isSessionActive) {
       _joinSession(_partySessionStore.partySession.getSessionId());
     }
     _partySessionStore.updateServerTime(serverTimeMessage.serverTime);

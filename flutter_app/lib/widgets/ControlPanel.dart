@@ -80,10 +80,9 @@ class _ControlPanelState extends State<ControlPanel> {
     _setupVideoPositionListener();
 
     return StreamBuilder(
-        stream: _partySessionStore.stream$,
-        builder: (context, AsyncSnapshot<PartySession> partySessionSnapshot) {
-          bool isSessionActive = partySessionSnapshot.data != null &&
-              partySessionSnapshot.data.isSessionActive();
+        stream: _partySessionStore.isSessionActive$,
+        builder: (context, AsyncSnapshot<bool> isSessionActiveSnapshot) {
+          bool isSessionActive = isSessionActiveSnapshot.data ?? false;
           return SlidingUpPanel(
             collapsed: isSessionActive ? _collapsed(isSessionActive) : null,
             backdropEnabled: true,
@@ -273,6 +272,10 @@ class _ControlPanelState extends State<ControlPanel> {
                           thumbRadius: 20.0,
                           progressWidth: 4,
                           thumbColor: Theme.of(context).primaryColor,
+                          barColor:
+                              Theme.of(context).brightness == Brightness.light
+                                  ? Colors.grey[350]
+                                  : Colors.white,
                           value: _shouldUseLastActiveScrubbingPercentage
                               ? _lastActiveScrubbingPercentage
                               : seekPercentage,

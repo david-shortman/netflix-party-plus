@@ -14,6 +14,15 @@ class ChatMessagesStore {
   ValueStream<List<ChatUser>> get chatUserStream$ => _chatUsers.stream;
   List<ChatUser> get chatUsers => _chatUsers.value;
 
+  BehaviorSubject<bool> _isSomeoneTyping = BehaviorSubject.seeded(false);
+
+  ValueStream<bool> get isSomeoneTypingStream$ => _isSomeoneTyping.stream;
+  bool get isSomeoneTyping => _isSomeoneTyping.value;
+
+  void setIsSomeoneTyping(bool isSomeoneTyping) {
+    _isSomeoneTyping.add(isSomeoneTyping);
+  }
+
   void pushNewChatMessages(List<ChatMessage> newChatMessages) {
     List<ChatMessage> combinedChatMessages = List();
     combinedChatMessages.addAll(_chatMessages.value);

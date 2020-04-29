@@ -6,7 +6,7 @@ class PartyHarderTheme {
         primaryColor: Colors.red,
         unselectedWidgetColor: Colors.black,
         cardColor: Colors.black12,
-        bottomAppBarColor: Colors.white70,
+        bottomAppBarColor: Colors.white,
         dialogBackgroundColor: Colors.white,
         selectedRowColor: Colors.grey[200],
         primaryTextTheme: TextTheme(

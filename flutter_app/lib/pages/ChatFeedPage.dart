@@ -50,19 +50,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   int _lastMessagesCount = 0;
 
-  double _lastMaxScrollExtent = 0;
-  double _lastExtentAfterPosition = 0;
-
-  bool _shouldPreserveScrollPosition = false;
-
-  _ChatFeedPageState({Key key}) {
-    _chatScrollController.addListener(_onScrollControllerPositionChanged);
-  }
-
-  void _onScrollControllerPositionChanged() {
-    _lastExtentAfterPosition = _chatScrollController.position.extentAfter;
-    _lastMaxScrollExtent = _chatScrollController.position.maxScrollExtent;
-  }
+  _ChatFeedPageState({Key key});
 
   void _setupNewChatMessagesListener() {
     _chatMessageListener = _chatMessagesStore.stream$
@@ -72,10 +60,8 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   void _onChatMessagesChanged(List<ChatMessage> chatMessages) {
     if (chatMessages.length > _lastMessagesCount) {
-      _shouldPreserveScrollPosition = true;
       if (_chatScrollController.hasClients) {
-        WidgetsBinding.instance
-            .addPostFrameCallback((_) => _scrollToBottomOfChatStream());
+        _scrollToBottomOfChatStream();
       }
       HapticFeedback.mediumImpact();
     }
@@ -95,17 +81,6 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: fix scrolling jank (again)
-//    if (_chatScrollController.hasClients) {
-//          debugPrint('kk');
-//          double lastPosition = _lastMaxScrollExtent - _lastExtentAfterPosition;
-//          double changeInSize = _chatScrollController.position.maxScrollExtent - _lastMaxScrollExtent;
-//          WidgetsBinding.instance
-//          .addPostFrameCallback((_) {
-//              _chatScrollController.jumpTo(lastPosition + changeInSize);
-//      });
-//    }
-    debugPrint('rebuild');
     if (_chatMessageListener == null) {
       _setupNewChatMessagesListener();
     }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -81,7 +82,7 @@ class _AppContainerState extends State<AppContainer>
   }
 
   void _onLocalUserChanged(LocalUser localUser) {
-    if (_partySessionStore.isSessionActive()) {
+    if (_partySessionStore.isSessionActive) {
       _sendBroadcastUserSettingsMessage(localUser);
     }
   }
@@ -89,7 +90,7 @@ class _AppContainerState extends State<AppContainer>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (!_partySessionStore.isSessionActive() &&
+      if (!_partySessionStore.isSessionActive &&
           itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession()) {
         _partyService.rejoinLastParty();
       }
@@ -99,12 +100,40 @@ class _AppContainerState extends State<AppContainer>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: StreamBuilder(
+          stream: _chatMessagesStore.isSomeoneTypingStream$,
+          builder: (context, AsyncSnapshot<bool> chatMessagesSnapshot) {
+            return Visibility(
+              visible: chatMessagesSnapshot.data ?? false,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 190),
+                child: Container(
+                  width: 200,
+                  height: 35,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      "People are typing...",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                      color: Color.fromRGBO(0, 0, 0, .5),
+                      borderRadius: BorderRadius.all(Radius.circular(12.0))),
+                ),
+              ),
+            );
+          },
+        ),
         appBar: CupertinoNavigationBar(
           middle: StreamBuilder(
-              stream: _partySessionStore.stream$.withLatestFrom(
+              stream: _partySessionStore.isSessionActive$.withLatestFrom(
                   _chatMessagesStore.chatUserStream$,
-                  (partySession, chatUsers) =>
-                      {'partySession': partySession, 'chatUsers': chatUsers}),
+                  (isSessionActive, chatUsers) => {
+                        'isSessionActive': isSessionActive,
+                        'chatUsers': chatUsers
+                      }),
               builder: (context, streamSnapshot) {
                 if (streamSnapshot.data == null) {
                   return Container();
@@ -113,27 +142,25 @@ class _AppContainerState extends State<AppContainer>
                   text: TextSpan(
                       style:
                           TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
-                      children:
-                          streamSnapshot.data['partySession'].isSessionActive()
-                              ? [
-                                  TextSpan(
-                                      text:
-                                          "${streamSnapshot.data['chatUsers'].length} people")
-                                ]
-                              : [
-                                  TextSpan(
-                                    text: LabelVault.LANDING_PAGE_TITLE,
-                                  ),
-                                ]),
+                      children: streamSnapshot.data['isSessionActive']
+                          ? [
+                              TextSpan(
+                                  text:
+                                      "${streamSnapshot.data['chatUsers'].length} people")
+                            ]
+                          : [
+                              TextSpan(
+                                text: LabelVault.LANDING_PAGE_TITLE,
+                              ),
+                            ]),
                 );
               }),
           backgroundColor: Theme.of(context).primaryColor,
         ),
         body: StreamBuilder(
-          stream: _partySessionStore.stream$,
-          builder: (context, AsyncSnapshot<PartySession> partySessionSnapshot) {
-            bool isSessionActive = partySessionSnapshot.data != null &&
-                partySessionSnapshot.data.isSessionActive();
+          stream: _partySessionStore.isSessionActive$,
+          builder: (context, AsyncSnapshot<bool> isSessionActiveSnapshot) {
+            bool isSessionActive = isSessionActiveSnapshot.data ?? false;
             return Stack(
               children: <Widget>[
                 isSessionActive ? _getPartyPage() : LandingPage(),
@@ -204,13 +231,12 @@ class _AppContainerState extends State<AppContainer>
   }
 
   void _onSessionUpdated(PartySession partySession) {
-    if (!partySession.isSessionActive()) {
+    if (!_partySessionStore.isSessionActive) {
       _playbackInfoStore.updateServerTimeAtLastUpdate(0);
       _playbackInfoStore.updateLastKnownMoviePosition(0);
       _chatMessagesStore.clearMessages();
       _sessionLastActiveAtTime = 0;
-    }
-    if (partySession.isSessionActive()) {
+    } else {
       _sessionLastActiveAtTime = DateTime.now().millisecondsSinceEpoch;
     }
   }
