@@ -45,22 +45,34 @@ class _ControlPanelState extends State<ControlPanel> {
   _ControlPanelState({Key key});
 
   void _setupVideoPositionListener() {
-    if (_playbackInfoSubscription != null) {
-      _playbackInfoSubscription.cancel();
+    if (_playbackInfoSubscription == null) {
+      _playbackInfoSubscription = _playbackInfoStore.stream$
+          .distinct(_playbackInfoDistinct)
+          .listen((playbackInfo) {
+        _shouldUseLastActiveScrubbingPercentage = false;
+        double progressPercentage = _getProgressPercentage(playbackInfo);
+        _lastActiveScrubbingPercentage = progressPercentage;
+        _seekPercentage$.add(progressPercentage);
+        playbackInfo.isPlaying
+            ? _restartVideoProgressTimer()
+            : _stopVideoProgressTimer();
+      });
     }
-    _playbackInfoSubscription =
-        _playbackInfoStore.stream$.distinct().listen((playbackInfo) {
-      _shouldUseLastActiveScrubbingPercentage = false;
-      _seekPercentage$.add(_getProgressPercentage());
-      playbackInfo.isPlaying
-          ? _startVideoProgressTimer()
-          : _stopVideoProgressTimer();
-    });
   }
 
-  double _getProgressPercentage() {
-    return (_playbackInfoStore.playbackInfo.lastKnownMoviePosition ?? 0) /
-        (_playbackInfoStore.playbackInfo.videoDuration ?? 1);
+  bool _playbackInfoDistinct(
+      PlaybackInfo playbackInfo, PlaybackInfo newPlaybackInfo) {
+    return playbackInfo.videoDuration == newPlaybackInfo.videoDuration &&
+        playbackInfo.lastKnownMoviePosition ==
+            newPlaybackInfo.lastKnownMoviePosition &&
+        playbackInfo.isPlaying == newPlaybackInfo.isPlaying;
+  }
+
+  double _getProgressPercentage(PlaybackInfo playbackInfo) {
+    return (playbackInfo.lastKnownMoviePosition ?? 0.0) *
+        1.0 /
+        (playbackInfo.videoDuration ?? 1.0) *
+        1.0;
   }
 
   @override
@@ -101,7 +113,7 @@ class _ControlPanelState extends State<ControlPanel> {
     return StreamBuilder(
       stream: _isPanelOpen.stream,
       builder: (context, AsyncSnapshot<bool> isPanelOpenSnapshot) {
-        bool isPanelOpen = isPanelOpenSnapshot.data;
+        bool isPanelOpen = isPanelOpenSnapshot.data ?? false;
         return Visibility(
             visible: !isPanelOpen,
             child: Container(
@@ -221,7 +233,7 @@ class _ControlPanelState extends State<ControlPanel> {
                 ],
               ),
               SizedBox(
-                height: 5.0,
+                height: 15.0,
               ),
               Visibility(
                   visible: isSessionActive,
@@ -266,14 +278,12 @@ class _ControlPanelState extends State<ControlPanel> {
                               : seekPercentage,
                           progressColor: Theme.of(context).primaryColor,
                           onProgressChanged: (seekPercentage) {
-                            debugPrint('progress changed');
                             _lastActiveScrubbingPercentage = seekPercentage;
                           },
                           onStartTrackingTouch: () {
                             _shouldUseLastActiveScrubbingPercentage = true;
                             _stopVideoProgressTimer();
-                            _playbackInfoSubscription.cancel();
-                            debugPrint('startTrackingTouch');
+                            _playbackInfoSubscription.pause();
                             setState(() {
                               _lastActiveScrubbingPercentage =
                                   ((_playbackInfoStore.playbackInfo
@@ -286,9 +296,11 @@ class _ControlPanelState extends State<ControlPanel> {
                             });
                           },
                           onStopTrackingTouch: () {
-                            debugPrint('stopTrackingTouch');
-                            _setupVideoPositionListener();
-                            _startVideoProgressTimer();
+                            _playbackInfoSubscription.resume();
+                            setState(() {
+                              _shouldUseLastActiveScrubbingPercentage = false;
+                            });
+                            _restartVideoProgressTimer();
                             _partyService.updateVideoState(
                                 _playbackInfoStore.getVideoState(),
                                 percentage: _lastActiveScrubbingPercentage);
@@ -373,14 +385,12 @@ class _ControlPanelState extends State<ControlPanel> {
     }
   }
 
-  void _startVideoProgressTimer() {
+  void _restartVideoProgressTimer() {
+    _stopVideoProgressTimer();
     if (_playbackInfoStore.getVideoState() == VideoState.PLAYING) {
-      _stopVideoProgressTimer();
       _seekPercentageTimer = Timer.periodic(Duration(seconds: 1), (_) {
-        debugPrint('info ${_playbackInfoStore.playbackInfo.videoDuration}');
         _lastActiveScrubbingPercentage = _lastActiveScrubbingPercentage +
             (1000 / _playbackInfoStore.playbackInfo.videoDuration);
-        debugPrint('this ${_lastActiveScrubbingPercentage.toString()}');
         _seekPercentage$.add(_lastActiveScrubbingPercentage);
       });
     }

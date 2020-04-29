@@ -163,14 +163,11 @@ class PartyService {
 
   void _onCatchupMessageReceived(
       VideoIdAndMessageCatchupMessage catchupMessage) {
-    debugPrint(
-        'catchup ${catchupMessage.lastKnownTime} ${catchupMessage.lastKnownTimeRemaining}');
     _playbackInfoStore.updatePlaybackInfo(PlaybackInfo(
         serverTimeAtLastVideoStateUpdate: catchupMessage.lastKnownTimeUpdatedAt,
         lastKnownMoviePosition: catchupMessage.lastKnownTime,
         isPlaying: catchupMessage.state == VideoState.PLAYING,
-        videoDuration: catchupMessage.lastKnownTime +
-            catchupMessage.lastKnownTimeRemaining));
+        videoDuration: catchupMessage.videoDuration));
     _addChatMessages(catchupMessage.userMessages);
     _sendNotBufferingMessage();
   }
