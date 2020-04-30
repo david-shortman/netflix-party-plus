@@ -3,33 +3,27 @@
 [![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Tests/badge.svg)](https://github.com/david-shortman/netflix-party-enhancement-suite/actions?query=workflow%3ATests) [![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Build/badge.svg)](https://github.com/david-shortman/netflix-party-enhancement-suite/actions?query=workflow%3ABuild)
 
 [![](https://codecov.io/gh/david-shortman/netflix-party-enhancement-suite/branch/master/graph/badge.svg)](https://codecov.io/gh/david-shortman/netflix-party-enhancement-suite)
-# netflix-party-enhancement-suite
-A set of enhancements to the Netflix Party experience
+# NP+ (formerly Netflix Party Harder)
+Hightens the party hype of the Netflix Party experience
 
-## Netflix Party Harder (A NP Remote App)
+![](https://lh3.googleusercontent.com/1b9hxrZpGQlYX7_qkISw8aPDqgeQJG1Ob7MeIKwGqFCftk5MdHrRmcmY_IqpkQELs5CIeJLgNTU=w640-h400-e365)
 
-Status: WIP
+### iOS/Android app
 
 Features:
-- Participate in a Netflix Party from your phone while your computer is hooked up to your TV
+- Participate in a Netflix Party from your phone while your computer streams to your TV
   - Chat
   - Play/pause
   - Scrub to a position
   - Update user profile
-  
-- Not seen before in the Chrome extension
-  - Invite friends to the party with a Share button
-  - Customize the jump distance
-  - iOS/Android compatability
 
-## Party Harder Extension
+### Chrome Extension
 
 Status: WIP
 
 Features:
 - Make the Netflix Party experience more seamless by
   - Hide the chat in fullscreen
-  - Automatically join your friends' parties
   - Providing a scannable QR code to open in the remote app
-- Cross browser support
+  - Cross browser support
  
