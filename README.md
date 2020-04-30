@@ -6,7 +6,7 @@
 # NP+ (formerly Netflix Party Harder)
 Hightens the party hype of the Netflix Party experience
 
-![](https://lh3.googleusercontent.com/1b9hxrZpGQlYX7_qkISw8aPDqgeQJG1Ob7MeIKwGqFCftk5MdHrRmcmY_IqpkQELs5CIeJLgNTU=w640-h400-e365)
+![](https://i.imgur.com/WsSkzdi.png)
 
 ### iOS/Android app
 
