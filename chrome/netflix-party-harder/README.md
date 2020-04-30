@@ -1,6 +1,4 @@
-## Party Harder Extension
-
-Status: Concept
+## NP+ Extension
 
 Features:
 - Make the Netflix Party experience more seamless by

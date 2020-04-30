@@ -656,6 +656,56 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
     	}
     }
 
+    var getUserColor = function(userIcon) {
+      userIcon = userIcon.toLocaleLowerCase().replace("/", "");
+      console.log(userIcon);
+      switch (userIcon) {
+        case "alien.svg":
+          return "#73e5ff";
+        case "batman.svg":
+          return "white";
+        case "chickenLeg.svg":
+          return "#f9ddc0";
+        case "chocobar.svg":
+          return "#f7d5ba";
+        case "cinderella.svg":
+          return "lightblue";
+        case "cookie.svg":
+          return "#fcd2ac";
+        case "cptAmerica.svg":
+          return "#ffb199";
+        case "deadPool.svg":
+          return "#f23e3e";
+        case "goofy.svg":
+          return "#ffb776";
+        case "hamburger.svg":
+          return "#f7aa63";
+        case "hotdog.svg":
+          return "#fcbdac";
+        case "iceCream.svg":
+          return "#ccfffe";
+        case "ironMan.svg":
+          return "#ff5a5a";
+        case "mulan.svg":
+          return "#abefac";
+        case "pizza.svg":
+          return "#ffaf99";
+        case "poohbear.svg":
+          return "#ffd15f";
+        case "popcorn.svg":
+          return "#f7e07f";
+        case "sailor cat.svg":
+          return "#bf8af9";
+        case "sailormoon.svg":
+          return "#ff97e9";
+        case "snow-white.svg":
+          return "#66afff";
+        case "wolverine.svg":
+          return "#ff8c69";
+      }
+      return "green";
+    }
+
     var getUserNickname = function(userId, userNickname) {
     	if(userNicknames[userId]) {
     		return userNicknames[userId]
@@ -1363,27 +1413,30 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
           padding-top: 16px;
         }
         /* line 157, ../sass/modules/_msg.scss */
-        #patreon-container #patreon-link {
+        #patreon-container {
           display: flex;
           flex-flow: wrap row;
           align-items: center;
         }
-        /* line 160, ../sass/modules/_msg.scss */
-        #patreon-container #patreon-link:hover {
-          cursor: pointer;
+        /* line 168, ../sass/modules/_msg.scss */
+        #patreon {
+          border-radius: 20px;
+          width: 100%;
         }
-        /* line 163, ../sass/modules/_msg.scss */
-        #patreon-container #patreon-link p {
-          font-family: 'Poppins', sans-serif;
-          font-size: 14.5px;
-          font-weight: 600;
-          color: #949494;
+
+        /* NPH */
+        #patreon-link {
+          margin-left:auto;
           width: 40%;
         }
-        /* line 168, ../sass/modules/_msg.scss */
-        #patreon-container #patreon-link img {
+
+        #nph-github {
           border-radius: 20px;
-          width: 60%;
+          width: 100%;
+        }
+
+        #nph-github-link {
+          width: 40%;
         }
 
         /* line 3, ../sass/modules/_setting.scss */
@@ -1658,7 +1711,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
             <ul id="chat-menu-container">
               <li id="function-title">
                 <div id="title">
-                  <h1>Netflix Party <em>Harder</em></h1> <!-- NPH -->
+                  <h1>NP&#43;</h1> <!-- NPH -->
                 </div>
               </li>
               <li id="function-user">
@@ -1767,12 +1820,13 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
             <input id="chat-input" type="text" placeholder="Type a message..." autocomplete="off"></input>
           </div>
 
+
           <div id="patreon-container">
+            <a id="nph-github-link" href="https://github.com/david-shortman/netflix-party-enhancement-suite" target="_blank">
+              <img id="nph-github" src='https://i.imgur.com/qlt7OBA.png' />
+            </a>
             <a id="patreon-link" href="https://www.patreon.com/netflixparty" target="_blank">
-              <p>
-                Support NP
-              </p>
-              <img src='https://c5.patreon.com/external/logo/become_a_patron_button@2x.png' />
+              <img id="patreon" src='https://c5.patreon.com/external/logo/become_a_patron_button@2x.png' />
             </a>
           </div>
 
@@ -2136,7 +2190,9 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 	  messages.push(message);
 
 
-	  var userIcon = message.userIcon ? getUserIconURL(message.permId, message.userIcon) : getUserIconURL(message.permId);
+    console.log(message);
+    var userIcon = message.userIcon ? getUserIconURL(message.permId, message.userIcon) : getUserIconURL(message.permId);
+    var userColor = message.userIcon ? getUserColor(message.userIcon) : "white";
 	  var userNickname = message.userNickname ? getUserNickname(message.permId, message.userNickname) : '' // todo create getUserNickame method
 
 	   if(userNickname == '') {
@@ -2160,7 +2216,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
 		          </div>
 		        </div>
 		        <div class="msg-txt message${ message.isSystemMessage ? '-system' : '-txt' }">
-              <h3>${userNickname.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h3>
+              <h3 style="font-weight:bold;color:${userColor}">${userNickname.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h3>
 		          <p>${message.body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
 		        </div>
 		      </div>
@@ -2330,7 +2386,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
     		window.location.href = 'https://www.netflix.com/watch/' + otherEpisode;
     	}
 
-    	alert('Long parties only work for consecutive episodes for now. Please share a new Netflix Party to continue watching together.')
+    	alert('Long parties only work for consecutive episodes for now. Please share a new party to continue watching together.')
     }
 
     // listen to URL changes on the webpage when next episode changes
@@ -2392,7 +2448,7 @@ var injectContentScript = function(defaultServerOptions=optionsConfig, servers=s
           if(otherEpisode) {
           	teardown();
           	// alert('Autoplay only works for consecutive episodes for now. Please create a new Netflix Party to continue watching together.')
-          	alert('Long parties only work for consecutive episodes for now. Please share a new Netflix Party to continue watching together.')
+          	alert('Long parties only work for consecutive episodes for now. Please share a new party to continue watching together.')
           	// alert('Long parties only work for consecutive episodes, not for the episode selector. Please create a new party to continue watching');
           } else if(!otherEpisode) {
 
