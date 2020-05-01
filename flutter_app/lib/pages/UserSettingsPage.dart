@@ -78,8 +78,14 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
   @override
   Widget build(BuildContext ctxt) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("User Settings"),
+        appBar: CupertinoNavigationBar(
+          actionsForegroundColor: Theme.of(context).primaryColor,
+          brightness: MediaQuery.of(context).platformBrightness,
+          middle: Text("User Settings",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Theme.of(context).textTheme.bodyText1.color)),
+          backgroundColor: CupertinoColors.quaternarySystemFill,
         ),
         body: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -98,7 +104,7 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
                 textInputAction: TextInputAction.done,
                 controller: _usernameController,
                 placeholder: 'Enter Username',
-                style: Theme.of(context).primaryTextTheme.body1,
+                style: Theme.of(context).primaryTextTheme.bodyText1,
                 clearButtonMode: OverlayVisibilityMode.editing,
                 keyboardType: TextInputType.text,
               ),

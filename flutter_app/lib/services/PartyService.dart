@@ -177,10 +177,10 @@ class PartyService {
 
   void _onConnectionClosed() {
     _partySessionStore.setAsSessionInactive();
-    if (_pingServerTimer.isActive) {
+    if (_pingServerTimer?.isActive ?? false) {
       _pingServerTimer.cancel();
     }
-    if (_getServerTimeTimer.isActive) {
+    if (_getServerTimeTimer?.isActive ?? false) {
       _getServerTimeTimer.cancel();
     }
   }

@@ -113,16 +113,24 @@ class _AppContainerState extends State<AppContainer>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: CupertinoNavigationBar(
+        brightness: MediaQuery.of(context).platformBrightness,
         middle: StreamBuilder(
             stream: _partySessionStore.isSessionActive$,
             builder: (context, isSessionActiveSnapshot) {
               bool isSessionActive = isSessionActiveSnapshot.data ?? false;
               return RichText(
                 text: TextSpan(
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Theme.of(context).textTheme.bodyText1.color),
                     children: isSessionActive
-                        ? [TextSpan(text: "$_numChatUsers people")]
+                        ? [
+                            TextSpan(
+                                text:
+                                    "$_numChatUsers ${_numChatUsers > 1 ? 'people' : 'person'}")
+                          ]
                         : [
                             TextSpan(
                               text: LabelVault.LANDING_PAGE_TITLE,
@@ -130,7 +138,7 @@ class _AppContainerState extends State<AppContainer>
                           ]),
               );
             }),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: CupertinoColors.quaternarySystemFill,
       ),
       body: StreamBuilder(
         stream: _partySessionStore.isSessionActive$,
@@ -189,8 +197,8 @@ class _AppContainerState extends State<AppContainer>
           builder: (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
             double bottomPadding = isKeyboardVisibleSnapshot.data != null &&
                     isKeyboardVisibleSnapshot.data
-                ? 10
-                : 130;
+                ? MediaQuery.of(context).viewInsets.bottom + 5
+                : 120;
             return SizedBox(
                 height: MediaQuery.of(context).size.height - 64,
                 child: Padding(
