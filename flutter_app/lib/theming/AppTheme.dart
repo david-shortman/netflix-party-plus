@@ -10,8 +10,8 @@ class PartyHarderTheme {
         dialogBackgroundColor: Colors.white,
         selectedRowColor: Colors.grey[200],
         primaryTextTheme: TextTheme(
-            body1: TextStyle(color: Colors.black),
-            display1: TextStyle(color: Colors.black12)));
+            bodyText1: TextStyle(color: Colors.black),
+            headline1: TextStyle(color: Colors.black12)));
   }
 
   static getDarkTheme() {
@@ -26,7 +26,7 @@ class PartyHarderTheme {
         dialogBackgroundColor: Colors.black87,
 //        dialogBackgroundColor: Colors.black38,
         primaryTextTheme: TextTheme(
-            body1: TextStyle(color: Colors.white),
-            display1: TextStyle(color: Colors.white70)));
+            bodyText1: TextStyle(color: Colors.white),
+            headline1: TextStyle(color: Colors.white70)));
   }
 }

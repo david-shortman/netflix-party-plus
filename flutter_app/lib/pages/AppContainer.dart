@@ -122,9 +122,9 @@ class _AppContainerState extends State<AppContainer>
               bool isSessionActive = isSessionActiveSnapshot.data ?? false;
               return RichText(
                 text: TextSpan(
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Theme.of(context).textTheme.body1.color),
+                    style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyText1.color),
                     children: isSessionActive
-                        ? [TextSpan(text: "$_numChatUsers people")]
+                        ? [TextSpan(text: "$_numChatUsers ${_numChatUsers > 1 ? 'people' : 'person'}")]
                         : [
                             TextSpan(
                               text: LabelVault.LANDING_PAGE_TITLE,

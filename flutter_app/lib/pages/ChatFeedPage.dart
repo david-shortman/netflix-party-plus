@@ -95,8 +95,6 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
           return Container();
         }
         LocalUser localUser = streamSnapshot.data['localUser'];
-        bool isDarkMode =
-            MediaQuery.of(context).platformBrightness == Brightness.dark;
         return KeyboardManagerWidget(
           child: DashChat(
             key: _chatKey,
