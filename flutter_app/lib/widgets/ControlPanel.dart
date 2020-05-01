@@ -89,7 +89,7 @@ class _ControlPanelState extends State<ControlPanel> {
             parallaxEnabled: true,
             controller: _panelController,
             maxHeight: isSessionActive ? 280 : 80,
-            minHeight: isSessionActive ? 120 : 80,
+            minHeight: isSessionActive ? 115 : 80,
             panel: _panel(isSessionActive),
             isDraggable: isSessionActive,
             onPanelOpened: () {
@@ -144,7 +144,26 @@ class _ControlPanelState extends State<ControlPanel> {
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
-                          _getPlaybackControlButton(),
+                          StreamBuilder(
+                              stream: _playbackInfoStore.stream$,
+                              builder: (context, playbackInfoSnapshot) {
+                                return CupertinoButton(
+                                  child: Icon(
+                                    playbackInfoSnapshot.hasData
+                                        ? (playbackInfoSnapshot.data.isPlaying
+                                        ? CupertinoIcons.pause_solid
+                                        : CupertinoIcons.play_arrow_solid)
+                                        : CupertinoIcons.play_arrow_solid,
+                                    color: Theme.of(context).primaryColor,
+                                    size: 45,
+                                  ),
+                                  onPressed: playbackInfoSnapshot.hasData
+                                      ? (_playbackInfoStore.playbackInfo.isPlaying
+                                      ? _onPausePressed
+                                      : _onPlayPressed)
+                                      : _onPlayPressed,
+                                );
+                              }),
                           CupertinoButton(
                             child: Icon(
                               Icons.replay_10,
@@ -193,17 +212,21 @@ class _ControlPanelState extends State<ControlPanel> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+              padding: EdgeInsets.fromLTRB(0, isSessionActive ? 8 : 0, 14, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Visibility(
+                  Visibility  (
                     visible: isSessionActive,
                     child: CupertinoButton(
-                      child: Text(
-                        "Disconnect",
-                        style: TextStyle(color: Theme.of(context).primaryColor),
+                      child: Row(
+                        children: <Widget>[
+                          Icon(CupertinoIcons.left_chevron, color: Theme.of(context).primaryColor,),
+                          Text(
+                          "Disconnect",
+                          style: TextStyle(color: Theme.of(context).primaryColor),
+                        )],
                       ),
                       onPressed: () {
                         _onDisconnectButtonPressed();
@@ -216,11 +239,12 @@ class _ControlPanelState extends State<ControlPanel> {
                       builder: (context, localUserSnapshot) {
                         LocalUser localUser = localUserSnapshot.data;
                         return IconButton(
+                          iconSize: 40,
                           icon: SvgPicture.asset(
                               localUserSnapshot.data.icon != null
                                   ? 'assets/avatars/${localUser?.icon ?? DefaultsVault.DEFAULT_AVATAR}'
                                   : 'assets/avatars/Batman.svg',
-                              height: 85),
+                              height: 100),
                           onPressed: () {
                             _navigateToAccountSettings(context);
                           },
@@ -272,7 +296,7 @@ class _ControlPanelState extends State<ControlPanel> {
                           barColor:
                           Theme.of(context).brightness == Brightness.light
                               ? Colors.grey[350]
-                              : Colors.white,
+                              : Colors.grey[700],
                           value: _shouldUseLastActiveScrubbingPercentage
                               ? _lastActiveScrubbingPercentage
                               : seekPercentage,
@@ -339,9 +363,9 @@ class _ControlPanelState extends State<ControlPanel> {
                           ? CupertinoIcons.pause_solid
                           : CupertinoIcons.play_arrow_solid)
                       : CupertinoIcons.play_arrow_solid,
-                  size: 40),
-              color: Theme.of(context).primaryColor,
-              padding: EdgeInsets.fromLTRB(35, 0, 30, 4),
+                  color: Theme.of(context).primaryColor,
+                  size: 60),
+              padding: EdgeInsets.fromLTRB(8, 0, 5, 4),
               minSize: 55,
               borderRadius: BorderRadius.circular(500),
               onPressed: playbackInfoSnapshot.hasData

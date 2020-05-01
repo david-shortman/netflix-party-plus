@@ -113,13 +113,14 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
             text: _messageInputText,
             inputDecoration: InputDecoration(
                 isDense: true,
+                hintStyle: TextStyle(color: Colors.grey[400]),
                 hintText: "Send a message",
                 border: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 errorBorder: InputBorder.none,
                 disabledBorder: InputBorder.none,
-                contentPadding: EdgeInsets.fromLTRB(6, 12, 6, 12)),
+                contentPadding: EdgeInsets.fromLTRB(4, 8, 4, 8)),
             textController: _messageInputTextEditingController,
             onTextChange: (newText) {
               _messenger.sendMessage(TypingMessage(TypingContent(true)));
@@ -128,16 +129,9 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
               });
               _setChatInputTextState(newText);
             },
-            inputToolbarPadding: EdgeInsets.fromLTRB(6, 0, 12, 0),
+            inputToolbarPadding: EdgeInsets.fromLTRB(2, 0, 3, 0),
             inputContainerStyle: BoxDecoration(
-                boxShadow: isDarkMode
-                    ? []
-                    : [
-                  BoxShadow(
-                      color: Theme.of(context).selectedRowColor,
-                      blurRadius: 2,
-                      spreadRadius: 2)
-                ],
+                border: Border.all(color: MediaQuery.of(context).platformBrightness == Brightness.light ? Colors.grey[300] : Colors.grey[800]),
                 color: Theme.of(context).dialogBackgroundColor,
                 borderRadius: BorderRadius.circular(30)),
             sendButtonBuilder: (onPressed) {

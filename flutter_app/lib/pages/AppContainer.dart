@@ -122,7 +122,7 @@ class _AppContainerState extends State<AppContainer>
               bool isSessionActive = isSessionActiveSnapshot.data ?? false;
               return RichText(
                 text: TextSpan(
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Theme.of(context).textTheme.body1.color),
                     children: isSessionActive
                         ? [TextSpan(text: "$_numChatUsers people")]
                         : [
@@ -132,7 +132,7 @@ class _AppContainerState extends State<AppContainer>
                           ]),
               );
             }),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: CupertinoColors.quaternarySystemFill,
       ),
       body: StreamBuilder(
         stream: _partySessionStore.isSessionActive$,
@@ -192,7 +192,7 @@ class _AppContainerState extends State<AppContainer>
             double bottomPadding = isKeyboardVisibleSnapshot.data != null &&
                     isKeyboardVisibleSnapshot.data
                 ? MediaQuery.of(context).viewInsets.bottom + 5
-                : 130;
+                : 120;
             return SizedBox(
                 height: MediaQuery.of(context).size.height - 64,
                 child: Padding(
