@@ -113,6 +113,7 @@ class _AppContainerState extends State<AppContainer>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: CupertinoNavigationBar(
         brightness: MediaQuery.of(context).platformBrightness,
         middle: StreamBuilder(
@@ -190,7 +191,7 @@ class _AppContainerState extends State<AppContainer>
           builder: (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
             double bottomPadding = isKeyboardVisibleSnapshot.data != null &&
                     isKeyboardVisibleSnapshot.data
-                ? 10
+                ? MediaQuery.of(context).viewInsets.bottom + 5
                 : 130;
             return SizedBox(
                 height: MediaQuery.of(context).size.height - 64,

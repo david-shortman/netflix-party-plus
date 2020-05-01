@@ -83,6 +83,15 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_interactive_keyboard:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: "4c7504054e336324cc2b3679dd0f27cf4363be4b"
+      url: "https://github.com/david-shortman/flutter_interactive_keyboard.git"
+    source: git
+    version: "0.1.2"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:

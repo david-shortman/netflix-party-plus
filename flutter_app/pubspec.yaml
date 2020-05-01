@@ -7,6 +7,11 @@ environment:
   sdk: ">=2.3.0 <3.0.0"
 
 dependencies:
+  flutter_interactive_keyboard:
+    git:
+      url: https://github.com/david-shortman/flutter_interactive_keyboard.git
+      ref: master
+
   flutter:
     sdk: flutter
 
