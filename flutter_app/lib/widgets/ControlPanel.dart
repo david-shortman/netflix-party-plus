@@ -151,16 +151,17 @@ class _ControlPanelState extends State<ControlPanel> {
                                   child: Icon(
                                     playbackInfoSnapshot.hasData
                                         ? (playbackInfoSnapshot.data.isPlaying
-                                        ? CupertinoIcons.pause_solid
-                                        : CupertinoIcons.play_arrow_solid)
+                                            ? CupertinoIcons.pause_solid
+                                            : CupertinoIcons.play_arrow_solid)
                                         : CupertinoIcons.play_arrow_solid,
                                     color: Theme.of(context).primaryColor,
                                     size: 45,
                                   ),
                                   onPressed: playbackInfoSnapshot.hasData
-                                      ? (_playbackInfoStore.playbackInfo.isPlaying
-                                      ? _onPausePressed
-                                      : _onPlayPressed)
+                                      ? (_playbackInfoStore
+                                              .playbackInfo.isPlaying
+                                          ? _onPausePressed
+                                          : _onPlayPressed)
                                       : _onPlayPressed,
                                 );
                               }),
@@ -188,7 +189,9 @@ class _ControlPanelState extends State<ControlPanel> {
 
   Widget _panel(bool isSessionActive) {
     return SingleChildScrollView(
-      physics: isSessionActive ? BouncingScrollPhysics() : NeverScrollableScrollPhysics(),
+      physics: isSessionActive
+          ? BouncingScrollPhysics()
+          : NeverScrollableScrollPhysics(),
       child: Container(
         child: Column(
           children: <Widget>[
@@ -205,7 +208,7 @@ class _ControlPanelState extends State<ControlPanel> {
                       decoration: BoxDecoration(
                           color: Colors.grey,
                           borderRadius:
-                          BorderRadius.all(Radius.circular(12.0))),
+                              BorderRadius.all(Radius.circular(12.0))),
                     ),
                   )
                 ],
@@ -217,16 +220,21 @@ class _ControlPanelState extends State<ControlPanel> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Visibility  (
+                  Visibility(
                     visible: isSessionActive,
                     child: CupertinoButton(
                       child: Row(
                         children: <Widget>[
-                          Icon(CupertinoIcons.left_chevron, color: Theme.of(context).primaryColor,),
+                          Icon(
+                            CupertinoIcons.left_chevron,
+                            color: Theme.of(context).primaryColor,
+                          ),
                           Text(
-                          "Disconnect",
-                          style: TextStyle(color: Theme.of(context).primaryColor),
-                        )],
+                            "Disconnect",
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor),
+                          )
+                        ],
                       ),
                       onPressed: () {
                         _onDisconnectButtonPressed();
@@ -294,9 +302,9 @@ class _ControlPanelState extends State<ControlPanel> {
                           progressWidth: 4,
                           thumbColor: Theme.of(context).primaryColor,
                           barColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.grey[350]
-                              : Colors.grey[700],
+                              Theme.of(context).brightness == Brightness.light
+                                  ? Colors.grey[350]
+                                  : Colors.grey[700],
                           value: _shouldUseLastActiveScrubbingPercentage
                               ? _lastActiveScrubbingPercentage
                               : seekPercentage,
@@ -311,11 +319,11 @@ class _ControlPanelState extends State<ControlPanel> {
                             setState(() {
                               _lastActiveScrubbingPercentage =
                                   ((_playbackInfoStore.playbackInfo
-                                      .lastKnownMoviePosition ??
-                                      0) /
-                                      (_playbackInfoStore
-                                          .playbackInfo.videoDuration ??
-                                          0)) *
+                                                  .lastKnownMoviePosition ??
+                                              0) /
+                                          (_playbackInfoStore
+                                                  .playbackInfo.videoDuration ??
+                                              0)) *
                                       1.0;
                             });
                           },

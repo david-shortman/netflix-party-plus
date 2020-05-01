@@ -81,7 +81,10 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
         appBar: CupertinoNavigationBar(
           actionsForegroundColor: Theme.of(context).primaryColor,
           brightness: MediaQuery.of(context).platformBrightness,
-          middle: Text("User Settings", style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyText1.color)),
+          middle: Text("User Settings",
+              style: TextStyle(
+                  fontSize: 18,
+                  color: Theme.of(context).textTheme.bodyText1.color)),
           backgroundColor: CupertinoColors.quaternarySystemFill,
         ),
         body: Padding(

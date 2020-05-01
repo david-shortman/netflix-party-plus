@@ -129,7 +129,11 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
             },
             inputToolbarPadding: EdgeInsets.fromLTRB(2, 0, 3, 0),
             inputContainerStyle: BoxDecoration(
-                border: Border.all(color: MediaQuery.of(context).platformBrightness == Brightness.light ? Colors.grey[300] : Colors.grey[800]),
+                border: Border.all(
+                    color: MediaQuery.of(context).platformBrightness ==
+                            Brightness.light
+                        ? Colors.grey[300]
+                        : Colors.grey[800]),
                 color: Theme.of(context).dialogBackgroundColor,
                 borderRadius: BorderRadius.circular(30)),
             sendButtonBuilder: (onPressed) {
@@ -151,7 +155,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
               builder: (context, showUserBubbleAsAvatarSnapshot) {
                 if (showUserBubbleAsAvatarSnapshot.data == false) {
                   String firstTwoLettersOfUsername = chatUser.name != null &&
-                      chatUser.name.isNotEmpty
+                          chatUser.name.isNotEmpty
                       ? '${chatUser.name[0].toUpperCase()}${chatUser.name.length > 1 ? '${chatUser.name[1]}' : ''}'
                       : '?';
                   return Container(
@@ -170,7 +174,8 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
                   );
                 }
                 String avatar = chatUser?.avatar != ''
-                    ? chatUser?.avatar ?? DefaultsVault.DEFAULT_AVATAR.toString()
+                    ? chatUser?.avatar ??
+                        DefaultsVault.DEFAULT_AVATAR.toString()
                     : DefaultsVault.DEFAULT_AVATAR.toString();
                 return SvgPicture.asset('assets/avatars/${avatar}', height: 35);
               },
