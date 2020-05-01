@@ -114,6 +114,7 @@ class _AppContainerState extends State<AppContainer>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CupertinoNavigationBar(
+        brightness: MediaQuery.of(context).platformBrightness,
         middle: StreamBuilder(
             stream: _partySessionStore.isSessionActive$,
             builder: (context, isSessionActiveSnapshot) {

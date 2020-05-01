@@ -83,6 +83,7 @@ class _ControlPanelState extends State<ControlPanel> {
         builder: (context, AsyncSnapshot<bool> isSessionActiveSnapshot) {
           bool isSessionActive = isSessionActiveSnapshot.data ?? false;
           return SlidingUpPanel(
+            color: Theme.of(context).bottomAppBarColor,
             collapsed: isSessionActive ? _collapsed(isSessionActive) : null,
             backdropEnabled: true,
             parallaxEnabled: true,
@@ -167,17 +168,14 @@ class _ControlPanelState extends State<ControlPanel> {
   }
 
   Widget _panel(bool isSessionActive) {
-    return MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        child: Container(
-          color: Theme.of(context).bottomAppBarColor,
-          child: Column(
-            children: <Widget>[
-              SizedBox(
-                height: 12.0,
-              ),
-              Row(
+    return SingleChildScrollView(
+      physics: isSessionActive ? BouncingScrollPhysics() : NeverScrollableScrollPhysics(),
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 12, 0, 0),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Visibility(
@@ -188,15 +186,15 @@ class _ControlPanelState extends State<ControlPanel> {
                       decoration: BoxDecoration(
                           color: Colors.grey,
                           borderRadius:
-                              BorderRadius.all(Radius.circular(12.0))),
+                          BorderRadius.all(Radius.circular(12.0))),
                     ),
                   )
                 ],
               ),
-              SizedBox(
-                height: 8,
-              ),
-              Row(
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -230,10 +228,10 @@ class _ControlPanelState extends State<ControlPanel> {
                       }),
                 ],
               ),
-              SizedBox(
-                height: 15.0,
-              ),
-              Visibility(
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
+              child: Visibility(
                   visible: isSessionActive,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -255,10 +253,10 @@ class _ControlPanelState extends State<ControlPanel> {
                             ),
                             onPressed: _onForward10Pressed),
                       ])),
-              SizedBox(
-                height: 20.0,
-              ),
-              Visibility(
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+              child: Visibility(
                   visible: isSessionActive,
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -272,9 +270,9 @@ class _ControlPanelState extends State<ControlPanel> {
                           progressWidth: 4,
                           thumbColor: Theme.of(context).primaryColor,
                           barColor:
-                              Theme.of(context).brightness == Brightness.light
-                                  ? Colors.grey[350]
-                                  : Colors.white,
+                          Theme.of(context).brightness == Brightness.light
+                              ? Colors.grey[350]
+                              : Colors.white,
                           value: _shouldUseLastActiveScrubbingPercentage
                               ? _lastActiveScrubbingPercentage
                               : seekPercentage,
@@ -289,11 +287,11 @@ class _ControlPanelState extends State<ControlPanel> {
                             setState(() {
                               _lastActiveScrubbingPercentage =
                                   ((_playbackInfoStore.playbackInfo
-                                                  .lastKnownMoviePosition ??
-                                              0) /
-                                          (_playbackInfoStore
-                                                  .playbackInfo.videoDuration ??
-                                              0)) *
+                                      .lastKnownMoviePosition ??
+                                      0) /
+                                      (_playbackInfoStore
+                                          .playbackInfo.videoDuration ??
+                                          0)) *
                                       1.0;
                             });
                           },
@@ -310,10 +308,12 @@ class _ControlPanelState extends State<ControlPanel> {
                         );
                       },
                     ),
-                  ))
-            ],
-          ),
-        ));
+                  )),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   void _onReplay10Pressed() {

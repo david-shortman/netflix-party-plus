@@ -98,6 +98,8 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
             MediaQuery.of(context).platformBrightness == Brightness.dark;
         return DashChat(
           key: _chatKey,
+          shouldShowLoadEarlier: false,
+          onLoadEarlier: () {},
           messages: streamSnapshot.data['chatMessages'],
           scrollController: _chatScrollController,
           scrollToBottom: false,
@@ -108,13 +110,14 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
               containerColor: AvatarColors.getColor(localUser?.icon ?? '')),
           text: _messageInputText,
           inputDecoration: InputDecoration(
+              isDense: true,
               hintText: "Send a message",
               border: InputBorder.none,
               focusedBorder: InputBorder.none,
               enabledBorder: InputBorder.none,
               errorBorder: InputBorder.none,
               disabledBorder: InputBorder.none,
-              contentPadding: EdgeInsets.fromLTRB(2, 5, 0, 0)),
+              contentPadding: EdgeInsets.fromLTRB(6, 12, 6, 12)),
           textController: _messageInputTextEditingController,
           onTextChange: (newText) {
             _messenger.sendMessage(TypingMessage(TypingContent(true)));
