@@ -77,10 +77,16 @@ class _LandingPageState extends State<LandingPage> {
               color: Theme.of(context).primaryColor,
               child: Align(
                 alignment: Alignment.center,
-                child: isAttemptingToJoinSessionFromText ? CupertinoTheme(data: CupertinoThemeData(brightness: Brightness.dark), child: CupertinoActivityIndicator(),) : Text('${LabelVault.CONNECT_TO_PARTY_BUTTON.toString()}',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
+                child: isAttemptingToJoinSessionFromText
+                    ? CupertinoTheme(
+                        data: CupertinoThemeData(brightness: Brightness.dark),
+                        child: CupertinoActivityIndicator(),
+                      )
+                    : Text(
+                        '${LabelVault.CONNECT_TO_PARTY_BUTTON.toString()}',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
               ),
               onPressed: _onConnectIntent,
             ),
