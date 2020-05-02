@@ -1,5 +1,4 @@
 import 'package:dash_chat/dash_chat.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ChatMessagesStore {
@@ -42,7 +41,6 @@ class ChatMessagesStore {
         .toSet();
     combinedChatUsers
         .removeWhere((user) => userUidsWhoLeftInMessages.contains(user.uid));
-    debugPrint('users ${combinedChatUsers.length}');
     _chatUsers.add(combinedChatUsers);
   }
 
