@@ -1,5 +1,4 @@
 import 'package:dash_chat/dash_chat.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ChatMessagesStore {
