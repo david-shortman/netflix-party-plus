@@ -130,7 +130,7 @@ class _AppContainerState extends State<AppContainer>
                         fontSize: 18,
                         fontWeight: MediaQuery.of(context).boldText
                             ? FontWeight.bold
-                            : FontWeight.normal,
+                            : FontWeight.w600,
                         color: Theme.of(context).textTheme.body1.color),
                     children: isSessionActive
                         ? [
@@ -145,7 +145,7 @@ class _AppContainerState extends State<AppContainer>
                           ]),
               );
             }),
-        backgroundColor: CupertinoColors.quaternarySystemFill,
+        backgroundColor: CupertinoColors.tertiarySystemFill,
       ),
       body: StreamBuilder(
         stream: _partySessionStore.isSessionActive$,

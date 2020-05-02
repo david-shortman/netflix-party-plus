@@ -84,7 +84,7 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
               style: TextStyle(
                   fontSize: 18,
                   color: Theme.of(context).textTheme.body1.color)),
-          backgroundColor: CupertinoColors.quaternarySystemFill,
+          backgroundColor: CupertinoColors.tertiarySystemFill,
         ),
         body: Padding(
             padding: const EdgeInsets.all(20.0),

@@ -8,7 +8,6 @@ import 'package:np_plus/services/PartyService.dart';
 import 'package:np_plus/services/ToastService.dart';
 import 'package:np_plus/store/PartySessionStore.dart';
 import 'package:np_plus/vaults/LabelVault.dart';
-import 'package:progress_button/progress_button.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -74,23 +73,22 @@ class _LandingPageState extends State<LandingPage> {
                   : false;
           return Padding(
             padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
-            child: ProgressButton(
+            child: CupertinoButton(
+              color: Theme.of(context).primaryColor,
               child: Align(
                 alignment: Alignment.center,
-                child: Text(
-                  isAttemptingToJoinSessionFromText
-                      ? ""
-                      : '${LabelVault.CONNECT_TO_PARTY_BUTTON.toString()}',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
+                child: isAttemptingToJoinSessionFromText
+                    ? CupertinoTheme(
+                        data: CupertinoThemeData(brightness: Brightness.dark),
+                        child: CupertinoActivityIndicator(),
+                      )
+                    : Text(
+                        '${LabelVault.CONNECT_TO_PARTY_BUTTON.toString()}',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
               ),
               onPressed: _onConnectIntent,
-              buttonState: isAttemptingToJoinSessionFromText
-                  ? ButtonState.inProgress
-                  : ButtonState.normal,
-              backgroundColor: Theme.of(context).primaryColor,
-              progressColor: Colors.white,
             ),
           );
         }));
@@ -113,15 +111,13 @@ class _LandingPageState extends State<LandingPage> {
                 "2. Paste the link there to create a scannable QR code"))));
     widgets.add(Padding(
       padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
-      child: ProgressButton(
+      child: CupertinoButton(
+        color: Theme.of(context).primaryColor,
         child: Text(
           LabelVault.SCAN_QR_BUTTON,
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: _onScanQRPressed,
-        buttonState: ButtonState.normal,
-        backgroundColor: Theme.of(context).primaryColor,
-        progressColor: Colors.white,
       ),
     ));
     return widgets;

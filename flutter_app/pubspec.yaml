@@ -21,7 +21,6 @@ dependencies:
   shared_preferences: ^0.5.6
   flutter_svg: ^0.17.4
   dash_chat: 1.1.2
-  progress_button: ^0.0.2
   barcode_scan: ^2.0.2
   fluttertoast: ^4.0.0
   sliding_up_panel: ^1.0.2
