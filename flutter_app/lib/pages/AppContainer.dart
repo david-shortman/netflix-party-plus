@@ -115,7 +115,6 @@ class _AppContainerState extends State<AppContainer>
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: CupertinoNavigationBar(
-        brightness: MediaQuery.of(context).platformBrightness,
         middle: StreamBuilder(
             stream: _partySessionStore.isSessionActive$,
             builder: (context, isSessionActiveSnapshot) {
@@ -124,12 +123,15 @@ class _AppContainerState extends State<AppContainer>
                 text: TextSpan(
                     style: TextStyle(
                         fontSize: 18,
-                        color: Theme.of(context).textTheme.bodyText1.color),
+                        fontWeight: MediaQuery.of(context).boldText
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: Theme.of(context).textTheme.body1.color),
                     children: isSessionActive
                         ? [
                             TextSpan(
                                 text:
-                                    "$_numChatUsers ${_numChatUsers > 1 ? 'people' : 'person'}")
+                                    "$_numChatUsers ${_numChatUsers != 1 ? 'people' : 'person'}")
                           ]
                         : [
                             TextSpan(
@@ -198,7 +200,7 @@ class _AppContainerState extends State<AppContainer>
             double bottomPadding = isKeyboardVisibleSnapshot.data != null &&
                     isKeyboardVisibleSnapshot.data
                 ? MediaQuery.of(context).viewInsets.bottom + 5
-                : 120;
+                : 122;
             return SizedBox(
                 height: MediaQuery.of(context).size.height - 64,
                 child: Padding(

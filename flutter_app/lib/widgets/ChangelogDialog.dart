@@ -26,7 +26,7 @@ class ChangelogDialog extends StatelessWidget {
                             fontSize: 18,
                             color: Theme.of(context)
                                 .primaryTextTheme
-                                .bodyText1
+                                .body1
                                 .color)),
                   )))
         ],
