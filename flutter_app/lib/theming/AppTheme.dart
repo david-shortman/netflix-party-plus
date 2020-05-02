@@ -1,17 +1,21 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PartyHarderTheme {
-  static getLightTheme() {
-    return ThemeData(
+  static getTheme() {
+    return CupertinoThemeData(
         primaryColor: Colors.red,
-        unselectedWidgetColor: Colors.black,
-        cardColor: Colors.black12,
-        bottomAppBarColor: Colors.white,
-        dialogBackgroundColor: Colors.white,
-        selectedRowColor: Colors.grey[200],
-        primaryTextTheme: TextTheme(
-            body1: TextStyle(color: Colors.black),
-            headline: TextStyle(color: Colors.black12)));
+        textTheme: CupertinoTextThemeData(textStyle: TextStyle(color: CupertinoDynamicColor.withBrightness(color: CupertinoColors.black, darkColor: CupertinoColors.white))),
+        barBackgroundColor: CupertinoDynamicColor.withBrightness(color: CupertinoColors.systemBackground, darkColor: CupertinoColors.darkBackgroundGray),
+//        unselectedWidgetColor: CupertinoColors.black,
+//        cardColor: CupertinoColors.black12,
+//        bottomAppBarColor: CupertinoColors.white,
+//        dialogBackgroundColor: CupertinoColors.white,
+//        selectedRowColor: CupertinoColors.grey[200],
+//        primaryTextTheme: TextTheme(
+//            body1: TextStyle(color: CupertinoColors.black),
+//            headline: TextStyle(color: CupertinoColors.black12)));
+    );
   }
 
   static getDarkTheme() {

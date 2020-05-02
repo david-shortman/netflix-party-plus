@@ -246,13 +246,11 @@ class _ControlPanelState extends State<ControlPanel> {
                       initialData: LocalUser(),
                       builder: (context, localUserSnapshot) {
                         LocalUser localUser = localUserSnapshot.data;
-                        return IconButton(
-                          iconSize: 40,
-                          icon: SvgPicture.asset(
-                              localUserSnapshot.data.icon != null
-                                  ? 'assets/avatars/${localUser?.icon ?? DefaultsVault.DEFAULT_AVATAR}'
-                                  : 'assets/avatars/Batman.svg',
-                              height: 100),
+                        return CupertinoButton(
+                          color: CupertinoColors.lightBackgroundGray,
+                          padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                          borderRadius: BorderRadius.circular(500),
+                          child: Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 1), child: Icon(CupertinoIcons.ellipsis, size: 25, color: Theme.of(context).primaryColor),),
                           onPressed: () {
                             _navigateToAccountSettings(context);
                           },

@@ -85,123 +85,125 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
     if (_chatMessageListener == null) {
       _setupNewChatMessagesListener();
     }
-    return StreamBuilder(
-      stream: _chatMessagesStore.stream$.withLatestFrom(
-          _localUserStore.stream$,
-          (chatMessages, localUser) =>
-              {'chatMessages': chatMessages, 'localUser': localUser}),
-      builder: (context, streamSnapshot) {
-        if (streamSnapshot.data == null) {
-          return Container();
-        }
-        LocalUser localUser = streamSnapshot.data['localUser'];
-        return KeyboardManagerWidget(
-          child: DashChat(
-            key: _chatKey,
-            shouldShowLoadEarlier: false,
-            onLoadEarlier: () {},
-            messages: streamSnapshot.data['chatMessages'],
-            scrollController: _chatScrollController,
-            scrollToBottom: false,
-            user: ChatUser(
-                name: localUser?.username,
-                uid: localUser?.id,
-                avatar: localUser?.icon ?? DefaultsVault.DEFAULT_AVATAR,
-                containerColor: AvatarColors.getColor(localUser?.icon ?? '')),
-            text: _messageInputText,
-            inputDecoration: InputDecoration(
-                isDense: true,
-                hintStyle: TextStyle(color: Colors.grey[400]),
-                hintText: "Send a message",
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                contentPadding: EdgeInsets.fromLTRB(4, 8, 4, 4)),
-            textController: _messageInputTextEditingController,
-            onTextChange: (newText) {
-              _messenger.sendMessage(TypingMessage(TypingContent(true)));
-              Future.delayed(Duration(milliseconds: 1500), () async {
-                _messenger.sendMessage(TypingMessage(TypingContent(false)));
-              });
-              _setChatInputTextState(newText);
-            },
-            inputToolbarPadding: EdgeInsets.fromLTRB(2, 0, 3, 0),
-            inputContainerStyle: BoxDecoration(
-                border: Border.all(
-                    color: MediaQuery.of(context).platformBrightness ==
-                            Brightness.light
-                        ? Colors.grey[300]
-                        : Colors.grey[800]),
-                color: Theme.of(context).dialogBackgroundColor,
-                borderRadius: BorderRadius.circular(30)),
-            sendButtonBuilder: (onPressed) {
-              return CupertinoButton(
-                  child: Icon(CupertinoIcons.up_arrow),
-                  color: Theme.of(context).primaryColor,
-                  padding: EdgeInsets.all(3),
-                  minSize: 30,
-                  borderRadius: BorderRadius.circular(500),
-                  onPressed: onPressed);
-            },
-            onSend: (chatMessage) {
-              HapticFeedback.lightImpact();
-              _sendChatMessage(chatMessage);
-            },
-            showUserAvatar: true,
-            avatarBuilder: (chatUser) => StreamBuilder(
-              stream: _showUserBubbleAsAvatar.stream,
-              builder: (context, showUserBubbleAsAvatarSnapshot) {
-                if (showUserBubbleAsAvatarSnapshot.data == false) {
-                  String firstTwoLettersOfUsername = chatUser.name != null &&
-                          chatUser.name.isNotEmpty
-                      ? '${chatUser.name[0].toUpperCase()}${chatUser.name.length > 1 ? '${chatUser.name[1]}' : ''}'
-                      : '?';
-                  return Container(
-                    width: 35,
-                    height: 35,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        firstTwoLettersOfUsername,
-                        style: TextStyle(fontSize: 15),
-                      ),
-                    ),
-                    decoration: BoxDecoration(
-                        color: AvatarColors.getColor(chatUser.avatar),
-                        shape: BoxShape.circle),
-                  );
-                }
-                String avatar = chatUser?.avatar != ''
-                    ? chatUser?.avatar ??
-                        DefaultsVault.DEFAULT_AVATAR.toString()
-                    : DefaultsVault.DEFAULT_AVATAR.toString();
-                return SvgPicture.asset('assets/avatars/${avatar}', height: 35);
+    return Scaffold(
+      body: StreamBuilder(
+        stream: _chatMessagesStore.stream$.withLatestFrom(
+            _localUserStore.stream$,
+                (chatMessages, localUser) =>
+            {'chatMessages': chatMessages, 'localUser': localUser}),
+        builder: (context, streamSnapshot) {
+          if (streamSnapshot.data == null) {
+            return Container();
+          }
+          LocalUser localUser = streamSnapshot.data['localUser'];
+          return KeyboardManagerWidget(
+            child: DashChat(
+              key: _chatKey,
+              shouldShowLoadEarlier: false,
+              onLoadEarlier: () {},
+              messages: streamSnapshot.data['chatMessages'],
+              scrollController: _chatScrollController,
+              scrollToBottom: false,
+              user: ChatUser(
+                  name: localUser?.username,
+                  uid: localUser?.id,
+                  avatar: localUser?.icon ?? DefaultsVault.DEFAULT_AVATAR,
+                  containerColor: AvatarColors.getColor(localUser?.icon ?? '')),
+              text: _messageInputText,
+              inputDecoration: InputDecoration(
+                  isDense: true,
+                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  hintText: "Send a message",
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.fromLTRB(4, 8, 4, 4)),
+              textController: _messageInputTextEditingController,
+              onTextChange: (newText) {
+                _messenger.sendMessage(TypingMessage(TypingContent(true)));
+                Future.delayed(Duration(milliseconds: 1500), () async {
+                  _messenger.sendMessage(TypingMessage(TypingContent(false)));
+                });
+                _setChatInputTextState(newText);
               },
+              inputToolbarPadding: EdgeInsets.fromLTRB(2, 0, 3, 0),
+              inputContainerStyle: BoxDecoration(
+                  border: Border.all(
+                      color: MediaQuery.of(context).platformBrightness ==
+                          Brightness.light
+                          ? Colors.grey[300]
+                          : Colors.grey[800]),
+                  color: Theme.of(context).dialogBackgroundColor,
+                  borderRadius: BorderRadius.circular(30)),
+              sendButtonBuilder: (onPressed) {
+                return CupertinoButton(
+                    child: Icon(CupertinoIcons.up_arrow),
+                    color: Theme.of(context).primaryColor,
+                    padding: EdgeInsets.all(3),
+                    minSize: 30,
+                    borderRadius: BorderRadius.circular(500),
+                    onPressed: onPressed);
+              },
+              onSend: (chatMessage) {
+                HapticFeedback.lightImpact();
+                _sendChatMessage(chatMessage);
+              },
+              showUserAvatar: true,
+              avatarBuilder: (chatUser) => StreamBuilder(
+                stream: _showUserBubbleAsAvatar.stream,
+                builder: (context, showUserBubbleAsAvatarSnapshot) {
+                  if (showUserBubbleAsAvatarSnapshot.data == false) {
+                    String firstTwoLettersOfUsername = chatUser.name != null &&
+                        chatUser.name.isNotEmpty
+                        ? '${chatUser.name[0].toUpperCase()}${chatUser.name.length > 1 ? '${chatUser.name[1]}' : ''}'
+                        : '?';
+                    return Container(
+                      width: 35,
+                      height: 35,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          firstTwoLettersOfUsername,
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ),
+                      decoration: BoxDecoration(
+                          color: AvatarColors.getColor(chatUser.avatar),
+                          shape: BoxShape.circle),
+                    );
+                  }
+                  String avatar = chatUser?.avatar != ''
+                      ? chatUser?.avatar ??
+                      DefaultsVault.DEFAULT_AVATAR.toString()
+                      : DefaultsVault.DEFAULT_AVATAR.toString();
+                  return SvgPicture.asset('assets/avatars/${avatar}', height: 35);
+                },
+              ),
+              onLongPressAvatar: (user) {
+                HapticFeedback.lightImpact();
+                _showUserBubbleAsAvatar.add(!_showUserBubbleAsAvatar.value);
+              },
+              messageTextBuilder: (text, [chatMessage]) {
+                return Text(
+                  text,
+                  style: TextStyle(color: Colors.white),
+                );
+              },
+              messageTimeBuilder: (time, [chatMessage]) {
+                return Text(
+                  time,
+                  style: TextStyle(color: Colors.white, fontSize: 10),
+                );
+              },
+              messageContainerDecoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(15)),
             ),
-            onLongPressAvatar: (user) {
-              HapticFeedback.lightImpact();
-              _showUserBubbleAsAvatar.add(!_showUserBubbleAsAvatar.value);
-            },
-            messageTextBuilder: (text, [chatMessage]) {
-              return Text(
-                text,
-                style: TextStyle(color: Colors.white),
-              );
-            },
-            messageTimeBuilder: (time, [chatMessage]) {
-              return Text(
-                time,
-                style: TextStyle(color: Colors.white, fontSize: 10),
-              );
-            },
-            messageContainerDecoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(15)),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

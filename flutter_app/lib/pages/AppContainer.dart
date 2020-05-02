@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:dash_chat/dash_chat.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:np_plus/GetItInstance.dart';
 import 'package:np_plus/changelog/ChangelogService.dart';
@@ -32,10 +31,9 @@ import '../services/SocketMessengerService.dart';
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return CupertinoApp(
         title: '${LabelVault.APP_TITLE_1}${LabelVault.APP_TITLE_2}',
-        theme: PartyHarderTheme.getLightTheme(),
-        darkTheme: PartyHarderTheme.getDarkTheme(),
+        theme: PartyHarderTheme.getTheme(),
         home: AppContainer());
   }
 }
@@ -117,9 +115,9 @@ class _AppContainerState extends State<AppContainer>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       resizeToAvoidBottomInset: false,
-      appBar: CupertinoNavigationBar(
+      navigationBar: CupertinoNavigationBar(
         middle: StreamBuilder(
             stream: _partySessionStore.isSessionActive$,
             builder: (context, isSessionActiveSnapshot) {
@@ -131,7 +129,7 @@ class _AppContainerState extends State<AppContainer>
                         fontWeight: MediaQuery.of(context).boldText
                             ? FontWeight.bold
                             : FontWeight.normal,
-                        color: Theme.of(context).textTheme.body1.color),
+                        color: CupertinoTheme.of(context).textTheme.textStyle.color),
                     children: isSessionActive
                         ? [
                             TextSpan(
@@ -145,9 +143,9 @@ class _AppContainerState extends State<AppContainer>
                           ]),
               );
             }),
-        backgroundColor: CupertinoColors.quaternarySystemFill,
+        backgroundColor: CupertinoColors.tertiarySystemFill,
       ),
-      body: StreamBuilder(
+      child: StreamBuilder(
         stream: _partySessionStore.isSessionActive$,
         builder: (context, AsyncSnapshot<bool> isSessionActiveSnapshot) {
           bool isSessionActive = isSessionActiveSnapshot.data ?? false;
@@ -167,32 +165,32 @@ class _AppContainerState extends State<AppContainer>
           );
         },
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: StreamBuilder(
-        stream: _chatMessagesStore.isSomeoneTypingStream$,
-        builder: (context, AsyncSnapshot<bool> chatMessagesSnapshot) {
-          return Visibility(
-            visible: chatMessagesSnapshot.data ?? false,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 0, 165),
-              child: Container(
-                width: 200,
-                height: 35,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "People are typing...",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                decoration: BoxDecoration(
-                    color: Color.fromRGBO(0, 0, 0, .5),
-                    borderRadius: BorderRadius.all(Radius.circular(12.0))),
-              ),
-            ),
-          );
-        },
-      ),
+//      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+//      floatingActionButton: StreamBuilder(
+//        stream: _chatMessagesStore.isSomeoneTypingStream$,
+//        builder: (context, AsyncSnapshot<bool> chatMessagesSnapshot) {
+//          return Visibility(
+//            visible: chatMessagesSnapshot.data ?? false,
+//            child: Padding(
+//              padding: EdgeInsets.fromLTRB(0, 0, 0, 165),
+//              child: Container(
+//                width: 200,
+//                height: 35,
+//                child: Align(
+//                  alignment: Alignment.center,
+//                  child: Text(
+//                    "People are typing...",
+//                    style: TextStyle(color: Colors.white),
+//                  ),
+//                ),
+//                decoration: BoxDecoration(
+//                    color: Color.fromRGBO(0, 0, 0, .5),
+//                    borderRadius: BorderRadius.all(Radius.circular(12.0))),
+//              ),
+//            ),
+//          );
+//        },
+//      ),
     );
   }
 
@@ -204,10 +202,10 @@ class _AppContainerState extends State<AppContainer>
           builder: (context, AsyncSnapshot<bool> isKeyboardVisibleSnapshot) {
             double bottomPadding = isKeyboardVisibleSnapshot.data != null &&
                     isKeyboardVisibleSnapshot.data
-                ? MediaQuery.of(context).viewInsets.bottom + 5
+                ? 5
                 : 122;
             return SizedBox(
-                height: MediaQuery.of(context).size.height - 64,
+                height: MediaQuery.of(context).size.height,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(6, 0, 6, bottomPadding),
                   child: ChatFeedPage(

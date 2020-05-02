@@ -1,6 +1,5 @@
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:np_plus/GetItInstance.dart';
 import 'package:np_plus/domains/server/ServerInfo.dart';
@@ -8,7 +7,6 @@ import 'package:np_plus/services/PartyService.dart';
 import 'package:np_plus/services/ToastService.dart';
 import 'package:np_plus/store/PartySessionStore.dart';
 import 'package:np_plus/vaults/LabelVault.dart';
-import 'package:progress_button/progress_button.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -60,7 +58,7 @@ class _LandingPageState extends State<LandingPage> {
         padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Align(
             alignment: Alignment.centerLeft,
-            child: Text("1. Copy the Netflix Party link onto your phone"))));
+            child: Text("1. Copy the Netflix Party link onto your phone",))));
     widgets.add(Padding(
       padding: EdgeInsets.all(5),
     ));
@@ -74,23 +72,17 @@ class _LandingPageState extends State<LandingPage> {
                   : false;
           return Padding(
             padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
-            child: ProgressButton(
+            child: CupertinoButton(
+              color: CupertinoColors.activeBlue,
               child: Align(
                 alignment: Alignment.center,
-                child: Text(
-                  isAttemptingToJoinSessionFromText
-                      ? ""
-                      : '${LabelVault.CONNECT_TO_PARTY_BUTTON.toString()}',
+                child: !isAttemptingToJoinSessionFromText ? Text(
+                  '${LabelVault.CONNECT_TO_PARTY_BUTTON.toString()}',
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
+                      color: CupertinoColors.white, fontWeight: FontWeight.bold),
+                ) : CupertinoActivityIndicator(animating: true,),
               ),
               onPressed: _onConnectIntent,
-              buttonState: isAttemptingToJoinSessionFromText
-                  ? ButtonState.inProgress
-                  : ButtonState.normal,
-              backgroundColor: Theme.of(context).primaryColor,
-              progressColor: Colors.white,
             ),
           );
         }));
@@ -113,15 +105,13 @@ class _LandingPageState extends State<LandingPage> {
                 "2. Paste the link there to create a scannable QR code"))));
     widgets.add(Padding(
       padding: EdgeInsets.fromLTRB(50, 10, 50, 10),
-      child: ProgressButton(
+      child: CupertinoButton(
+        color: CupertinoColors.activeBlue,
         child: Text(
           LabelVault.SCAN_QR_BUTTON,
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: CupertinoColors.white, fontWeight: FontWeight.bold),
         ),
         onPressed: _onScanQRPressed,
-        buttonState: ButtonState.normal,
-        backgroundColor: Theme.of(context).primaryColor,
-        progressColor: Colors.white,
       ),
     ));
     return widgets;
@@ -145,8 +135,13 @@ class _LandingPageState extends State<LandingPage> {
 
   void _connectToServer() {
     _updateLastJoinedPartyUrl();
-    _npServerInfoStore
-        .updatePartySession(PartySession.fromUrl(url: _urlTextController.text));
+    try {
+      _npServerInfoStore
+          .updatePartySession(PartySession.fromUrl(url: _urlTextController.text));
+    } catch (e) {
+      _isAttemptingToJoinSessionFromText$.add(false);
+      rethrow;
+    }
     if (_npServerInfoStore.partySession.isMetadataIncomplete()) {
       _onConnectFailed();
     }
