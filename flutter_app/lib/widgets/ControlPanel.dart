@@ -393,6 +393,7 @@ class _ControlPanelState extends State<ControlPanel> {
     _panelController.close();
     _messengerService.closeConnection();
     _partySessionStore.setAsSessionInactive();
+    _partySessionStore.setWasLastDisconnectPerformedByUser(true);
   }
 
   void _onPlayPressed() {

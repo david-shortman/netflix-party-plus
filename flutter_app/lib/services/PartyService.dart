@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dash_chat/dash_chat.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:np_plus/domains/avatar/Avatar.dart';
 import 'package:np_plus/domains/media-controls/VideoState.dart';
 import 'package:np_plus/domains/messages/incoming-messages/ErrorMessage.dart';
@@ -34,6 +35,7 @@ import 'package:np_plus/store/ChatMessagesStore.dart';
 import 'package:np_plus/store/PartySessionStore.dart';
 import 'package:np_plus/store/PlaybackInfoStore.dart';
 import 'package:np_plus/theming/AvatarColors.dart';
+import 'package:http/http.dart' as http;
 
 class PartyService {
   SocketMessengerService _messengerService;
@@ -79,6 +81,7 @@ class PartyService {
         _onConnectionClosed,
         _onConnectionOpened);
     _lastPartySession = partySession;
+    _partySessionStore.setWasLastDisconnectPerformedByUser(false);
   }
 
   void _onReceivedStreamMessage(streamMessage) {
@@ -108,7 +111,7 @@ class PartyService {
   }
 
   void _onUserIdMessageReceived(UserIdMessage userIdMessage) async {
-    await _localUserService.updateUserId(userIdMessage.userId);
+//    await _localUserService.updateUserId(userIdMessage.userId);
     _sendGetServerTimeMessage();
   }
 
@@ -191,13 +194,22 @@ class PartyService {
   }
 
   void _joinSession(String sessionIdForJoin) async {
-    LocalUser localUser = await _localUserService.getLocalUser();
-    UserSettings userSettings =
-        UserSettings(true, localUser.icon, localUser.id, localUser.username);
-    JoinSessionContent joinSessionContent =
-        JoinSessionContent(sessionIdForJoin, localUser.id, userSettings);
+    UserSettings userSettings = await _getLocalUserSettings();
+    JoinSessionContent joinSessionContent = JoinSessionContent(
+        sessionIdForJoin, userSettings.getId(), userSettings);
     _messengerService.sendMessage(JoinSessionMessage(joinSessionContent));
     _partySessionStore.setAsSessionActive();
+  }
+
+  Future<UserSettings> _getLocalUserSettings() async {
+    LocalUser localUser = await _localUserService.getLocalUser();
+    if (localUser.id == null) {
+      String permId =
+          (await http.get("https://data2.netflixparty.com/create-userId")).body;
+      _localUserService.updateUserId(permId);
+      localUser = await _localUserService.getLocalUser();
+    }
+    return UserSettings(true, localUser.icon, localUser.id, localUser.username);
   }
 
   void _addChatMessages(List<UserMessage> userMessages) {
@@ -209,7 +221,7 @@ class PartyService {
 
   ChatUser _buildChatUser(UserMessage userMessage) {
     return ChatUser.fromJson({
-      'uid': userMessage.userId,
+      'uid': userMessage.permId,
       'name': userMessage.userNickname,
       'avatar': UserAvatar.formatIconName(userMessage.userIcon),
       'containerColor': AvatarColors.getColor(userMessage.userIcon).value

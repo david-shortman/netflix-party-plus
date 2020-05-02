@@ -4,14 +4,24 @@ import 'package:rxdart/rxdart.dart';
 class PartySessionStore {
   BehaviorSubject<PartySession> _partySession =
       BehaviorSubject.seeded(PartySession());
-
   ValueStream<PartySession> get stream$ => _partySession.stream;
   PartySession get partySession => _partySession.value;
 
   BehaviorSubject<bool> _isSessionActive = BehaviorSubject.seeded(false);
-
   ValueStream<bool> get isSessionActive$ => _isSessionActive.stream;
   bool get isSessionActive => _isSessionActive.value;
+
+  BehaviorSubject<bool> _wasLastDisconnectPerformedByUser =
+      BehaviorSubject.seeded(true);
+  ValueStream<bool> get wasLastDisconnectPerformedByUser$ =>
+      _wasLastDisconnectPerformedByUser.stream;
+  bool get wasLastDisconnectPerformedByUser =>
+      _wasLastDisconnectPerformedByUser.value;
+
+  void setWasLastDisconnectPerformedByUser(
+      bool newWasLastDisconnectPerformedByUser) {
+    _wasLastDisconnectPerformedByUser.add(newWasLastDisconnectPerformedByUser);
+  }
 
   void updateServerTime(int newServerTime) {
     _partySession.add(PartySession.fromPartySession(partySession,

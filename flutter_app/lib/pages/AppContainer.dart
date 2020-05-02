@@ -103,11 +103,16 @@ class _AppContainerState extends State<AppContainer>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      if (!_partySessionStore.isSessionActive &&
-          itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession()) {
+      if (_shouldTryReconnecting()) {
         _partyService.rejoinLastParty();
       }
     }
+  }
+
+  bool _shouldTryReconnecting() {
+    return !_partySessionStore.wasLastDisconnectPerformedByUser &&
+        itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession() &&
+        !_partySessionStore.isSessionActive;
   }
 
   @override
@@ -169,7 +174,7 @@ class _AppContainerState extends State<AppContainer>
           return Visibility(
             visible: chatMessagesSnapshot.data ?? false,
             child: Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 0, 190),
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 165),
               child: Container(
                 width: 200,
                 height: 35,
@@ -247,7 +252,6 @@ class _AppContainerState extends State<AppContainer>
       _playbackInfoStore.updateServerTimeAtLastUpdate(0);
       _playbackInfoStore.updateLastKnownMoviePosition(0);
       _chatMessagesStore.clearMessages();
-      _sessionLastActiveAtTime = 0;
     } else {
       _sessionLastActiveAtTime = DateTime.now().millisecondsSinceEpoch;
     }
@@ -255,7 +259,7 @@ class _AppContainerState extends State<AppContainer>
 
   bool itHasBeenLessThan30MinutesSinceDisconnectedFromTheLastSession() {
     return DateTime.now().millisecondsSinceEpoch - _sessionLastActiveAtTime <
-        1800;
+        1800000;
   }
 
   @override
