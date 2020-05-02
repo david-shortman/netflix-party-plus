@@ -118,7 +118,7 @@ class _ChatFeedPageState extends State<ChatFeedPage> {
                 enabledBorder: InputBorder.none,
                 errorBorder: InputBorder.none,
                 disabledBorder: InputBorder.none,
-                contentPadding: EdgeInsets.fromLTRB(4, 8, 4, 8)),
+                contentPadding: EdgeInsets.fromLTRB(4, 8, 4, 4)),
             textController: _messageInputTextEditingController,
             onTextChange: (newText) {
               _messenger.sendMessage(TypingMessage(TypingContent(true)));

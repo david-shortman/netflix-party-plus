@@ -80,11 +80,10 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
     return Scaffold(
         appBar: CupertinoNavigationBar(
           actionsForegroundColor: Theme.of(context).primaryColor,
-          brightness: MediaQuery.of(context).platformBrightness,
           middle: Text("User Settings",
               style: TextStyle(
                   fontSize: 18,
-                  color: Theme.of(context).textTheme.bodyText1.color)),
+                  color: Theme.of(context).textTheme.body1.color)),
           backgroundColor: CupertinoColors.quaternarySystemFill,
         ),
         body: Padding(
@@ -104,7 +103,7 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
                 textInputAction: TextInputAction.done,
                 controller: _usernameController,
                 placeholder: 'Enter Username',
-                style: Theme.of(context).primaryTextTheme.bodyText1,
+                style: Theme.of(context).primaryTextTheme.body1,
                 clearButtonMode: OverlayVisibilityMode.editing,
                 keyboardType: TextInputType.text,
               ),
