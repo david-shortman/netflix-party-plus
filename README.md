@@ -1,3 +1,5 @@
+## This project is no longer under active development due to restrictions imposed by the Apple App Store review process. Read more about our challenges [here](https://medium.com/@david_shortman/hobbyists-arent-welcome-on-the-app-store-54c49f301754).
+
 [![](https://img.shields.io/badge/dynamic/json.svg?label=r/NetflixPartyPlus%20subscribers&query=$.data.subscribers&url=https://www.reddit.com/r/NetflixPartyPlus/about.json)](https://www.reddit.com/r/NetflixPartyPlus/)
 
 [![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Tests/badge.svg)](https://github.com/david-shortman/netflix-party-enhancement-suite/actions?query=workflow%3ATests) [![](https://github.com/david-shortman/netflix-party-enhancement-suite/workflows/Build/badge.svg)](https://github.com/david-shortman/netflix-party-enhancement-suite/actions?query=workflow%3ABuild)
@@ -18,8 +20,6 @@ Features:
   - Update user profile
 
 ### Chrome Extension
-
-Status: WIP
 
 Features:
 - Make the Netflix Party experience more seamless by
